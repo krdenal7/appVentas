@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title></title>
+ <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+ <link rel="stylesheet" type="text/css" href="css/jquery.mobile.structure-1.4.5.min.css">
+ <link rel="stylesheet" type="text/css" href="css/marzamcss.css"/>
+ <link rel="stylesheet" type="text/css" href="css/jquery.mobile.icons.min.css">
+ <link rel="stylesheet" href="css/jquery-ui.css" >
+ <script src="js/jquery.js"></script>
+ <script src="js/jquery.mobile-1.4.4.js"></script>
+ <script src="js/jquery-ui.js"></script>
+ <script src="js/highcharts.js"></script>
+<script>
+$(function () {
+    $('#container').highcharts({
+        chart: {
+			height:250,
+            type: 'bar'
+        },
+        title: {
+            text: 'Cartera Vencida'
+        },
+        xAxis: {
+            categories: ['Total']
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: ''
+            }
+        },
+        legend: {
+            reversed: true
+        },
+        plotOptions: {
+            series: {
+                stacking: 'normal'
+            }
+        },
+        series: [
+		{
+            name: 'Disponible $197,592.00',
+            data: [197592]
+        },{
+            name: '30D $15,188.00',
+            data: [15188]
+        }, {
+            name: '60D $60,000.00',
+            data: [60000]
+        }, {
+            name: '90D $15,000.00',
+            data: [15000]
+        },
+		{
+            name: 'M90D $5,500.00',
+            data: [5500]
+        }	
+		]
+    });
+});
+</script>
+</head>
+<body class="ui-mobile-viewport ui-overlay-a">
+<div data-role="page" class="jqm-demos ui-page ui-page-theme-a ui-page-header-fixed ui-page-footer-fixed ui-page-active" id="Ventas" data-title="Ventas" data-url="panel-fixed-page1" tabindex="0" style="padding-top: 44px; padding-bottom: 44px;">
+
+   
+    <div class="ui-panel-wrapper">
+    	<div role="main" class="ui-content jqm-content jqm-fullwidth">
+        <div id="inf" style="width:90%; margin:0px auto; font-size:20px; font-family:Arial, Helvetica, sans-serif; text-align:justify; color:#000;">
+            	<span>Saldo:</span>
+                <span id="saldo" style="text-shadow:2px 2px 2px #0CF;">$91,038.00</span>
+                <br/>
+                <span>Limite:</span>
+                <span id="limite" style="text-shadow:2px 2px 2px #0CF;">$288,630.00</span>
+                <div id="progressbar" style="width:100%; height:30px; margin:0px auto;"></div>                           	
+        </div>
+        <div id="graficas">
+        	<div id="container" style="min-width: 80%; max-width: 80%; height: 20%; margin: 0px auto;"></div>
+        </div>
+                       
+        </div><!--main-->            
+    </div><!-- /content -->
+
+   
+
+	<div data-role="panel" data-position-fixed="true" data-display="push" data-theme="b" id="nav-panel" class="ui-panel ui-panel-position-left ui-panel-display-push ui-panel-closed ui-body-b ui-panel-fixed ui-panel-animate">
+
+		<div class="ui-panel-inner"><ul data-role="listview" class="ui-listview">
+            <li data-icon="delete" class="ui-first-child"><a href="#" data-rel="close" class="ui-btn ui-btn-icon-right ui-icon-delete">Menú</a></li>
+            
+		</ul></div>
+	</div><!-- /panel -->
+
+	<div data-role="panel" data-position="right" data-position-fixed="true" data-display="overlay" data-theme="a" id="add-form" class="ui-panel ui-panel-position-right ui-panel-display-overlay ui-panel-closed ui-body-a ui-panel-fixed ui-panel-animate">
+
+        <div class="ui-panel-inner"><form class="userform">
+
+        	<h2>Login</h2>
+
+            <label for="name">Username:</label>
+            <div class="ui-input-text ui-body-inherit ui-corner-all ui-mini ui-shadow-inset ui-input-has-clear"><input type="text" name="name" id="name" value="" data-clear-btn="true" data-mini="true"><a href="#" tabindex="-1" aria-hidden="true" class="ui-input-clear ui-btn ui-icon-delete ui-btn-icon-notext ui-corner-all ui-input-clear-hidden" title="Clear text">Clear text</a></div>
+
+            <label for="password">Password:</label>
+            <div class="ui-input-text ui-body-inherit ui-corner-all ui-mini ui-shadow-inset ui-input-has-clear"><input type="password" name="password" id="password" value="" data-clear-btn="true" autocomplete="off" data-mini="true"><a href="#" tabindex="-1" aria-hidden="true" class="ui-input-clear ui-btn ui-icon-delete ui-btn-icon-notext ui-corner-all ui-input-clear-hidden" title="Clear text">Clear text</a></div>
+
+            <div class="ui-grid-a">
+                <div class="ui-block-a"><a href="#" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-btn-b ui-mini">Cancel</a></div>
+                <div class="ui-block-b"><a href="#" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-btn-a ui-mini">Save</a></div>
+			</div>
+        </form></div>
+
+	</div><!-- /panel -->
+
+</div><!-- /page -->
+
+<div data-role="page" id="panel-fixed-page2" data-url="panel-fixed-page2">
+
+    <div data-role="header">
+        <h1>Landing page</h1>
+    </div><!-- /header -->
+
+    <div role="main" class="ui-content jqm-content">
+    </div><!-- /content -->
+
+</div><!-- /page -->
+
+
+
+<div class="ui-loader ui-corner-all ui-body-a ui-loader-default"><span class="ui-icon-loading"></span><h1>loading</h1></div><div class="ui-panel-dismiss"></div><div class="ui-panel-dismiss"></div>
+<script>
+ 	$(function() {
+		$( "#progressbar").progressbar({
+			value:(125555*100)/288630
+			});
+		});
+ </script>
+</body>
+</html>

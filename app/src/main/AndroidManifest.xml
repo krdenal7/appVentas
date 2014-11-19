@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.marzam.com.appventas" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <!--
+ The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but are recommended.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <permission
+        android:name="com.marzam.com.appventas.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.marzam.com.appventas.permission.C2D_MESSAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.Marzambar" >
+        <activity
+            android:name="com.marzam.com.appventas.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <activity
+            android:name="com.marzam.com.appventas.MapsActivity"
+            android:label="@string/Mapa" >
+        </activity>
+        <activity android:name="com.marzam.com.appventas.MapsLocation" />
+        <activity
+            android:name="com.marzam.com.appventas.Graficas.Grafica_Vendedor"
+            android:label="@string/title_activity_grafica__vendedor" >
+        </activity>
+        <activity
+            android:name="com.marzam.com.appventas.KPI.KPI_General"
+            android:label="@string/KPIgral" >
+        </activity>
+        <activity
+            android:name="com.marzam.com.appventas.Tab_pedidos.pcabecera"
+            android:label="@string/title_activity_pcabecera" >
+        </activity>
+        <activity
+            android:name="com.marzam.com.appventas.Tab_pedidos.pdetalle"
+            android:label="@string/title_activity_pdetalle" >
+        </activity>
+        <activity
+            android:name="com.marzam.com.appventas.Tab_pedidos.pliquidacion"
+            android:label="@string/title_activity_pliquidacion" >
+        </activity>
+        <activity
+            android:name="com.marzam.com.appventas.Tab_pedidos.pedido"
+            android:label="@string/title_activity_pedido" >
+        </activity>
+        <activity
+            android:name=".Tab_pedidos.pcatalogo"
+            android:label="@string/title_activity_catalogo" >
+        </activity>
+
+        <receiver
+            android:name=".PushNotifications.GCMBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
+                <category android:name="com.marzam.com.appventas" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".PushNotifications.GCMIntentService"/>
+
+    </application>
+
+</manifest>

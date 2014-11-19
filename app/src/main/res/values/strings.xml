@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">appVentas</string>
+    <string name="Mapa">Mapa</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="Aceptar">Aceptar</string>
+    <string name="Contraseña">Contraseña:</string>
+    <string name="titulo">A92310 - PRUEBAS SISTEMAS</string>
+    <string name="ctehoy">Clientes de hoy</string>
+    <string name="ctetotales">Clientes totales</string>
+    <string name="ReporteVendedor">Graficas</string>
+    <string name="title_activity_grafica__vendedor">Grafica del Vendedor</string>
+    <string name="title_activity_kpi__general">KPI_General</string>
+    <string name="visitas">Visitados:</string>
+    <string name="title_activity_pedidos">Pedidos</string>
+    <string name="title_activity_pcabecera">pcabecera</string>
+    <string name="title_activity_pdetalle">pdetalle</string>
+    <string name="title_activity_pliquidacion">pliquidacion</string>
+    <string name="Nopedido">No. Pedido:</string>
+    <string name="pedido">Pedidos</string>
+    <string name="tipopago">Tipo de pago:</string>
+    <string name="Entrega">Entrega:</string>
+    <string name="Pedidos">Pedidos:</string>
+    <string name="KPIgral">KPI General</string>
+    <string name="title_activity_pedido">Pedido</string>
+    <string name="tipo_pedido">Tipo de pedido:</string>
+    <string name="title_activity_catalogo">catalogo</string>
+    <string name="Guardar">Guardar</string>
+    <string name="Eliminar">Eliminar</string>
+    <string name="Agregarp">Agregar productos de catalogo</string>
+
+</resources>
