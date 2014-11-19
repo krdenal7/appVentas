@@ -80,9 +80,9 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     }
     public void ShowCteH(){
         final CharSequence[] list=new CharSequence[3];
-        list[0]="A92310";
-        list[1]="A92311";
-        list[2]="A92312";
+        list[0]="Benavides";
+        list[1]="Wal-Mart Ecatepec";
+        list[2]="San Juan";
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Clientes de hoy");

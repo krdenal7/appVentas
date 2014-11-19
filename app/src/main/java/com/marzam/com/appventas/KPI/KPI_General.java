@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
+import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.Tab_pedidos.pedido;
 
@@ -33,7 +34,7 @@ public class KPI_General extends Activity {
 
     public void ShowMenu(){
 
-        CharSequence[] items={"Pedidos"};
+        CharSequence[] items={"Pedidos","Cerrar visita"};
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Menú");
@@ -44,6 +45,10 @@ public class KPI_General extends Activity {
                 if(i==0){
 
                     Intent intent=new Intent(context, pedido.class);
+                    startActivity(intent);
+                }
+                if(i==1){
+                    Intent intent=new Intent(context, MapsLocation.class);
                     startActivity(intent);
                 }
 
