@@ -31,5 +31,10 @@
     <string name="Guardar">Guardar</string>
     <string name="Eliminar">Eliminar</string>
     <string name="Agregarp">Agregar productos de catalogo</string>
+    <string name="title_activity_actualizar_coord">Actualizar_coord</string>
+    <string name="Latitud">Latitud:</string>
+    <string name="Longitud">Longitud:</string>
+    <string name="Actualizar">Actualizar</string>
+    <string name="title_activity_actualizar__coordenadas">Actualizar_Coordenadas</string>
 
 </resources>

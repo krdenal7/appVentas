@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
+import com.marzam.com.appventas.GPS.Actualizar_Coordenadas;
 import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.Tab_pedidos.pedido;
@@ -34,7 +35,7 @@ public class KPI_General extends Activity {
 
     public void ShowMenu(){
 
-        CharSequence[] items={"Pedidos","Cerrar visita"};
+        CharSequence[] items={"Pedidos","Actualizar coordenadas","Cerrar visita"};
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Menú");
@@ -48,8 +49,12 @@ public class KPI_General extends Activity {
                     startActivity(intent);
                 }
                 if(i==1){
-                    Intent intent=new Intent(context, MapsLocation.class);
+
+                    Intent intent=new Intent(context, Actualizar_Coordenadas.class);
                     startActivity(intent);
+                }
+                if(i==2){
+                    ShowCierreVisita();
                 }
 
             }
@@ -59,6 +64,28 @@ public class KPI_General extends Activity {
 
 
     }
+    public void ShowCierreVisita(){
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Aviso");
+        alert.setIcon(android.R.drawable.ic_dialog_alert);
+        alert.setMessage("Desea cerrar la visita?");
+        alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Intent intent=new Intent(context, MapsLocation.class);
+                startActivity(intent);
+            }
+        });
+        alert.setNegativeButton("No",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        AlertDialog alertDialog=alert.create();
+        alertDialog.show();
+    }
+
 
 
     @Override

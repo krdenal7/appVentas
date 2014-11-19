@@ -3,8 +3,10 @@ package com.marzam.com.appventas;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -128,6 +130,11 @@ public class MainActivity extends Activity {
 
 
         return super.onKeyDown(keyCode,event);
+    }
+
+    @Override
+    public void onBackPressed(){
+        finish();
     }
 
 

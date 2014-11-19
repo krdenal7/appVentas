@@ -228,4 +228,33 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         return super.onKeyDown(keyCode,event);
     }
+
+    @Override
+    public void onBackPressed(){
+
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Aviso");
+        alert.setIcon(android.R.drawable.ic_dialog_alert);
+        alert.setMessage("¿Desea salir?");
+        alert.setPositiveButton("SI",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                startActivity(new Intent(getBaseContext(), MainActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                finish();
+
+            }
+        });
+        alert.setNegativeButton("No",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        AlertDialog alertDialog=alert.create();
+        alertDialog.show();
+
+
+    }
 }
