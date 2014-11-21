@@ -35,7 +35,10 @@ import net.lingala.zip4j.exception.ZipException;
 
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -66,6 +69,7 @@ public class MainActivity extends Activity {
     String correo;
 
     File directorio;
+  static  InputStream stream;
 
     LocationManager locationManager;
 
@@ -82,6 +86,7 @@ public class MainActivity extends Activity {
       ShowEnableGPS();//Muestra el alert en caso de que el GPS del dispositivo se encuentre desactivado
       CrearDirectorioDownloads();//Crea el directorio donde se descargaran todos los archivos del Webservice
 
+       // File file=new File(directorio+"/db_download.zip");
 
 
       final  Intent i=new Intent(context,MapsLocation.class);
@@ -145,6 +150,21 @@ public class MainActivity extends Activity {
     }
 
 
+
+    public void ExtractZIP(String origen){
+
+        try{
+
+            ZipFile zipFile=new ZipFile(origen);
+            zipFile.extractAll(directorio.toString());
+
+
+        }catch (ZipException e){
+            String err=e.toString();
+            Log.d("Fail ExtractZip:",err);
+        }
+
+    }
     public void comprimeBD(String origen,String destino){
         File urlorigen=new File(origen);
         ZipFile zipfile=null;
@@ -161,6 +181,56 @@ public class MainActivity extends Activity {
             zipfile.addFile(urlorigen,parameters);
         }catch (Exception e){
 
+        }
+
+    }
+
+
+    public static byte[] ConvertZip(File file){
+
+
+
+        try {
+             stream = new FileInputStream(file);
+        }catch (Exception e){
+            String a=e.toString();
+            Log.d("ConvertStream:",a);
+        }
+
+        long length=file.length();
+        int numRead=0;
+        byte[] bytes=new byte[(int)length];
+        int offset=0;
+        try {
+            while(offset<bytes.length && (numRead=stream.read(bytes,offset,bytes.length-offset))>=0){
+
+                offset+=numRead;
+
+            }
+            if(offset<bytes.length){
+                Log.d("Error al convertir en bytes","Fallo");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            String a=e.toString();
+        }
+
+
+        return  bytes;
+    }
+    public void  ObtenerZIP(byte[] data){
+
+        String result=directorio+"/db_down.zip";
+        try{
+
+            File of =new File(directorio,"db_down.zip");
+            FileOutputStream osf=new FileOutputStream(of);
+            osf.write(data);
+            osf.flush();
+
+        }catch (Exception e){
+            String error=e.toString();
+            Log.d("Error al crear zip",e.toString());
         }
 
     }
