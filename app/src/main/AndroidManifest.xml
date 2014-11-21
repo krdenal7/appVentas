@@ -32,7 +32,8 @@
         android:theme="@style/Theme.Marzambar" >
         <activity
             android:name="com.marzam.com.appventas.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -49,36 +50,44 @@
 
         <activity
             android:name="com.marzam.com.appventas.MapsActivity"
-            android:label="@string/Mapa" >
+            android:label="@string/Mapa"
+            android:screenOrientation="portrait" >
         </activity>
         <activity android:name="com.marzam.com.appventas.MapsLocation" />
         <activity
             android:name="com.marzam.com.appventas.Graficas.Grafica_Vendedor"
-            android:label="@string/title_activity_grafica__vendedor" >
+            android:label="@string/title_activity_grafica__vendedor"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name="com.marzam.com.appventas.KPI.KPI_General"
-            android:label="@string/KPIgral" >
+            android:label="@string/KPIgral"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name="com.marzam.com.appventas.Tab_pedidos.pcabecera"
-            android:label="@string/title_activity_pcabecera" >
+            android:label="@string/title_activity_pcabecera"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name="com.marzam.com.appventas.Tab_pedidos.pdetalle"
-            android:label="@string/title_activity_pdetalle" >
+            android:label="@string/title_activity_pdetalle"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name="com.marzam.com.appventas.Tab_pedidos.pliquidacion"
-            android:label="@string/title_activity_pliquidacion" >
+            android:label="@string/title_activity_pliquidacion"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name="com.marzam.com.appventas.Tab_pedidos.pedido"
-            android:label="@string/title_activity_pedido" >
+            android:label="@string/title_activity_pedido"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name="com.marzam.com.appventas.Tab_pedidos.pcatalogo"
-            android:label="@string/title_activity_catalogo" >
+            android:label="@string/title_activity_catalogo"
+            android:screenOrientation="portrait" >
         </activity>
 
         <receiver
@@ -95,7 +104,12 @@
 
         <activity
             android:name="com.marzam.com.appventas.GPS.Actualizar_Coordenadas"
-            android:label="@string/title_activity_actualizar__coordenadas" >
+            android:label="@string/title_activity_actualizar__coordenadas"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.marzam.com.appventas.Productos.Info_producto"
+            android:label="@string/title_activity_info_producto" >
         </activity>
     </application>
 

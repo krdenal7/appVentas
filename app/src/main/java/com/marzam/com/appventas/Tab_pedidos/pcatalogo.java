@@ -35,7 +35,9 @@ public class pcatalogo extends Activity {
     Model[] modelItems;
     CustomAdapter adapter1;
     NumberPicker picker;
-    String[] list={"Aspirina 500 mg","Aspirina 250 mg","Sedalmerk"};
+    String[] list={"ASPIRINA 500MG","ASPIRINA 250MG","SEDALMERK",
+                   "ABATELENGUAS ROGER ESCOLAR C10","ACCU CHEK PERFORMA EQ GLUCEMIA",
+                    "ABATELENGUAS DAMACO MADERA C25","AGUA ROSAS HUME AMERICAN 250ML"};
     final static ArrayList<HashMap<String,?>>data=new ArrayList<HashMap<String, ?>>();
     SimpleAdapter simpleAdapter;
 
@@ -66,10 +68,14 @@ public class pcatalogo extends Activity {
          EditBuscar=(EditText)findViewById(R.id.editText4);
          lproductos=(ListView)findViewById(R.id.listView2);
 
-        modelItems=new Model[3];
-        modelItems[0]= new Model("Aspirina 500 mg",0);
-        modelItems[1]= new Model("Aspirina 250 mg",0);
-        modelItems[2]= new Model("Sedalmerk",0);
+        modelItems=new Model[7];
+        modelItems[0]= new Model("ASPIRINA 500MG",0,0);
+        modelItems[1]= new Model("ASPIRINA 250MG",0,0);
+        modelItems[2]= new Model("SEDALMERK",0,0);
+        modelItems[3]=new Model("ABATELENGUAS ROGER ESCOLAR C10",0,0);
+        modelItems[4]=new Model("ACCU CHEK PERFORMA EQ GLUCEMIA",0,0);
+        modelItems[5]=new Model("ABATELENGUAS DAMACO MADERA C25",0,0);
+        modelItems[6]=new Model("AGUA ROSAS HUME AMERICAN 250ML",0,0);
 
 
         adapter1=new CustomAdapter(this,modelItems);

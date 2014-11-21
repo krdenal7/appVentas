@@ -9,18 +9,29 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.marzam.com.appventas.R;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class pcabecera extends Activity {
 
     Context context;
+    TextView txtFpedido;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pcabecera);
         context=this;
+
+        txtFpedido=(TextView)findViewById(R.id.textView25);
+        txtFpedido.setText(getDate());
+
     }
 
 
@@ -42,6 +53,15 @@ public class pcabecera extends Activity {
         });
         AlertDialog alertDialog=alert.create();
         alertDialog.show();
+    }
+    private String getDate(){
+
+        Calendar cal = new GregorianCalendar();
+        Date dt = cal.getTime();
+        SimpleDateFormat df=new SimpleDateFormat("dd-MM-yyyy");
+        String formatteDate=df.format(dt.getTime());
+
+        return formatteDate;
     }
 
 

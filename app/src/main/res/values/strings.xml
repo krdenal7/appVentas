@@ -36,5 +36,6 @@
     <string name="Longitud">Longitud:</string>
     <string name="Actualizar">Actualizar</string>
     <string name="title_activity_actualizar__coordenadas">Actualizar_Coordenadas</string>
+    <string name="title_activity_info_producto">Info_producto</string>
 
 </resources>

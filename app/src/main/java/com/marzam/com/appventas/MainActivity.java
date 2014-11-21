@@ -11,9 +11,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -26,10 +28,18 @@ import android.widget.Toast;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.util.Zip4jConstants;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+
+
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
 
 
 public class MainActivity extends Activity {
@@ -55,11 +65,24 @@ public class MainActivity extends Activity {
     String telefono;
     String correo;
 
+    File directorio;
+
+    LocationManager locationManager;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
         context=this;
+
+
+      locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
+
+      ShowEnableGPS();//Muestra el alert en caso de que el GPS del dispositivo se encuentre desactivado
+      CrearDirectorioDownloads();//Crea el directorio donde se descargaran todos los archivos del Webservice
+
+
 
       final  Intent i=new Intent(context,MapsLocation.class);
 
@@ -67,7 +90,6 @@ public class MainActivity extends Activity {
         btnAceptar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
 
             //    gcm = GoogleCloudMessaging.getInstance(MainActivity.this);
             //    regid = getRegistrationId(context, "Isaac");
@@ -77,11 +99,70 @@ public class MainActivity extends Activity {
                     tarea.execute("");
                     pd = ProgressDialog.show(context, "Por favor espere", "Registrando en servidor", true, false);
                 }*/
-
-
                 startActivity(i);
             }
         });
+    }
+
+
+    public void ShowEnableGPS(){
+        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            AlertDialog.Builder alert=new AlertDialog.Builder(context);
+            alert.setTitle("Aviso");
+            alert.setMessage("Desea activar el GPS");
+            alert.setPositiveButton("SI",new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                    Intent settingIntent=new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    settingIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                    startActivity(settingIntent);
+
+                }
+            });
+            alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                }
+            });
+            AlertDialog alertDialog=alert.create();
+            alertDialog.show();
+        }
+    }
+
+    public void CrearDirectorioDownloads(){
+
+        try {
+            File folder = android.os.Environment.getExternalStorageDirectory();
+            directorio = new File(folder.getAbsolutePath() + "/Marzam/preferencias");
+            if (directorio.exists() == false) {
+                directorio.mkdirs();
+            }
+        }catch (Exception e){
+            Log.d("ErrorCrearDir",e.toString());
+        }
+    }
+
+
+    public void comprimeBD(String origen,String destino){
+        File urlorigen=new File(origen);
+        ZipFile zipfile=null;
+        try {
+           zipfile=new ZipFile(destino);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        ZipParameters parameters=new ZipParameters();
+        parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
+        parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+        parameters.setPassword("Marzam1.");
+        try {
+            zipfile.addFile(urlorigen,parameters);
+        }catch (Exception e){
+
+        }
+
     }
 
 
@@ -282,6 +363,16 @@ public class MainActivity extends Activity {
         return telephonyManager.getLine1Number();
     }
 
+
+    /*Obtener hora actual del dispositivo*/
+
+    private String getDate(){
+       Date dt=new Date();
+        SimpleDateFormat df=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        String formatteDate=df.format(dt.getDate());
+
+        return formatteDate;
+    }
 
 
 

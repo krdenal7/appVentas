@@ -14,6 +14,7 @@ import android.widget.CompoundButton;
 import android.widget.Filterable;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,41 +46,63 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     @Override
     public View getView(final int position, View convertView,ViewGroup parent){
 
+        final View viewconvert=convertView;
 
-
+    int valor=modelitems[position].getCantidad();
     LayoutInflater inflater = ((Activity) context).getLayoutInflater();
     convertView = inflater.inflate(R.layout.row, parent, false);
     TextView name = (TextView)convertView.findViewById(R.id.textView12);
     final CheckBox cb = (CheckBox)convertView.findViewById(R.id.checkBoxRow);
-    Cantidad=(TextView)convertView.findViewById(R.id.textView28);
-    name.setText(modelitems[position].getName());
+    Cantidad=(TextView)convertView.findViewById(R.id.textView29);
+    Cantidad.setText("Cantidad:"+valor);//Envia la cantidad Inicial del producto
+    name.setText(modelitems[position].getName());//Asigna el nombre a los Texview
+    cb.setClickable(false);
     if(modelitems[position].getValue()==1)
         cb.setChecked(true);
     else
         cb.setChecked(false);
 
-    cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
 
-            if (cb.isChecked()) {
 
-                ShowDialog();
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-                // Toast t = Toast.makeText(context, modelitems[position].getName(), Toast.LENGTH_SHORT);
-                // t.show();
-            }
+                  CheckBox checkBox=(CheckBox)view.findViewById(R.id.checkBoxRow);
+                  TextView cant=(TextView)view.findViewById(R.id.textView29);
 
-        }
-    });
+                /*Verifica si no esta seleccionado el check mostrara el popup para seleccionar la cantidad, en caso contratio
+                  pasara la cantidad a 0 y deseleccionara el ckeck*/
+
+                 if(modelitems[position].getValue()!=1) {
+                    ShowDialog(position, view);
+                }else{
+
+                    modelitems[position].value = 0;
+                    checkBox.setChecked(false);
+                    cant.setText("Cantidad:0");
+
+                }
+
+                   }});
+
+
+        /*Se agrega el evento al checkBox*/
+
+
+
 
 
         return convertView;
     }
 
-    public void ShowDialog(){
-        llenar_picker();
+    public void ShowDialog( int position , View view){
+        llenar_picker();//llena el picker
 
+
+     final   int pos=position;
+     final   CheckBox checkBox=(CheckBox)view.findViewById(R.id.checkBoxRow);
+     final   TextView cant=(TextView)view.findViewById(R.id.textView29);
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
         alertDialogBuilder.setTitle( "Seleccione una cantidad");
@@ -88,6 +111,17 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
             public void onClick(DialogInterface dialog,int id) {
 
+
+               int cantidad=(picker.getValue())-1;
+
+                if(cantidad<=0){
+                    Toast t=Toast.makeText(context,"La cantidad debe ser mayor a 0",Toast.LENGTH_SHORT);
+                    t.show();
+                }else {
+                        modelitems[pos].value = 1;
+                        checkBox.setChecked(true);
+                        cant.setText("Cantidad: " + cantidad);
+                }
 
 
             }

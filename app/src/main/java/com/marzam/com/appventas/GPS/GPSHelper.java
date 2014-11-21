@@ -33,7 +33,7 @@ public class GPSHelper {
         if(location !=null){
             message=String.valueOf(location.getLongitude());
         }else{
-            message="=";
+            message="0";
         }
 
         return message;
@@ -44,7 +44,7 @@ public class GPSHelper {
         if(location !=null){
             message=String.valueOf(location.getLatitude());
         }else{
-            message="=";
+            message="0";
         }
 
         return message;

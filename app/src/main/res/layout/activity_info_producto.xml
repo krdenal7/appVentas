@@ -1,0 +1,73 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.marzam.com.appventas.Productos.Info_producto">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="1234567890"
+        android:id="@+id/textView37"
+        android:layout_marginTop="17dp"
+        android:layout_below="@+id/textView40"
+        android:layout_alignLeft="@+id/textView40"
+        android:layout_alignStart="@+id/textView40" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Nombre del Producto:"
+        android:id="@+id/textView38"
+        android:layout_marginTop="23dp"
+        android:layout_toEndOf="@+id/textView40"
+        android:layout_below="@+id/textView37"
+        android:layout_alignLeft="@+id/textView37"
+        android:layout_alignStart="@+id/textView37" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Aspirina 500 mg"
+        android:id="@+id/textView39"
+        android:layout_marginTop="17dp"
+        android:layout_below="@+id/textView38"
+        android:layout_alignLeft="@+id/textView38"
+        android:layout_alignStart="@+id/textView38" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Codigo:"
+        android:id="@+id/textView40"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Cantidad:"
+        android:id="@+id/textView41"
+        android:layout_marginTop="26dp"
+        android:layout_below="@+id/textView39"
+        android:layout_alignLeft="@+id/textView39"
+        android:layout_alignStart="@+id/textView39" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editText5"
+        android:layout_below="@+id/textView41"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="31dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+</RelativeLayout>
