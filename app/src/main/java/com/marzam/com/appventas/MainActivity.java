@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.marzam.com.appventas.SQLite.CSQLite;
 
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
@@ -39,8 +42,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 
 
@@ -85,9 +91,16 @@ public class MainActivity extends Activity {
 
       ShowEnableGPS();//Muestra el alert en caso de que el GPS del dispositivo se encuentre desactivado
       CrearDirectorioDownloads();//Crea el directorio donde se descargaran todos los archivos del Webservice
+      SQLiteDatabase db;
+      CSQLite csqLite=new CSQLite(context);
+      db=csqLite.getDataBase();
 
-       // File file=new File(directorio+"/db_download.zip");
+        Cursor c=db.rawQuery("select * from Usuario",null);
 
+        if(c.moveToFirst()){
+            String valor=c.getString(0);
+            String a="";
+        }
 
       final  Intent i=new Intent(context,MapsLocation.class);
 
@@ -151,7 +164,7 @@ public class MainActivity extends Activity {
 
 
 
-    public void ExtractZIP(String origen){
+    public void unZipBD(String origen){
 
         try{
 
@@ -165,7 +178,7 @@ public class MainActivity extends Activity {
         }
 
     }
-    public void comprimeBD(String origen,String destino){
+    public void ZipBD(String origen,String destino){
         File urlorigen=new File(origen);
         ZipFile zipfile=null;
         try {
@@ -186,7 +199,7 @@ public class MainActivity extends Activity {
     }
 
 
-    public static byte[] ConvertZip(File file){
+    public static byte[] StreamZip(File file){
 
 
 
@@ -218,7 +231,7 @@ public class MainActivity extends Activity {
 
         return  bytes;
     }
-    public void  ObtenerZIP(byte[] data){
+    public void  unStreamZip(byte[] data){
 
         String result=directorio+"/db_down.zip";
         try{
@@ -231,6 +244,42 @@ public class MainActivity extends Activity {
         }catch (Exception e){
             String error=e.toString();
             Log.d("Error al crear zip",e.toString());
+        }
+
+    }
+
+    public void CopiarBD(){
+
+        byte[] buffer=new byte[1024];
+        OutputStream myOutput=null;
+        int length;
+        InputStream myInput=null;
+
+        try{
+            File filebd=new File("/data/data/com.marzam.com.appventas/databases/db.db");
+            File fileBack=new File(directorio+"/dbBackup.zip");
+            File filedown=new File(directorio+"/db.db");
+            if(fileBack.exists()==true){
+                fileBack.delete();
+            }
+
+            ZipBD(filebd.toString(), fileBack.toString()); //comprime
+            unZipBD(directorio + "/db_down.zip");
+
+            myInput=new FileInputStream(filedown);
+
+            myOutput=new FileOutputStream("/data/data/com.marzam.com.appventas/databases/db.db");
+            while ((length=myInput.read(buffer))>0){
+                myOutput.write(buffer,0,length);
+            }
+            myOutput.close();
+            myOutput.flush();
+            myInput.close();
+            filedown.delete();
+
+        }catch (Exception e){
+            String error=e.toString();
+            Log.d("Error al copiar BD",error);
         }
 
     }
@@ -437,9 +486,11 @@ public class MainActivity extends Activity {
     /*Obtener hora actual del dispositivo*/
 
     private String getDate(){
-       Date dt=new Date();
-        SimpleDateFormat df=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        String formatteDate=df.format(dt.getDate());
+
+        Calendar cal = new GregorianCalendar();
+        Date dt = cal.getTime();
+        SimpleDateFormat df=new SimpleDateFormat("dd-MM-yyyy");
+        String formatteDate=df.format(dt.getTime());
 
         return formatteDate;
     }
