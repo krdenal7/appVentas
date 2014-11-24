@@ -159,19 +159,14 @@
         android:textColor="@android:color/white"
         android:background="#ffff571e" />
 
-    <android.gesture.GestureOverlayView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/gestureOverlayView"
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/imageView3"
         android:layout_below="@+id/textView26"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/textView26"
-        android:layout_alignEnd="@+id/textView26"
-        android:layout_alignParentBottom="true"
-        android:eventsInterceptionEnabled="true"
-        android:fadeEnabled="false"
-        android:gestureStrokeType="multiple"
-        android:gestureColor="#ff000000"></android.gesture.GestureOverlayView>
+        android:layout_alignRight="@+id/textView24"
+        android:layout_alignEnd="@+id/textView24" />
 
 </RelativeLayout>

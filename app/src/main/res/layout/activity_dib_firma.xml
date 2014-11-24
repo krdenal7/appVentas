@@ -1,0 +1,26 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.marzam.com.appventas.Gesture.Dib_firma">
+
+    <android.gesture.GestureOverlayView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/gestureFirma"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@+id/button3"
+        android:eventsInterceptionEnabled="true"
+        android:background="@android:color/transparent"
+        android:gestureColor="@android:color/black"
+        android:gestureStrokeType="multiple"></android.gesture.GestureOverlayView>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Guardar"
+        android:id="@+id/button3"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+</RelativeLayout>

@@ -5,14 +5,24 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.gesture.Gesture;
+import android.gesture.GestureOverlayView;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.marzam.com.appventas.Gesture.Dib_firma;
 import com.marzam.com.appventas.R;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -22,13 +32,16 @@ public class pcabecera extends Activity {
 
     Context context;
     TextView txtFpedido;
+    Bitmap bitmap;
+    GestureOverlayView gesture;
+    File Directorio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pcabecera);
-        context=this;
 
+        context=this;
         txtFpedido=(TextView)findViewById(R.id.textView25);
         txtFpedido.setText(getDate());
 
@@ -37,12 +50,17 @@ public class pcabecera extends Activity {
 
     public void ShowMenu(){
 
-        CharSequence[] items={"Guardar","Eliminar","Agregar productos"};
+        CharSequence[] items={"Guardar","Agregar Firma","Agregar productos"};
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Menú");
         alert.setItems(items,new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+
+                if(i==1){
+                    Intent intent=new Intent(context, Dib_firma.class);
+                    startActivity(intent);
+                }
 
                 if(i==2){
                     Intent intent=new Intent(context,pcatalogo.class);
@@ -54,6 +72,8 @@ public class pcabecera extends Activity {
         AlertDialog alertDialog=alert.create();
         alertDialog.show();
     }
+
+
     private String getDate(){
 
         Calendar cal = new GregorianCalendar();
@@ -63,6 +83,8 @@ public class pcabecera extends Activity {
 
         return formatteDate;
     }
+
+
 
 
     @Override
@@ -88,10 +110,18 @@ public class pcabecera extends Activity {
     @Override
     public boolean onKeyDown(int keyEvent,KeyEvent event){
 
-        if(keyEvent==KeyEvent.KEYCODE_MENU)
-            ShowMenu();
+
+
+        if(keyEvent==KeyEvent.KEYCODE_MENU) {
+
+           ShowMenu();
+
+        }
 
 
         return  super.onKeyDown(keyEvent,event);
     }
+
+
+
 }

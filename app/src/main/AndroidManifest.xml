@@ -111,6 +111,10 @@
             android:name="com.marzam.com.appventas.Productos.Info_producto"
             android:label="@string/title_activity_info_producto" >
         </activity>
+        <activity
+            android:name="com.marzam.com.appventas.Gesture.Dib_firma"
+            android:label="@string/title_activity_dib_firma" >
+        </activity>
     </application>
 
 </manifest>

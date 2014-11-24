@@ -10,6 +10,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.marzam.com.appventas.Gesture.Dib_firma;
 import com.marzam.com.appventas.R;
 
 public class pdetalle extends Activity {
@@ -25,12 +26,17 @@ public class pdetalle extends Activity {
 
     public void ShowMenu(){
 
-        CharSequence[] items={"Guardar","Eliminar","Agregar productos"};
+        CharSequence[] items={"Guardar","Agregar Firma","Agregar productos"};
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Menú");
         alert.setItems(items,new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+
+                if(i==1){
+                    Intent intent=new Intent(context, Dib_firma.class);
+                    startActivity(intent);
+                }
 
                 if(i==2){
                     Intent intent=new Intent(context,pcatalogo.class);

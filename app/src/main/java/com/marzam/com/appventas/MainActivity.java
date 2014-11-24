@@ -91,16 +91,8 @@ public class MainActivity extends Activity {
 
       ShowEnableGPS();//Muestra el alert en caso de que el GPS del dispositivo se encuentre desactivado
       CrearDirectorioDownloads();//Crea el directorio donde se descargaran todos los archivos del Webservice
-      SQLiteDatabase db;
-      CSQLite csqLite=new CSQLite(context);
-      db=csqLite.getDataBase();
 
-        Cursor c=db.rawQuery("select * from Usuario",null);
 
-        if(c.moveToFirst()){
-            String valor=c.getString(0);
-            String a="";
-        }
 
       final  Intent i=new Intent(context,MapsLocation.class);
 
@@ -485,7 +477,7 @@ public class MainActivity extends Activity {
 
     /*Obtener hora actual del dispositivo*/
 
-    private String getDate(){
+       private String getDate(){
 
         Calendar cal = new GregorianCalendar();
         Date dt = cal.getTime();
@@ -494,6 +486,9 @@ public class MainActivity extends Activity {
 
         return formatteDate;
     }
+
+    /*Comprobar fecha para el cambio de la Base de Datos*/
+
 
 
 
