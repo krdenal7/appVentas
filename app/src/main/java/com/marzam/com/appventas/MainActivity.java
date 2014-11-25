@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.marzam.com.appventas.SQLite.CSQLite;
+import com.marzam.com.appventas.WebService.WebServices;
 
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
@@ -48,7 +49,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
-
+import java.util.Objects;
 
 
 public class MainActivity extends Activity {
@@ -75,8 +76,6 @@ public class MainActivity extends Activity {
     String correo;
 
     File directorio;
-  static  InputStream stream;
-
     LocationManager locationManager;
 
 
@@ -90,7 +89,9 @@ public class MainActivity extends Activity {
       locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
 
       ShowEnableGPS();//Muestra el alert en caso de que el GPS del dispositivo se encuentre desactivado
-      CrearDirectorioDownloads();//Crea el directorio donde se descargaran todos los archivos del Webservice
+
+       /*Realiza tarea de Enviar Backup*/
+
 
 
 
@@ -141,140 +142,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void CrearDirectorioDownloads(){
 
-        try {
-            File folder = android.os.Environment.getExternalStorageDirectory();
-            directorio = new File(folder.getAbsolutePath() + "/Marzam/preferencias");
-            if (directorio.exists() == false) {
-                directorio.mkdirs();
-            }
-        }catch (Exception e){
-            Log.d("ErrorCrearDir",e.toString());
-        }
-    }
-
-
-
-    public void unZipBD(String origen){
-
-        try{
-
-            ZipFile zipFile=new ZipFile(origen);
-            zipFile.extractAll(directorio.toString());
-
-
-        }catch (ZipException e){
-            String err=e.toString();
-            Log.d("Fail ExtractZip:",err);
-        }
-
-    }
-    public void ZipBD(String origen,String destino){
-        File urlorigen=new File(origen);
-        ZipFile zipfile=null;
-        try {
-           zipfile=new ZipFile(destino);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        ZipParameters parameters=new ZipParameters();
-        parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
-        parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
-        parameters.setPassword("Marzam1.");
-        try {
-            zipfile.addFile(urlorigen,parameters);
-        }catch (Exception e){
-
-        }
-
-    }
-
-
-    public static byte[] StreamZip(File file){
-
-
-
-        try {
-             stream = new FileInputStream(file);
-        }catch (Exception e){
-            String a=e.toString();
-            Log.d("ConvertStream:",a);
-        }
-
-        long length=file.length();
-        int numRead=0;
-        byte[] bytes=new byte[(int)length];
-        int offset=0;
-        try {
-            while(offset<bytes.length && (numRead=stream.read(bytes,offset,bytes.length-offset))>=0){
-
-                offset+=numRead;
-
-            }
-            if(offset<bytes.length){
-                Log.d("Error al convertir en bytes","Fallo");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            String a=e.toString();
-        }
-
-
-        return  bytes;
-    }
-    public void  unStreamZip(byte[] data){
-
-        String result=directorio+"/db_down.zip";
-        try{
-
-            File of =new File(directorio,"db_down.zip");
-            FileOutputStream osf=new FileOutputStream(of);
-            osf.write(data);
-            osf.flush();
-
-        }catch (Exception e){
-            String error=e.toString();
-            Log.d("Error al crear zip",e.toString());
-        }
-
-    }
-
-    public void CopiarBD(){
-
-        byte[] buffer=new byte[1024];
-        OutputStream myOutput=null;
-        int length;
-        InputStream myInput=null;
-
-        try{
-            File filebd=new File("/data/data/com.marzam.com.appventas/databases/db.db");
-            File fileBack=new File(directorio+"/dbBackup.zip");
-            File filedown=new File(directorio+"/db.db");
-            if(fileBack.exists()==true){
-                fileBack.delete();
-            }
-
-            ZipBD(filebd.toString(), fileBack.toString()); //comprime
-            unZipBD(directorio + "/db_down.zip");
-
-            myInput=new FileInputStream(filedown);
-
-            myOutput=new FileOutputStream("/data/data/com.marzam.com.appventas/databases/db.db");
-            while ((length=myInput.read(buffer))>0){
-                myOutput.write(buffer,0,length);
-            }
-            myOutput.close();
-            myOutput.flush();
-            myInput.close();
-            filedown.delete();
-
-        }catch (Exception e){
-            String error=e.toString();
-            Log.d("Error al copiar BD",error);
-        }
-
-    }
 
 
     @Override

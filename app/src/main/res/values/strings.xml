@@ -38,5 +38,6 @@
     <string name="title_activity_actualizar__coordenadas">Actualizar_Coordenadas</string>
     <string name="title_activity_info_producto">Info_producto</string>
     <string name="title_activity_dib_firma">Dib_firma</string>
+    <string name="title_activity_sincronizar">Sincronizar</string>
 
 </resources>

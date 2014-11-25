@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.marzam.com.appventas.Graficas.Grafica_Vendedor;
 import com.marzam.com.appventas.KPI.KPI_General;
+import com.marzam.com.appventas.Sincronizacion.Sincronizar;
 
 /**
  * Created by SAMSUMG on 11/11/2014.
@@ -57,7 +58,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     public void ShowMenu(){
 
-        final CharSequence[] items={"Clientes de hoy","Clientes totales"};
+        final CharSequence[] items={"Clientes de hoy","Clientes totales","Sincronización"};
 
         AlertDialog.Builder alert = new AlertDialog.Builder(context);
         alert.setTitle( "Menú");
@@ -69,6 +70,10 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                     ShowCteH();
                 if(i==1)
                     ShowCteT();
+                if(i==2){
+                    Intent intent=new Intent(context, Sincronizar.class);
+                    startActivity(intent);
+                }
 
             }
         });

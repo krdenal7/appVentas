@@ -29,6 +29,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     Context context;
     NumberPicker picker;
     TextView Cantidad;
+    CheckBox cb;
 
 
     public CustomAdapter(Context context, Model[] resource) {
@@ -52,7 +53,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     LayoutInflater inflater = ((Activity) context).getLayoutInflater();
     convertView = inflater.inflate(R.layout.row, parent, false);
     TextView name = (TextView)convertView.findViewById(R.id.textView12);
-    final CheckBox cb = (CheckBox)convertView.findViewById(R.id.checkBoxRow);
+    cb = (CheckBox)convertView.findViewById(R.id.checkBoxRow);
     Cantidad=(TextView)convertView.findViewById(R.id.textView29);
     Cantidad.setText("Cantidad:"+valor);//Envia la cantidad Inicial del producto
     name.setText(modelitems[position].getName());//Asigna el nombre a los Texview
@@ -88,6 +89,25 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
 
         /*Se agrega el evento al checkBox*/
+
+      convertView.setOnLongClickListener(new View.OnLongClickListener() {
+          @Override
+          public boolean onLongClick(View view) {
+
+              CheckBox checkBox=(CheckBox)view.findViewById(R.id.checkBoxRow);
+
+              Toast t=Toast.makeText(context,"Detalle del Producto",Toast.LENGTH_SHORT);
+              t.show();
+
+              if(checkBox.isChecked()){
+                  checkBox.setChecked(true);
+              }else{
+                  checkBox.setChecked(false);
+              }
+
+              return false;
+          }
+      });
 
 
 

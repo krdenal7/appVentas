@@ -17,6 +17,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
 
 import com.marzam.com.appventas.CustomAdapter;
 import com.marzam.com.appventas.Model;
@@ -121,6 +122,17 @@ public class pcatalogo extends Activity {
                 ShowDialog();
             }
         });
+
+        lproductos.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                Toast t=Toast.makeText(context,"Detalle",Toast.LENGTH_SHORT);
+                t.show();
+
+                return false;
+            }
+        });
     }
 
 
@@ -166,6 +178,7 @@ public class pcatalogo extends Activity {
         picker.setWrapSelectorWheel(false);
         picker.setDisplayedValues(nums);
         picker.setValue(1);
+
 
 
     }
