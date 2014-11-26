@@ -221,6 +221,7 @@ public class pdetalle extends Activity {
 
     }
 
+
     private class UpLoadTask extends AsyncTask<String,Void,Object> {
 
         @Override

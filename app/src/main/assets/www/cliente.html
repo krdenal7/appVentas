@@ -12,55 +12,97 @@
  <script src="js/jquery.mobile-1.4.4.js"></script>
  <script src="js/jquery-ui.js"></script>
  <script src="js/highcharts.js"></script>
-<script>
-$(function () {
+    <script>
+    $(function () {
+                        var disponible=2500.00,D30=800.00,D60=1500.00,D90=4500.00,MD90=9000.00;
     $('#container').highcharts({
         chart: {
-			height:250,
-            type: 'bar'
+            type: 'bar',
+                                   height:'350'
         },
         title: {
             text: 'Cartera Vencida'
         },
+        subtitle: {
+            text: 'Cliente:A92310'
+        },
         xAxis: {
-            categories: ['Total']
+            categories: ['Total'],
+            title: {
+                text: null
+            },
+                                   height:'125'
         },
         yAxis: {
             min: 0,
             title: {
-                text: ''
-            }
+                text: '',
+                align: 'high'
+            },
+                                   height:'125'
         },
-        legend: {
-            reversed: true
+        tooltip: {
+            valueSuffix: ''
         },
-        plotOptions: {
-            series: {
-                stacking: 'normal'
-            }
+        credits: {
+            enabled: false
         },
-        series: [
-		{
-            name: 'Disponible $197,592.00',
-            data: [197592]
-        },{
-            name: '30D $15,188.00',
-            data: [15188]
+        series: [{
+            name: 'Disponible $'+deci(disponible.toString()),
+            data: [disponible]
         }, {
-            name: '60D $60,000.00',
-            data: [60000]
+            name: '30D $'+deci(D30.toString()),
+            data: [D30]
         }, {
-            name: '90D $15,000.00',
-            data: [15000]
-        },
-		{
-            name: 'M90D $5,500.00',
-            data: [5500]
-        }	
-		]
+            name: '60D $'+deci(D60.toString()),
+            data: [D60]
+        }, {
+            name: '90D $'+deci(D90.toString()),
+            data: [D90]
+        }
+, {
+            name: '+90D $'+deci(MD90.toString()),
+            data: [MD90]
+        }]
     });
 });
+
+function deci(valor){
+            var dec=valor.split(".");
+            var leng = parseInt((dec).length);
+            var cantidad="";
+            if(leng==2){
+            cantidad=conComas(dec[0],dec[1]);
+    }else{
+            cantidad=conComas(dec[0],"00");
+            }
+            return cantidad;
+            }
+function conComas(valor,Deci) {
+
+    var nums = new Array();
+    var simb = ","; //Éste es el separador
+    valor = valor.toString();
+    valor = valor.replace(/\D/g, "");   //Ésta expresión regular solo permitira ingresar números
+    nums = valor.split(""); //Se vacia el valor en un arreglo
+    var long = nums.length - 1; // Se saca la longitud del arreglo
+    var patron = 3; //Indica cada cuanto se ponen las comas
+    var prox = 2; // Indica en que lugar se debe insertar la siguiente coma
+    var res = "";
+
+    while (long > prox) {
+        nums.splice((long - prox),0,simb); //Se agrega la coma
+        prox += patron; //Se incrementa la posición próxima para colocar la coma
+    }
+
+    for (var i = 0; i <= nums.length-1; i++) {
+        res += nums[i]; //Se crea la nueva cadena para devolver el valor formateado
+    }
+
+    return res+"."+Deci;
+}
 </script>
+
 </head>
 <body class="ui-mobile-viewport ui-overlay-a">
 <div data-role="page" class="jqm-demos ui-page ui-page-theme-a ui-page-header-fixed ui-page-footer-fixed ui-page-active" id="Ventas" data-title="Ventas" data-url="panel-fixed-page1" tabindex="0" style="padding-top: 44px; padding-bottom: 44px;">
@@ -70,10 +112,10 @@ $(function () {
     	<div role="main" class="ui-content jqm-content jqm-fullwidth">
         <div id="inf" style="width:90%; margin:0px auto; font-size:20px; font-family:Arial, Helvetica, sans-serif; text-align:justify; color:#000;">
             	<span>Saldo:</span>
-                <span id="saldo" style="text-shadow:2px 2px 2px #0CF;">$91,038.00</span>
+                <span id="saldo" >$91,038.00</span>
                 <br/>
                 <span>Limite:</span>
-                <span id="limite" style="text-shadow:2px 2px 2px #0CF;">$288,630.00</span>
+                <span id="limite" >$288,630.00</span>
                 <div id="progressbar" style="width:100%; height:30px; margin:0px auto;"></div>                           	
         </div>
         <div id="graficas">

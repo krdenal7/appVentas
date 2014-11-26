@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -62,7 +63,6 @@ public class pcatalogo extends Activity {
 
 
         LlenarModelItems();
-
         adapter1=new CustomAdapter(this,modelItems);
         lproductos.setAdapter(adapter1);
 
@@ -79,11 +79,15 @@ public class pcatalogo extends Activity {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
 
+                  String charseq=charSequence.toString();
+                  int cant=charSequence.length();
+
                  if(charSequence.length()>0) {
                      pcatalogo.this.simpleAdapter.getFilter().filter(charSequence);
                      Filter cont = simpleAdapter.getFilter();
-                     if (cont != null)
-                         lproductos.setAdapter(simpleAdapter);
+                     if (cont != null) {
+                             lproductos.setAdapter(simpleAdapter);
+                                       }
                  }else {
                      lproductos.setAdapter(adapter1);
                  }
@@ -108,7 +112,7 @@ public class pcatalogo extends Activity {
         lproductos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                ShowDialog();
+                ShowDialog(i);
             }
         });
 
@@ -125,18 +129,31 @@ public class pcatalogo extends Activity {
     }
 
 
-    public void ShowDialog(){
+    public void ShowDialog(final int posicion){
         llenar_picker();
+
+         String Item=String.valueOf(simpleAdapter.getItem(posicion));
+         final String codigo=ObtenerValoresdeFilter(Item);
 
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
         alertDialogBuilder.setTitle( "Seleccione una cantidad");
         alertDialogBuilder.setView(picker);
-        alertDialogBuilder.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+        alertDialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
 
-            public void onClick(DialogInterface dialog,int id) {
+            public void onClick(DialogInterface dialog, int id) {
 
-                   lproductos.setAdapter(adapter1);
+                int val=picker.getValue();
+                if(val==0){
+                    Toast.makeText(context,"La cantidad debe ser mayor a 0",Toast.LENGTH_SHORT).show();
+                }else {
+
+                    AgregarProducto(codigo,val,1);
+                    LlenarModelItems();
+                    adapter1=new CustomAdapter(context,modelItems);
+                    EditBuscar.setText("");
+                    lproductos.setAdapter(adapter1);
+                }
 
             }
 
@@ -151,10 +168,13 @@ public class pcatalogo extends Activity {
         });
 
         AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
+
+        if(codigo!=null)
+          alertDialog.show();
 
 
     }
+
     public void llenar_picker(){
 
         picker = new NumberPicker(context);
@@ -171,8 +191,6 @@ public class pcatalogo extends Activity {
 
 
     }
-
-
     public void LlenarHasmap(){
 
         lite=new CSQLite(context);
@@ -180,7 +198,7 @@ public class pcatalogo extends Activity {
 
         Cursor rs=null;
 
-        String query="select descripcion,precio,Cantidad  from productos limit 1000";
+        String query="select descripcion,precio,Cantidad,codigo  from productos limit 1000";
 
         rs=db.rawQuery(query,null);
         data=new ArrayList<HashMap<String, ?>>();
@@ -190,6 +208,7 @@ public class pcatalogo extends Activity {
             producto_row.put("A",rs.getString(0));
             producto_row.put("B","Precio: $"+rs.getString(1)+" Oferta: 0%");
             producto_row.put("C","Cantidad: "+rs.getString(2));
+            producto_row.put("D",rs.getString(3));
             data.add(producto_row);
             producto_row=new HashMap<String, String>();
         }
@@ -231,6 +250,32 @@ public class pcatalogo extends Activity {
     }
 
 
+    public String ObtenerValoresdeFilter(String Item){
+
+        String[] split=Item.replace("{","").replace("}","").split(",");
+
+        String cantidad= split[3].replace("C=Cantidad: ","").trim();
+        String codigo=split[0].replace("D=","");
+
+        int cant=Integer.parseInt(cantidad);
+
+        if(cant==0)
+            return codigo;
+
+            return null;
+    }
+    public void AgregarProducto(String ean,int cantidad,int isChecked){
+
+        lite=new CSQLite(context);
+
+        SQLiteDatabase db=lite.getWritableDatabase();
+        db.execSQL("update productos set  Cantidad="+cantidad+",isCheck="+isChecked+" where codigo='"+ean+"'");
+
+        db.close();
+        lite.close();
+
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -252,9 +297,19 @@ public class pcatalogo extends Activity {
 
     @Override
     public void onBackPressed(){
-        startActivity(new Intent(getBaseContext(), pedido.class)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                startActivity(new Intent(getBaseContext(),pedido.class)
+              .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
         finish();
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        LlenarModelItems();
+        adapter1=new CustomAdapter(this,modelItems);
+        lproductos.setAdapter(adapter1);
+
     }
 
 }

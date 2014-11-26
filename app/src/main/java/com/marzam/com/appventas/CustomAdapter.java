@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.AvoidXfermode;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,7 +59,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     LayoutInflater inflater = ((Activity) context).getLayoutInflater();
     convertView = inflater.inflate(R.layout.row, parent, false);
     TextView name = (TextView)convertView.findViewById(R.id.textView12);
-    cb = (CheckBox)convertView.findViewById(R.id.checkBoxRow);
+   // cb = (CheckBox)convertView.findViewById(R.id.checkBoxRow);
 
     Cantidad=(TextView)convertView.findViewById(R.id.textView29);
     Cantidad.setText("Cantidad:"+valor);//Envia la cantidad Inicial del producto
@@ -68,11 +69,15 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
 
     name.setText(modelitems[position].getName());//Asigna el nombre a los Texview
-    cb.setClickable(false);
-    if(modelitems[position].getValue()==1)
-        cb.setChecked(true);
-    else
-        cb.setChecked(false);
+    //cb.setClickable(false);
+    if(modelitems[position].getValue()==1) {
+      //  cb.setChecked(true);
+        convertView.setBackgroundColor(Color.parseColor("#89BBEE"));
+    }
+    else {
+        convertView.setBackgroundColor(Color.TRANSPARENT);
+      //  cb.setChecked(false);
+    }
 
 
 
@@ -80,7 +85,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
             @Override
             public void onClick(View view) {
 
-                  CheckBox checkBox=(CheckBox)view.findViewById(R.id.checkBoxRow);
+                 // CheckBox checkBox=(CheckBox)view.findViewById(R.id.checkBoxRow);
                   TextView cant=(TextView)view.findViewById(R.id.textView29);
 
                 /*Verifica si no esta seleccionado el check mostrara el popup para seleccionar la cantidad, en caso contratio
@@ -92,7 +97,8 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
                     AgregarProducto(modelitems[position].getEan(),0,0);
                     modelitems[position].value = 0;
-                    checkBox.setChecked(false);
+                    view.setBackgroundColor(Color.TRANSPARENT);
+                   // checkBox.setChecked(false);
                     cant.setText("Cantidad:0");
 
                 }
@@ -102,38 +108,17 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
         /*Se agrega el evento al checkBox*/
 
-      convertView.setOnLongClickListener(new View.OnLongClickListener() {
-          @Override
-          public boolean onLongClick(View view) {
-
-              CheckBox checkBox=(CheckBox)view.findViewById(R.id.checkBoxRow);
-
-              Toast t=Toast.makeText(context,"Detalle del Producto",Toast.LENGTH_SHORT);
-              t.show();
-
-              if(checkBox.isChecked()){
-                  checkBox.setChecked(true);
-              }else{
-                  checkBox.setChecked(false);
-              }
-
-              return false;
-          }
-      });
-
-
-
 
 
         return convertView;
     }
 
-    public void ShowDialog( int position , View view){
+    public void ShowDialog( int position , final View view){
         llenar_picker();//llena el picker
 
 
      final   int pos=position;
-     final   CheckBox checkBox=(CheckBox)view.findViewById(R.id.checkBoxRow);
+    // final   CheckBox checkBox=(CheckBox)view.findViewById(R.id.checkBoxRow);
      final   TextView cant=(TextView)view.findViewById(R.id.textView29);
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
@@ -153,7 +138,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
                         AgregarProducto(modelitems[pos].getEan(),cantidad,1);
                         modelitems[pos].value = 1;
-                        checkBox.setChecked(true);
+                        view.setBackgroundColor(Color.parseColor("#89BBEE"));
                         cant.setText("Cantidad: " + cantidad);
                 }
 
