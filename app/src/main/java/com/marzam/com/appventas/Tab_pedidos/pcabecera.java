@@ -32,9 +32,12 @@ public class pcabecera extends Activity {
 
     Context context;
     TextView txtFpedido;
+    TextView txt_idPedido;
     Bitmap bitmap;
     GestureOverlayView gesture;
     File Directorio;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +45,11 @@ public class pcabecera extends Activity {
         setContentView(R.layout.activity_pcabecera);
 
         context=this;
+
         txtFpedido=(TextView)findViewById(R.id.textView25);
         txtFpedido.setText(getDate());
+
+        txt_idPedido=(TextView)findViewById(R.id.textView9);
 
     }
 

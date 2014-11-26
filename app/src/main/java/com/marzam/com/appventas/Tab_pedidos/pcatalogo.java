@@ -4,9 +4,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,8 +24,10 @@ import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.marzam.com.appventas.CustomAdapter;
+import com.marzam.com.appventas.MainActivity;
 import com.marzam.com.appventas.Model;
 import com.marzam.com.appventas.R;
+import com.marzam.com.appventas.SQLite.CSQLite;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,29 +42,13 @@ public class pcatalogo extends Activity {
     Model[] modelItems;
     CustomAdapter adapter1;
     NumberPicker picker;
-    String[] list={"ASPIRINA 500MG","ASPIRINA 250MG","SEDALMERK",
-                   "ABATELENGUAS ROGER ESCOLAR C10","ACCU CHEK PERFORMA EQ GLUCEMIA",
-                    "ABATELENGUAS DAMACO MADERA C25","AGUA ROSAS HUME AMERICAN 250ML"};
-    final static ArrayList<HashMap<String,?>>data=new ArrayList<HashMap<String, ?>>();
+    HashMap<String,String> producto_row;
+    static ArrayList<HashMap<String,?>>data=null;
     SimpleAdapter simpleAdapter;
+    CSQLite lite;
 
-    static {
-        HashMap<String, String> row=new HashMap<String, String>();
-        row.put("A","Aspirina 500 mg");
-        row.put("B","Precio: $50.00 Oferta: 50%");
-        row.put("C","Cantidad: 0");
-        data.add(row);
-        row=new HashMap<String, String>();
-        row.put("A","Aspirina 250 mg");
-        row.put("B","Precio: $25.00 Oferta: 25%");
-        row.put("C","Cantidad: 0");
-        data.add(row);
-        row=new HashMap<String, String>();
-        row.put("A","Sedalmerk");
-        row.put("B","Precio: $100.00 Oferta: 10%");
-        row.put("C","Cantidad: 0");
-        data.add(row);
-    }
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,18 +59,14 @@ public class pcatalogo extends Activity {
          EditBuscar=(EditText)findViewById(R.id.editText4);
          lproductos=(ListView)findViewById(R.id.listView2);
 
-        modelItems=new Model[7];
-        modelItems[0]= new Model("ASPIRINA 500MG",0,0);
-        modelItems[1]= new Model("ASPIRINA 250MG",0,0);
-        modelItems[2]= new Model("SEDALMERK",0,0);
-        modelItems[3]=new Model("ABATELENGUAS ROGER ESCOLAR C10",0,0);
-        modelItems[4]=new Model("ACCU CHEK PERFORMA EQ GLUCEMIA",0,0);
-        modelItems[5]=new Model("ABATELENGUAS DAMACO MADERA C25",0,0);
-        modelItems[6]=new Model("AGUA ROSAS HUME AMERICAN 250ML",0,0);
 
+
+        LlenarModelItems();
 
         adapter1=new CustomAdapter(this,modelItems);
         lproductos.setAdapter(adapter1);
+
+        LlenarHasmap();//llena el arreglo para el simpleAdapter
 
         simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
 
@@ -93,11 +79,14 @@ public class pcatalogo extends Activity {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
 
-
-                pcatalogo.this.simpleAdapter.getFilter().filter(charSequence);
-                Filter cont=simpleAdapter.getFilter();
-                if(cont!=null)
-                  lproductos.setAdapter(simpleAdapter);
+                 if(charSequence.length()>0) {
+                     pcatalogo.this.simpleAdapter.getFilter().filter(charSequence);
+                     Filter cont = simpleAdapter.getFilter();
+                     if (cont != null)
+                         lproductos.setAdapter(simpleAdapter);
+                 }else {
+                     lproductos.setAdapter(adapter1);
+                 }
 
             }
 
@@ -184,6 +173,64 @@ public class pcatalogo extends Activity {
     }
 
 
+    public void LlenarHasmap(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=null;
+
+        String query="select descripcion,precio,Cantidad  from productos limit 1000";
+
+        rs=db.rawQuery(query,null);
+        data=new ArrayList<HashMap<String, ?>>();
+        producto_row=new HashMap<String, String>();
+
+        while (rs.moveToNext()){
+            producto_row.put("A",rs.getString(0));
+            producto_row.put("B","Precio: $"+rs.getString(1)+" Oferta: 0%");
+            producto_row.put("C","Cantidad: "+rs.getString(2));
+            data.add(producto_row);
+            producto_row=new HashMap<String, String>();
+        }
+
+        rs.close();
+        db.close();
+        lite.close();
+
+
+    }
+    public void LlenarModelItems(){
+
+      lite=new CSQLite(context);
+      SQLiteDatabase db=lite.getWritableDatabase();
+      Cursor rs=null;
+
+        try {
+            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,codigo  from productos limit 1000",null);
+        }catch (Exception e){
+            String err="Error:"+e.toString();
+            Log.d("Error:",err);
+        }
+
+
+
+        modelItems=new Model[rs.getCount()];
+
+        int cont=0;
+
+        while (rs.moveToNext()){
+            modelItems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4));
+            cont++;
+        }
+
+        rs.close();
+        db.close();
+
+        lite.close();
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -202,4 +249,12 @@ public class pcatalogo extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onBackPressed(){
+        startActivity(new Intent(getBaseContext(), pedido.class)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+        finish();
+    }
+
 }

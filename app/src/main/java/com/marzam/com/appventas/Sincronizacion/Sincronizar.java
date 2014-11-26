@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.marzam.com.appventas.R;
+import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.WebService.WebServices;
 
 import net.lingala.zip4j.core.ZipFile;
@@ -34,6 +36,7 @@ public class Sincronizar extends Activity {
     File directorio;
     ProgressDialog progres;
     static  InputStream stream;
+    CSQLite lite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,7 +195,7 @@ public class Sincronizar extends Activity {
             }
 
             ZipBD(filebd.toString(), fileBack.toString()); //comprime
-            // unZipBD(directorio + "/db_down.zip");
+            unZipBD(directorio + "/db_down.zip");
 
             myInput=new FileInputStream(filedown);
 
@@ -212,6 +215,28 @@ public class Sincronizar extends Activity {
 
     }
 
+    public void AgregarColumnProductos(){
+
+        lite=new CSQLite(context);
+
+        SQLiteDatabase db=lite.getWritableDatabase();
+try {
+
+    db.execSQL("ALTER TABLE productos ADD COLUMN isCheck int DEFAULT 0");
+    db.execSQL("ALTER TABLE productos ADD COLUMN Cantidad int DEFAULT 0 ");
+
+}catch (Exception e){
+    String err=e.toString();
+    Log.d("Error:",err);
+}
+
+        db.close();
+        lite.close();
+
+    }
+
+
+
 
     private class UpLoadTask extends AsyncTask<String,Void,Object> {
 
@@ -219,8 +244,9 @@ public class Sincronizar extends Activity {
         protected Object doInBackground(String... strings) {
             WebServices web=new WebServices();
             CopiarBD();
+            AgregarColumnProductos();
             File file=new File(directorio+"/dbBackup.zip");
-            Object archivo=web.Down_BD(StreamZip(file));
+        //    Object archivo=web.Down_BD(StreamZip(file));
             return null;
         }
 
@@ -253,4 +279,6 @@ public class Sincronizar extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
 }

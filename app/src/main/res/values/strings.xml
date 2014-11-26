@@ -8,7 +8,7 @@
     <string name="title_activity_maps">Map</string>
     <string name="Aceptar">Aceptar</string>
     <string name="Contraseña">Contraseña:</string>
-    <string name="titulo">A92310 - PRUEBAS SISTEMAS</string>
+    <string name="titulo">134057 - EDGAR JIMENEZ</string>
     <string name="ctehoy">Clientes de hoy</string>
     <string name="ctetotales">Clientes totales</string>
     <string name="ReporteVendedor">Graficas</string>
@@ -27,7 +27,7 @@
     <string name="KPIgral">KPI General</string>
     <string name="title_activity_pedido">Pedido</string>
     <string name="tipo_pedido">Tipo de pedido:</string>
-    <string name="title_activity_catalogo">catalogo</string>
+    <string name="title_activity_catalogo">Catalogo</string>
     <string name="Guardar">Guardar</string>
     <string name="Eliminar">Eliminar</string>
     <string name="Agregarp">Agregar productos de catalogo</string>

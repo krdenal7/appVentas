@@ -5,20 +5,20 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.gesture.Gesture;
-import android.gesture.GestureOverlayView;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.marzam.com.appventas.Gesture.Dib_firma;
 import com.marzam.com.appventas.R;
+import com.marzam.com.appventas.SQLite.CSQLite;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,7 +30,17 @@ public class pliquidacion extends Activity {
 
     Context context;
     File Directorio;
+    CSQLite lite;
+    Double subTotal=0.00;
+    Double total=0.00;
+    int CantProductos=0;
 
+    TextView txtSubtotal;
+    TextView txtIva;
+    TextView txtIeps;
+    TextView txtDescuentos;
+    TextView txtTotal;
+    TextView txtCantp;
 
 
     @Override
@@ -39,6 +49,15 @@ public class pliquidacion extends Activity {
         setContentView(R.layout.activity_pliquidacion);
         context=this;
         MostrarFirma();
+        ObtenerValores();
+
+        txtSubtotal=(TextView)findViewById(R.id.textView14);
+        txtTotal=(TextView)findViewById(R.id.textView22);
+        txtCantp=(TextView)findViewById(R.id.textView24);
+
+        txtSubtotal.setText("$"+String.format("%.2f",subTotal));
+        txtTotal.setText("$"+String.format("%.2f",total));
+        txtCantp.setText(""+CantProductos);
 
     }
 
@@ -85,6 +104,25 @@ public class pliquidacion extends Activity {
 
     }
 
+    public void ObtenerValores(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select precio,Cantidad from productos where isCheck=1",null);
+       // CantProductos=rs.getCount();
+        while (rs.moveToNext()){
+
+            Double precio=Double.parseDouble(rs.getString(0));
+            int cantidad=Integer.parseInt(rs.getString(1));
+
+            CantProductos+=cantidad;
+            subTotal+=(precio*cantidad);
+
+        }
+
+          total=subTotal+(subTotal*0.16);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -118,6 +156,15 @@ public class pliquidacion extends Activity {
     @Override
     protected void onResume(){
         super.onResume();
+
+        subTotal=0.00;
+        total=0.00;
+        CantProductos=0;
+        ObtenerValores();
+        txtSubtotal.setText("$"+String.format("%.2f",subTotal));
+        txtTotal.setText("$"+String.format("%.2f",total));
+        txtCantp.setText(""+CantProductos);
+
         MostrarFirma();
     }
 }

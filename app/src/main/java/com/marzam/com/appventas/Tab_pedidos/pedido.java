@@ -44,6 +44,7 @@ try {
     tabHost.addTab(spec1);
     tabHost.addTab(spec2);
     tabHost.addTab(spec3);
+    tabHost.setCurrentTab(1);
 
 }catch (Exception e){
 

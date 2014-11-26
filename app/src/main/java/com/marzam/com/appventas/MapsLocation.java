@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -25,6 +27,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.marzam.com.appventas.Graficas.Grafica_Vendedor;
 import com.marzam.com.appventas.KPI.KPI_General;
+import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Sincronizacion.Sincronizar;
 
 /**
@@ -39,6 +42,8 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     private GoogleApiClient mGoogleApiClient;
     private TextView mMessageView;
     Context context;
+
+    CSQLite lite;
 
     private static final LocationRequest REQUEST = LocationRequest.create()
             .setInterval(5000)         // 5 seconds
@@ -84,10 +89,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     }
     public void ShowCteH(){
-        final CharSequence[] list=new CharSequence[3];
-        list[0]="Benavides";
-        list[1]="Wal-Mart Ecatepec";
-        list[2]="San Juan";
+        final CharSequence[] list=ObtenerCtesHoy("134057");
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Clientes de hoy");
@@ -105,11 +107,11 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     }
     public void ShowCteT(){
-        final CharSequence[] list={"A92310","C124520","D72639","D97987","A89870980","G86587"};
+        final CharSequence[] list=ObtenerCteTotales("134057");
 
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
-        alert.setTitle("Clientes de hoy");
+        alert.setTitle("Clientes");
         alert.setItems(list,new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -118,6 +120,85 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         });
         AlertDialog alertDialog=alert.create();
         alertDialog.show();
+
+    }
+
+
+    public CharSequence[] ObtenerCtesHoy(String agente){
+        String[] clientes = new String[0];
+        String[] valor={agente,"Miercoles"};
+        CharSequence[] datos=null;
+
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor cursor=db.rawQuery("select id_cliente from agenda where numero_empleado=? and dia=?",valor);
+
+        clientes=new String[cursor.getCount()];
+        datos=new CharSequence[cursor.getCount()];
+
+        int cont=0;
+
+       while (cursor.moveToNext()){
+           clientes[cont]=cursor.getString(0);
+           cont++;
+       }
+
+        Cursor rs = null;
+       for(int i=0;i<clientes.length;i++){
+
+        rs=db.rawQuery("select nombre from clientes where id_cliente='"+clientes[i]+"'",null);
+
+           if(rs.moveToFirst()){
+               datos[i]=rs.getString(0);
+           }
+
+       }
+
+        cursor.close();
+        rs.close();
+        db.close();
+        lite.close();
+
+        return datos;
+    }
+    public CharSequence[] ObtenerCteTotales(String agente){
+
+       CharSequence[] clientes=null;
+        CharSequence[] datos=null;
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor cursor=db.rawQuery("select id_cliente from  agenda where numero_empleado='134057'",null);
+
+        clientes=new CharSequence[cursor.getCount()];
+        datos=new CharSequence[cursor.getCount()];
+        int cont=0;
+        while (cursor.moveToNext()){
+            clientes[cont]=cursor.getString(0);
+            cont++;
+        }
+
+        Cursor rs=null;
+
+         for(int i=0;i<datos.length;i++){
+
+             rs=db.rawQuery("select nombre from clientes where id_cliente='"+clientes[i]+"' ",null);
+
+             if(rs.moveToFirst()){
+                 datos[i]=rs.getString(0);
+             }
+
+         }
+
+        cursor.close();
+        rs.close();
+        db.close();
+        lite.close();
+
+        return datos;
 
     }
 

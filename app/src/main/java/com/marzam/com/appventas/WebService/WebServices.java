@@ -16,8 +16,6 @@ import java.util.Objects;
 public class WebServices {
 
 
-
-
     public Object Down_BD(byte[] bit){
 
         byte[] enc=bit;
@@ -49,6 +47,7 @@ public class WebServices {
         }catch (Exception e){
             String a=e.toString();
             Log.d("WebServiceBakError",a);
+            return "";
         }
 
 
@@ -56,4 +55,5 @@ public class WebServices {
 
         return response;
     }
+
 }

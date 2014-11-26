@@ -25,6 +25,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -78,6 +80,10 @@ public class MainActivity extends Activity {
     File directorio;
     LocationManager locationManager;
 
+    CSQLite lite;
+
+   String password;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,13 +93,11 @@ public class MainActivity extends Activity {
 
 
       locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
+      CrearDirectorioDownloads();
+
+
 
       ShowEnableGPS();//Muestra el alert en caso de que el GPS del dispositivo se encuentre desactivado
-
-       /*Realiza tarea de Enviar Backup*/
-
-
-
 
       final  Intent i=new Intent(context,MapsLocation.class);
 
@@ -105,14 +109,36 @@ public class MainActivity extends Activity {
             //    gcm = GoogleCloudMessaging.getInstance(MainActivity.this);
             //    regid = getRegistrationId(context, "Isaac");
 
-           /*     if (regid.equals("")) {
-                    TareaRegistroGCM tarea = new TareaRegistroGCM();
-                    tarea.execute("");
-                    pd = ProgressDialog.show(context, "Por favor espere", "Registrando en servidor", true, false);
-                }*/
-                startActivity(i);
+           //     if (regid.equals("")) {
+           //         TareaRegistroGCM tarea = new TareaRegistroGCM();
+           //         tarea.execute("");
+            //        pd = ProgressDialog.show(context, "Por favor espere", "Registrando en servidor", true, false);
+            //    }
+
+                password=((EditText)findViewById(R.id.editText)).getText().toString();
+
+               // if(VerificaContraseña(password)){
+                    startActivity(i);
+               // }else {
+               //    Toast toast=Toast.makeText(context,"Password incorrecto",Toast.LENGTH_SHORT);
+               //     toast.show();
+               // }
+
             }
         });
+    }
+
+    public void CrearDirectorioDownloads(){
+
+        try {
+            File folder = android.os.Environment.getExternalStorageDirectory();
+            directorio = new File(folder.getAbsolutePath() + "/Marzam/preferencias");
+            if (directorio.exists() == false) {
+                directorio.mkdirs();
+            }
+        }catch (Exception e){
+            Log.d("ErrorCrearDir", e.toString());
+        }
     }
 
 
@@ -143,7 +169,48 @@ public class MainActivity extends Activity {
     }
 
 
+    public boolean VerificaContraseña(String password){
 
+        String[] valor={password};
+
+       lite=new CSQLite(context);
+       lite.getDataBase();
+
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        String query="Select * From agentes where numero_empleado=?";
+        Cursor cursor = db.rawQuery(query,valor);
+
+        while (cursor.moveToFirst()){
+            db.close();
+            lite.close();
+            return true;
+        }
+
+
+
+        return false;
+    }
+    public void CambiarEstatus(String password){
+
+        String[] valor={password};
+
+        lite=new CSQLite(context);
+
+        SQLiteDatabase bd=lite.getWritableDatabase();
+
+        try {
+            Cursor cursor=bd.rawQuery("update agentes set id_estatus=1 where numero_empleado=?",valor);
+        }catch (Exception e){
+            String err="BD:"+e.toString();
+            String error;
+        }
+
+
+
+
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -235,7 +302,12 @@ public class MainActivity extends Activity {
 
     }
 
-
+    @Override
+    protected void onResume(){
+        super.onResume();
+        EditText txtPas=(EditText)findViewById(R.id.editText);
+        txtPas.setText("");
+    }
 
 
 
