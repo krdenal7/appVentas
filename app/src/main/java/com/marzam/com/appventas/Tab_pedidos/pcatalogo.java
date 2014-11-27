@@ -183,10 +183,11 @@ public class pcatalogo extends Activity {
             nums[i] = Integer.toString(i);
 
         picker.setMinValue(1);
-        picker.setMaxValue(nums.length-1);
+        picker.setMaxValue(nums.length);
         picker.setWrapSelectorWheel(false);
         picker.setDisplayedValues(nums);
-        picker.setValue(1);
+        picker.setValue(2);
+
 
 
 

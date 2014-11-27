@@ -23,6 +23,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.marzam.com.appventas.Gesture.Dib_firma;
 import com.marzam.com.appventas.R;
@@ -47,6 +48,7 @@ public class pdetalle extends Activity {
     EditText txtBuscar;
     ImageButton btnClear;
     ProgressDialog progress;
+    String res_de_guardado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,7 +151,10 @@ public class pdetalle extends Activity {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
-
+                 if(i==0){
+                     new UpLoadTask().execute("");
+                     progress=ProgressDialog.show(context,"Transmitiendo pedidos","Cargando..",true,false);
+                 }
 
 
                 if(i==1){
@@ -227,18 +232,29 @@ public class pdetalle extends Activity {
         @Override
         protected Object doInBackground(String... strings) {
             WebServices web=new WebServices();
+
             envio_pedido pedido=new envio_pedido();
+            String res= pedido.GuardarPedido(context);
 
-           // boolean resp=pedido.Dib_pedido(context);
 
-            return null;
+            return res;
         }
 
         @Override
         protected void onPostExecute(Object result){
 
-            if(progress.isShowing())
+            if(progress.isShowing()) {
+
+                monto=0.00;
+                Productos();
+                txtMonto.setText("Monto actual: $"+String.format("%.2f", monto));
+                simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
+                lista.setAdapter(simpleAdapter);
                 progress.dismiss();
+
+                String res=String.valueOf(result);
+                Toast.makeText(context,res,Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

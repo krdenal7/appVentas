@@ -2,12 +2,14 @@ package com.marzam.com.appventas.Tab_pedidos;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.gesture.Gesture;
 import android.gesture.GestureOverlayView;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -16,9 +18,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.marzam.com.appventas.Gesture.Dib_firma;
 import com.marzam.com.appventas.R;
+import com.marzam.com.appventas.Sincronizacion.envio_pedido;
+import com.marzam.com.appventas.WebService.WebServices;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,9 +38,7 @@ public class pcabecera extends Activity {
     Context context;
     TextView txtFpedido;
     TextView txt_idPedido;
-    Bitmap bitmap;
-    GestureOverlayView gesture;
-    File Directorio;
+    ProgressDialog progress;
 
 
 
@@ -62,6 +65,12 @@ public class pcabecera extends Activity {
         alert.setItems(items,new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+
+                if(i==0){
+                    new UpLoadTask().execute("");
+                    progress=ProgressDialog.show(context,"Transmitiendo pedidos","Cargando..",true,false);
+                }
+
 
                 if(i==1){
                     Intent intent=new Intent(context, Dib_firma.class);
@@ -91,7 +100,28 @@ public class pcabecera extends Activity {
     }
 
 
+    private class UpLoadTask extends AsyncTask<String,Void,Object> {
 
+        @Override
+        protected Object doInBackground(String... strings) {
+            WebServices web=new WebServices();
+
+            envio_pedido pedido=new envio_pedido();
+            String res= pedido.GuardarPedido(context);
+
+
+            return res;
+        }
+
+        @Override
+        protected void onPostExecute(Object result){
+
+            if(progress.isShowing()) {
+                String res=String.valueOf(result);
+                Toast.makeText(context, res, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

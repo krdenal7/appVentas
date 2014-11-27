@@ -235,10 +235,10 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     public void addMarker(){
 
-        mMap.addMarker(new MarkerOptions().position(new LatLng(19.6022857102156,-99.0444087597412)).title("Farmacia Guadalajara"));
-        mMap.addMarker(new MarkerOptions().position(new LatLng(19.607743417282613,-99.05784126248778)).title("Farmacia Benavides"));
-        mMap.addMarker(new MarkerOptions().position(new LatLng(19.601436716919167, -99.02754302945556)).title("Bodega Aurrera"));
-        mMap.addMarker(new MarkerOptions().position(new LatLng(19.608843206919167, -99.05754502946669)).title("Wal-Mart Ecatepec"));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(19.555965369691677, -99.0496741113617)).title("Bodega Aurrera"));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(19.555247562141705, -99.04640181636353)).title("El Fenix"));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(19.56101015234801,  -99.05210955714722)).title("Farmacia Guadalajara"));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(19.56317359796029,  -99.04562934016724)).title("Wal-Mart Ecatepec"));
 
     }
 
