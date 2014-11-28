@@ -16,12 +16,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.marzam.com.appventas.CustomAdapter;
@@ -48,7 +50,12 @@ public class pcatalogo extends Activity {
     SimpleAdapter simpleAdapter;
     CSQLite lite;
 
-
+    Button boton1;
+    Button boton2;
+    Button boton3;
+    Button boton4;
+    Button boton5;
+    Button boton6;
 
 
     @Override
@@ -59,6 +66,15 @@ public class pcatalogo extends Activity {
 
          EditBuscar=(EditText)findViewById(R.id.editText4);
          lproductos=(ListView)findViewById(R.id.listView2);
+
+        /*Botones*/
+        boton1=(Button)findViewById(R.id.button6);
+        boton2=(Button)findViewById(R.id.button7);
+        boton3=(Button)findViewById(R.id.button8);
+        boton4=(Button)findViewById(R.id.button9);
+        boton5=(Button)findViewById(R.id.button10);
+        boton6=(Button)findViewById(R.id.button11);
+        /*Botones*/
 
 
 
@@ -112,7 +128,47 @@ public class pcatalogo extends Activity {
         lproductos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                ShowDialog(i);
+
+              view.setBackgroundColor(Color.parseColor("#DFDFDF"));
+
+                boton1.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+
+                    }
+                });
+                boton2.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });
+                boton3.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });
+                boton4.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });
+                boton5.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });
+                boton6.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });
+               // ShowDialog(i);
             }
         });
 
@@ -268,8 +324,16 @@ public class pcatalogo extends Activity {
     public void AgregarProducto(String ean,int cantidad,int isChecked){
 
         lite=new CSQLite(context);
-
         SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select Cantidad from  productos where codigo='"+ean+"'",null);
+        int pzas=0;
+
+        if(rs.moveToNext()){
+
+           pzas=rs.getInt(0);
+        }
+
         db.execSQL("update productos set  Cantidad="+cantidad+",isCheck="+isChecked+" where codigo='"+ean+"'");
 
         db.close();
@@ -277,13 +341,16 @@ public class pcatalogo extends Activity {
 
     }
 
+
+
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_catalogo, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -295,14 +362,12 @@ public class pcatalogo extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
-
     @Override
     public void onBackPressed(){
                 startActivity(new Intent(getBaseContext(),pedido.class)
               .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
         finish();
     }
-
     @Override
     protected void onResume(){
         super.onResume();

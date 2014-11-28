@@ -14,7 +14,8 @@
         android:layout_toStartOf="@+id/imageButton2"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:focusable="true" />
 
     <ListView
         android:layout_width="wrap_content"
@@ -36,53 +37,64 @@
         android:background="@android:color/transparent" />
 
     <Button
+        style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="1"
+        android:text="0"
         android:id="@+id/button6"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:enabled="false" />
+        android:layout_alignParentStart="true" />
 
     <Button
+        style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="2"
+        android:text="+1"
         android:id="@+id/button7"
-        android:layout_alignBottom="@+id/button6"
-        android:layout_toRightOf="@+id/button6"
-        android:layout_toEndOf="@+id/button6"
-        android:enabled="false" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="5"
-        android:id="@+id/button8"
-        android:layout_alignBottom="@+id/button7"
-        android:layout_toRightOf="@+id/button7"
-        android:layout_toEndOf="@+id/button7"
-        android:enabled="false" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="9"
-        android:id="@+id/button9"
         android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/button8"
-        android:layout_toEndOf="@+id/button8"
-        android:enabled="false" />
+        android:layout_toRightOf="@+id/button6"
+        android:layout_toEndOf="@+id/button6" />
 
     <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+2"
+        android:id="@+id/button8"
+        android:layout_below="@+id/listView2"
+        android:layout_toRightOf="@+id/button7"
+        android:layout_toEndOf="@+id/button7" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+5"
+        android:id="@+id/button9"
+        android:layout_below="@+id/listView2"
+        android:layout_toRightOf="@+id/button8"
+        android:layout_toEndOf="@+id/button8" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+9"
+        android:id="@+id/button10"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/button9"
+        android:layout_toEndOf="@+id/button9" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="+"
-        android:id="@+id/button10"
-        android:layout_toEndOf="@+id/button9"
+        android:id="@+id/button11"
         android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@+id/button10"
+        android:layout_toRightOf="@+id/button10"
         android:layout_alignRight="@+id/listView2"
-        android:layout_alignEnd="@+id/listView2"
-        android:enabled="false" />
+        android:layout_alignEnd="@+id/listView2" />
+
 </RelativeLayout>

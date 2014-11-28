@@ -151,7 +151,8 @@ public class envio_pedido {
       byte[] img=StreamArchivo(imagen);
       String code64= Base64.encodeToString(img,Base64.DEFAULT);
 
-      return code64;
+
+      return  code64;
   }//Conpleto
   public String Obtener_claveagente(){
 
@@ -325,13 +326,14 @@ public class envio_pedido {
 
 
 
-    public String JSONCabecera(){
+    public Object JSONCabecera(){
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
        Cursor rs= db.rawQuery("select * from encabezado_pedido where id_pedido='"+Obtener_idPedido()+"'",null);
        JSONObject json=new JSONObject();
+       JSONArray array=new JSONArray();
        String[] date=getDate();
 
 while (rs.moveToNext()) {
@@ -369,6 +371,7 @@ while (rs.moveToNext()) {
         json.put("no_pedido_cliente", rs.getString(10));
         json.put("firma", rs.getString(11));
         json.put("id_visita", rs.getString(12));
+        array.put(json);
 
     }catch (Exception e){
 
@@ -380,11 +383,11 @@ while (rs.moveToNext()) {
 
 
 
-      String Sjson=String.valueOf(json);
 
-      return Sjson;
+
+      return array;
   }
-    public String JSONDetalle(){
+    public Object JSONDetalle(){
 
      lite=new CSQLite(context);
      SQLiteDatabase db=lite.getWritableDatabase();
@@ -417,9 +420,9 @@ try {
 
      }
 
-        String Sjson=String.valueOf(array);
 
-        return Sjson;
+
+        return array;
     }
 
 
