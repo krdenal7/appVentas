@@ -99,8 +99,10 @@ public class pcatalogo extends Activity {
                   int cant=charSequence.length();
 
                  if(charSequence.length()>0) {
-                     pcatalogo.this.simpleAdapter.getFilter().filter(charSequence);
-                     Filter cont = simpleAdapter.getFilter();
+
+                     pcatalogo.this.adapter1.getFilter().filter(charSequence);
+                     Filter cont =  adapter1.getFilter();
+
                      if (cont != null) {
                              lproductos.setAdapter(simpleAdapter);
                                        }
@@ -120,8 +122,10 @@ public class pcatalogo extends Activity {
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 EditBuscar.setText("");
                 lproductos.setAdapter(adapter1);
+
             }
         });
 
@@ -129,46 +133,8 @@ public class pcatalogo extends Activity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-              view.setBackgroundColor(Color.parseColor("#DFDFDF"));
+                ShowDialog(i);
 
-                boton1.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-
-                    }
-                });
-                boton2.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                    }
-                });
-                boton3.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                    }
-                });
-                boton4.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                    }
-                });
-                boton5.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                    }
-                });
-                boton6.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                    }
-                });
-               // ShowDialog(i);
             }
         });
 

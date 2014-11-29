@@ -195,6 +195,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
 
 
+
     public void ShowDialog( int position , final View view){
         llenar_picker();//llena el picker
 
@@ -335,6 +336,8 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
         lite.close();
     }
+
+
 
 
 }
