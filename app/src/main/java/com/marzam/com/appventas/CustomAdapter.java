@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.AvoidXfermode;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,16 +14,12 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.Filterable;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.marzam.com.appventas.SQLite.CSQLite;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -37,7 +32,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     NumberPicker picker;
     TextView Cantidad;
     TextView Precio;
-    CheckBox cb;
+
     CSQLite lite;
 
     Button boton1;
@@ -46,6 +41,9 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     Button boton4;
     Button boton5;
     Button boton6;
+
+   AlertDialog alertDialog;
+   AlertDialog alertDialog_picker;
 
 
     public CustomAdapter(Context context, Model[] resource) {
@@ -73,12 +71,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
 
         /*Botones*/
-        boton1=(Button)((Activity)context).findViewById(R.id.button6);
-        boton2=(Button)((Activity)context).findViewById(R.id.button7);
-        boton3=(Button)((Activity)context).findViewById(R.id.button8);
-        boton4=(Button)((Activity)context).findViewById(R.id.button9);
-        boton5=(Button)((Activity)context).findViewById(R.id.button10);
-        boton6=(Button)((Activity)context).findViewById(R.id.button11);
+
         /*Botones*/
 
     int valor=modelitems[position].getCantidad();
@@ -114,60 +107,13 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
             @Override
             public void onClick(View view) {
 
-                 // CheckBox checkBox=(CheckBox)view.findViewById(R.id.checkBoxRow);
-                  final TextView cant=(TextView)view.findViewById(R.id.textView29);
-
                 /*Verifica si no esta seleccionado el check mostrara el popup para seleccionar la cantidad, en caso contratio
                   pasara la cantidad a 0 y deseleccionara el ckeck*/
 
                 // if(modelitems[position].getValue()!=1) {
 
                    //  view.setBackgroundColor(Color.TRANSPARENT);
-                     view.setBackgroundColor(Color.parseColor("#DFDFDF"));//Cambia el color del producto que seleccionaron para que sepan a cual le agregaran la cantidad
-                     boton1.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
 
-                        TextView txtCant=(TextView)finalConvertView.findViewById(R.id.textView29);
-                        AgregarProducto(modelitems[position].getEan(), 0, 0,finalConvertView);
-                        modelitems[position].value = 0;
-                        finalConvertView.setBackgroundColor(Color.TRANSPARENT);
-                        // checkBox.setChecked(false);
-                        txtCant.setText("Cantidad:0");
-                        LlenarModelItems();
-                    }
-                });
-                boton2.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Agregar_Producto(finalConvertView, 1, position);
-                    }
-                });
-                boton3.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Agregar_Producto(finalConvertView, 2, position);
-                    }
-                });
-                boton4.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Agregar_Producto(finalConvertView, 5, position);
-                    }
-                });
-                boton5.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Agregar_Producto(finalConvertView, 9, position);
-                    }
-                });
-                boton6.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        ShowDialog(position, finalConvertView);
-                        LlenarModelItems();
-                    }
-                });
 
                      //ShowDialog(position, view);
                 //}//else{
@@ -179,6 +125,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
                   //  cant.setText("Cantidad:0");
 
               //  }
+                ShowDialog(position,view);
 
                    }});
 
@@ -199,51 +146,55 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     public void ShowDialog( int position , final View view){
         llenar_picker();//llena el picker
 
-
-     final   int pos=position;
-    // final   CheckBox checkBox=(CheckBox)view.findViewById(R.id.checkBoxRow);
-     final   TextView cant=(TextView)view.findViewById(R.id.textView29);
+     LayoutInflater inflater=((Activity)context).getLayoutInflater();
+     View botones=inflater.inflate(R.layout.botones_cantidad,null);
+     Evento_Botones(botones,view,position);
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
         alertDialogBuilder.setTitle( "Seleccione una cantidad");
-        alertDialogBuilder.setView(picker);
+        alertDialogBuilder.setView(botones);
         alertDialogBuilder.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog,int id) {
 
 
-               int cantidad=(picker.getValue())-1;
-
-                if(cantidad<=0){
-                    Toast t=Toast.makeText(context,"La cantidad debe ser mayor a 0",Toast.LENGTH_SHORT);
-                    t.show();
-                }else {
-
-
-                        AgregarProducto(modelitems[pos].getEan(),cantidad,1,view);
-                        modelitems[pos].value = 1;
-                        view.setBackgroundColor(Color.parseColor("#89BBEE"));
-                        cant.setText("Cantidad: " + cantidad);
-                }
 
 
             }
 
         });
 
-        alertDialogBuilder.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface dialog,int id) {
-
-            }
-
-        });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog = alertDialogBuilder.create();
         alertDialog.show();
 
 
     }
+    public void ShowDialog_picker(final int posicion, final View view){
+        llenar_picker();
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Seleccione una cantidad");
+        alert.setView(picker);
+        alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+
+                Agregar_Producto(view,0,posicion);
+                Agregar_Producto(view,(picker.getValue())-1,posicion);
+
+            }
+        });
+        alert.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        alertDialog_picker=alert.create();
+        alertDialog_picker.show();
+    }
+
+
     public void llenar_picker(){
 
         picker = new NumberPicker(context);
@@ -285,9 +236,9 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
             return (cantidad+pzas);
 
         }else {
-            db.execSQL("update productos set  Cantidad="+cantidad+",isCheck="+isChecked+" where codigo='"+ean+"'");
+            db.execSQL("update productos set  Cantidad="+cantidad+",isCheck=0 where codigo='"+ean+"'");
             LlenarModelItems();
-            view.setBackgroundColor(Color.parseColor("#89BBEE"));
+            view.setBackgroundColor(Color.TRANSPARENT);
             cant.setText("Cantidad: " + cantidad);
 
             db.close();
@@ -298,6 +249,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
     }
     public void Agregar_Producto(View view,int cantidad,int position){
+
 
 
        int pzas=AgregarProducto(modelitems[position].getEan(),cantidad,1,view);
@@ -336,6 +288,111 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
         lite.close();
     }
+
+
+
+    public String[] ObtenerInfoProductos(int posicion){
+        String[] info=new String[3];
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        Cursor rs=db.rawQuery("select descripcion,precio,Cantidad from productos where codigo='"+modelitems[posicion].getEan()+"'",null);
+
+        if(rs.moveToFirst()){
+            info[0]=rs.getString(0);
+            info[1]=rs.getString(1);
+            info[2]=rs.getString(2);
+        }
+
+
+        return info;
+    }
+    public void Evento_Botones(View viewBoton, final View content, final int posicion){
+
+
+
+        boton1=(Button)viewBoton.findViewById(R.id.button12);
+        boton2=(Button)viewBoton.findViewById(R.id.button13);
+        boton3=(Button)viewBoton.findViewById(R.id.button14);
+        boton4=(Button)viewBoton.findViewById(R.id.button15);
+        boton5=(Button)viewBoton.findViewById(R.id.button16);
+        boton6=(Button)viewBoton.findViewById(R.id.button17);
+
+        TextView txt1=(TextView)viewBoton.findViewById(R.id.textView50);
+        TextView txt2=(TextView)viewBoton.findViewById(R.id.textView52);
+        final TextView txt3=(TextView)viewBoton.findViewById(R.id.textView54);
+
+        final String[] info=ObtenerInfoProductos(posicion);
+
+        txt1.setText(info[0]);
+        txt2.setText(info[1]);
+        txt3.setText(info[2]);
+
+        final int[] cont = {0};
+
+        boton1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Agregar_Producto(content,0,posicion);
+                cont[0]=0;
+                txt3.setText("0");
+            }
+        });
+        boton2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+               Agregar_Producto(content,1,posicion);
+               int val=Integer.parseInt(info[2]);
+               txt3.setText(""+((val+ cont[0])+1));
+               cont[0]++;
+            }
+        });
+        boton3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Agregar_Producto(content,2,posicion);
+                int val=Integer.parseInt(info[2]);
+                txt3.setText(""+((val+ cont[0])+2));
+                cont[0]+=2;
+            }
+        });
+        boton4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Agregar_Producto(content,5,posicion);
+                int val=Integer.parseInt(info[2]);
+                txt3.setText(""+((val+ cont[0])+5));
+                cont[0]+=5;
+            }
+        });
+        boton5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Agregar_Producto(content,10,posicion);
+                int val=Integer.parseInt(info[2]);
+                txt3.setText(""+((val+ cont[0])+10));
+                cont[0]+=10;
+
+            }
+        });
+        boton6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                 alertDialog.dismiss();
+                 ShowDialog_picker(posicion, content);
+
+            }
+        });
+
+    }
+
+
+
 
 
 

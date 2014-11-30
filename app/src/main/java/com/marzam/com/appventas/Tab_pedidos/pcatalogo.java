@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,6 +51,9 @@ public class pcatalogo extends Activity {
     SimpleAdapter simpleAdapter;
     CSQLite lite;
 
+    AlertDialog alertDialog;
+    AlertDialog alertDialog_picker;
+
     Button boton1;
     Button boton2;
     Button boton3;
@@ -67,23 +71,12 @@ public class pcatalogo extends Activity {
          EditBuscar=(EditText)findViewById(R.id.editText4);
          lproductos=(ListView)findViewById(R.id.listView2);
 
-        /*Botones*/
-        boton1=(Button)findViewById(R.id.button6);
-        boton2=(Button)findViewById(R.id.button7);
-        boton3=(Button)findViewById(R.id.button8);
-        boton4=(Button)findViewById(R.id.button9);
-        boton5=(Button)findViewById(R.id.button10);
-        boton6=(Button)findViewById(R.id.button11);
-        /*Botones*/
-
-
 
         LlenarModelItems();
         adapter1=new CustomAdapter(this,modelItems);
         lproductos.setAdapter(adapter1);
 
         LlenarHasmap();//llena el arreglo para el simpleAdapter
-
         simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
 
         EditBuscar.addTextChangedListener(new TextWatcher() {
@@ -100,14 +93,14 @@ public class pcatalogo extends Activity {
 
                  if(charSequence.length()>0) {
 
-                     pcatalogo.this.adapter1.getFilter().filter(charSequence);
-                     Filter cont =  adapter1.getFilter();
+                     pcatalogo.this.simpleAdapter.getFilter().filter(charSequence);
+                     Filter cont =  simpleAdapter.getFilter();
 
                      if (cont != null) {
                              lproductos.setAdapter(simpleAdapter);
                                        }
                  }else {
-                     lproductos.setAdapter(adapter1);
+                             lproductos.setAdapter(adapter1);
                  }
 
             }
@@ -152,47 +145,73 @@ public class pcatalogo extends Activity {
 
 
     public void ShowDialog(final int posicion){
-        llenar_picker();
+
 
          String Item=String.valueOf(simpleAdapter.getItem(posicion));
          final String codigo=ObtenerValoresdeFilter(Item);
 
+        LayoutInflater inflater=getLayoutInflater();
+        View viewButton=inflater.inflate(R.layout.botones_cantidad,null);
+        Eventos_Button(viewButton,codigo);
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
         alertDialogBuilder.setTitle( "Seleccione una cantidad");
-        alertDialogBuilder.setView(picker);
+        alertDialogBuilder.setView(viewButton);
         alertDialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int id) {
 
-                int val=picker.getValue();
-                if(val==0){
-                    Toast.makeText(context,"La cantidad debe ser mayor a 0",Toast.LENGTH_SHORT).show();
-                }else {
-
-                    AgregarProducto(codigo,val,1);
-                    LlenarModelItems();
-                    adapter1=new CustomAdapter(context,modelItems);
-                    EditBuscar.setText("");
-                    lproductos.setAdapter(adapter1);
-                }
+                LlenarModelItems();
+                adapter1=new CustomAdapter(context,modelItems);
+                lproductos.setAdapter(adapter1);
+                LlenarHasmap();//llena el arreglo para el simpleAdapter
+                simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
+                EditBuscar.setText("");
 
             }
 
         });
 
-        alertDialogBuilder.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
 
-            public void onClick(DialogInterface dialog,int id) {
+
+        alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+
+
+    }
+    public void ShowDialog_picker(final String codigo){
+
+        llenar_picker();
+
+        AlertDialog.Builder alert1=new AlertDialog.Builder(context);
+        alert1.setTitle("Seleccione una cantidad");
+        alert1.setView(picker);
+        alert1.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                AgregarProducto(codigo,0,1);
+                AgregarProducto(codigo,(picker.getValue())-1,1);
+                LlenarModelItems();
+                adapter1=new CustomAdapter(context,modelItems);
+                lproductos.setAdapter(adapter1);
+                LlenarHasmap();//llena el arreglo para el simpleAdapter
+                simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
+
+                EditBuscar.setText("");
 
             }
+        });
+        alert1.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
 
+            }
         });
 
-        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog_picker=alert1.create();
+        alertDialog_picker.show();
 
-        if(codigo!=null)
-          alertDialog.show();
 
 
     }
@@ -280,32 +299,144 @@ public class pcatalogo extends Activity {
         String cantidad= split[3].replace("C=Cantidad: ","").trim();
         String codigo=split[0].replace("D=","");
 
-        int cant=Integer.parseInt(cantidad);
 
-        if(cant==0)
+
+
             return codigo;
-
-            return null;
     }
+    public String[] ObtenerInfoProductos(String ean){
+        String[] info=new String[3];
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        Cursor rs=db.rawQuery("select descripcion,precio,Cantidad from productos where codigo='"+ean+"'",null);
+
+        if(rs.moveToFirst()){
+            info[0]=rs.getString(0);
+            info[1]=rs.getString(1);
+            info[2]=rs.getString(2);
+        }
+
+
+        return info;
+    }
+
+    public void Eventos_Button(View view, final String  codigo){
+
+        boton1=(Button)view.findViewById(R.id.button12);
+        boton2=(Button)view.findViewById(R.id.button13);
+        boton3=(Button)view.findViewById(R.id.button14);
+        boton4=(Button)view.findViewById(R.id.button15);
+        boton5=(Button)view.findViewById(R.id.button16);
+        boton6=(Button)view.findViewById(R.id.button17);
+
+        TextView txt1=(TextView)view.findViewById(R.id.textView50);
+        TextView txt2=(TextView)view.findViewById(R.id.textView52);
+        final TextView txt3=(TextView)view.findViewById(R.id.textView54);
+
+        final String[] info=ObtenerInfoProductos(codigo);
+
+        txt1.setText(info[0]);
+        txt2.setText(info[1]);
+        txt3.setText(info[2]);
+
+        final int[] cont = {0};
+
+        boton1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AgregarProducto(codigo,0,0);
+                cont[0]=0;
+                txt3.setText("0");
+            }
+        });
+        boton2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AgregarProducto(codigo,1,1);
+                int val=Integer.parseInt(info[2]);
+                txt3.setText(""+((val+ cont[0])+1));
+                cont[0]++;
+
+            }
+        });
+        boton3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AgregarProducto(codigo, 2, 1);
+                int val=Integer.parseInt(info[2]);
+                txt3.setText(""+((val+ cont[0])+2));
+                cont[0]+=2;
+            }
+        });
+        boton4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AgregarProducto(codigo,5,1);
+                int val=Integer.parseInt(info[2]);
+                txt3.setText(""+((val+ cont[0])+5));
+                cont[0]+=5;
+
+            }
+        });
+        boton5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AgregarProducto(codigo,10,1);
+                int val=Integer.parseInt(info[2]);
+                txt3.setText(""+((val+ cont[0])+10));
+                cont[0]+=10;
+            }
+        });
+        boton6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                alertDialog.dismiss();
+                ShowDialog_picker(codigo);
+            }
+        });
+
+    }
+
     public void AgregarProducto(String ean,int cantidad,int isChecked){
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select Cantidad from  productos where codigo='"+ean+"'",null);
-        int pzas=0;
+        if(cantidad!=0){
+            Cursor rs=db.rawQuery("select Cantidad from productos where codigo='"+ean+"'",null);
+            int pzas=0;
+            if(rs.moveToFirst()){
 
-        if(rs.moveToNext()){
+                pzas=rs.getInt(0);
 
-           pzas=rs.getInt(0);
+            }
+            db.execSQL("update productos set  Cantidad="+(cantidad+pzas)+",isCheck="+isChecked+" where codigo='"+ean+"'");
+
+
+
+            db.close();
+            lite.close();
+
+
+        }else {
+            db.execSQL("update productos set  Cantidad=" + cantidad + ",isCheck=0 where codigo='" + ean + "'");
+            db.close();
+            lite.close();
         }
 
-        db.execSQL("update productos set  Cantidad="+cantidad+",isCheck="+isChecked+" where codigo='"+ean+"'");
-
-        db.close();
-        lite.close();
-
+        LlenarHasmap();//llena el arreglo para el simpleAdapter
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
     }
+
+
+
 
 
 
