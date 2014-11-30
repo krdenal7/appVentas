@@ -81,8 +81,10 @@ public class MainActivity extends Activity {
     LocationManager locationManager;
 
     CSQLite lite;
-
-   String password;
+    String password;
+    String nombre_agente;
+    String[] clave_agente;
+    TextView txtUsuario;
 
 
     @Override
@@ -91,9 +93,20 @@ public class MainActivity extends Activity {
         setContentView(R.layout.login);
         context=this;
 
+        txtUsuario=(TextView)findViewById(R.id.textView);
+        locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
+        CrearDirectorioDownloads();
 
-      locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
-      CrearDirectorioDownloads();
+
+        if(ExistsBD()) {
+            MostrarDatos_Agente();
+        }else {
+            new Task_DownBD().execute("");
+            pd=ProgressDialog.show(context,"Obteniendo información de rutas","Cargando",true,false);
+        }
+
+
+
 
 
 
@@ -109,20 +122,20 @@ public class MainActivity extends Activity {
             //    gcm = GoogleCloudMessaging.getInstance(MainActivity.this);
             //    regid = getRegistrationId(context, "Isaac");
 
-           //     if (regid.equals("")) {
-           //         TareaRegistroGCM tarea = new TareaRegistroGCM();
-           //         tarea.execute("");
+            //     if (regid.equals("")) {
+            //         TareaRegistroGCM tarea = new TareaRegistroGCM();
+            //         tarea.execute("");
             //        pd = ProgressDialog.show(context, "Por favor espere", "Registrando en servidor", true, false);
             //    }
 
                 password=((EditText)findViewById(R.id.editText)).getText().toString();
 
-               // if(VerificaContraseña(password)){
+                if(VerificaContraseña(password,nombre_agente)){
                     startActivity(i);
-               // }else {
-               //    Toast toast=Toast.makeText(context,"Password incorrecto",Toast.LENGTH_SHORT);
-               //     toast.show();
-               // }
+                }else {
+                   Toast toast=Toast.makeText(context,"Password incorrecto",Toast.LENGTH_SHORT);
+                    toast.show();
+                }
 
             }
         });
@@ -140,8 +153,6 @@ public class MainActivity extends Activity {
             Log.d("ErrorCrearDir", e.toString());
         }
     }
-
-
     public void ShowEnableGPS(){
         if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
             AlertDialog.Builder alert=new AlertDialog.Builder(context);
@@ -169,16 +180,16 @@ public class MainActivity extends Activity {
     }
 
 
-    public boolean VerificaContraseña(String password){
+    public boolean VerificaContraseña(String password,String nombre){
 
-        String[] valor={password};
+        String[] valor={password,nombre};
 
        lite=new CSQLite(context);
        lite.getDataBase();
 
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        String query="Select * From agentes where numero_empleado=?";
+        String query="Select * From agentes where numero_empleado=? and nombre=?";
         Cursor cursor = db.rawQuery(query,valor);
 
         while (cursor.moveToFirst()){
@@ -191,7 +202,7 @@ public class MainActivity extends Activity {
 
         return false;
     }
-    public void CambiarEstatus(String password){
+    public void    CambiarEstatus(String password){
 
         String[] valor={password};
 
@@ -212,27 +223,6 @@ public class MainActivity extends Activity {
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     public boolean onKeyDown(int keyCode,KeyEvent event){
@@ -247,8 +237,9 @@ public class MainActivity extends Activity {
 
            case KeyEvent.KEYCODE_MENU:
                if(press==true)
-               (presMenu=Toast.makeText(context,"Correcto",Toast.LENGTH_SHORT)).show();
-               press=false;
+                          press=false;
+
+
                return true;
 
        }
@@ -309,6 +300,190 @@ public class MainActivity extends Activity {
         txtPas.setText("");
     }
 
+
+    /*Comprobar Ruta y Base de datos*/
+    public void EliminarBD(){
+
+        try {
+
+            File filebd = new File("/data/data/com.marzam.com.appventas/databases/db.db");
+            filebd.delete();
+
+        }catch (Exception e){
+            String err=e.toString();
+            Log.d("Error al eliminar BD",err);
+        }
+
+    }//Pruebas
+    public boolean ExistsBD(){
+
+        File file=new File("/data/data/com.marzam.com.appventas/databases/db.db");
+
+        if(file.exists()) {
+            return true;
+        }else {
+            return false;
+        }
+
+    }  //Verifica si existe la base de Datos
+    public void MostrarDatos_Agente(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select numero_empleado,nombre from agentes where Sesion=1",null);
+        String usuario="";
+
+        if(rs.moveToFirst()){
+            usuario=rs.getString(0)+"-----"+rs.getString(1);
+            txtUsuario.setText(usuario);
+            nombre_agente=rs.getString(1);
+        }else{
+            Show_SelectRutaAgente();
+        }
+    } //Si existe la base de datos y esta seleccionado el usuario lo mostrara en la pantalla
+    public String[] Obtener_Agentes(){
+        String[] agentes=null;
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select nombre,clave_agente from agentes",null);
+
+        agentes=new String[rs.getCount()];
+        clave_agente=new String[rs.getCount()];
+        int cont=0;
+        while (rs.moveToNext()){
+            agentes[cont]=rs.getString(0);
+            clave_agente[cont]=rs.getString(1);
+            cont++;
+        }
+
+        return  agentes;
+    }  //Obtiene los nombres de los agentes para que sea seleccionado el que se requiera
+    public void ActualizarSesionAgente(String clave){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        db.execSQL("update agentes set Sesion=1 where clave_agente='"+clave+"'");
+        db.close();
+        lite.close();
+    }
+
+    public void Show_SelectRutaAgente(){
+
+        String[] usuarios=Obtener_Agentes();
+
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Seleccione un usuario");
+        alert.setItems(usuarios, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                 ActualizarSesionAgente(clave_agente[i]);
+                 MostrarDatos_Agente();
+            }
+        });
+        AlertDialog alertDialog=alert.create();
+        alertDialog.show();
+    } //Si no esta configurado un usuario mostrara la ventana para que sea seleccionado uno
+
+    private class Task_DownBD extends AsyncTask<String,Void,Object> {
+
+        @Override
+        protected Object doInBackground(String... strings) {
+            WebServices web=new WebServices();
+            if(CopiarBD()) {
+                AgregarColumnProductos();
+            }else {
+                return "0";
+            }
+            File file=new File(directorio+"/dbBackup.zip");
+            //    Object archivo=web.Down_BD(StreamZip(file));
+
+            if(ExistsBD())
+                  return "1";
+            else
+                  return  "0";
+
+
+        }
+
+        @Override
+        protected void onPostExecute(Object result){
+
+            if(pd.isShowing()) {
+
+                if(result=="1"){
+                    Show_SelectRutaAgente();
+                }else {
+                    Toast.makeText(context,"Error al agregar la base de datos. Verifique su conexion a Internet e intente nuevamente",Toast.LENGTH_SHORT).show();
+                }
+
+                pd.dismiss();
+            }
+        }
+    }
+    public void unZipBD(String origen){
+
+        try{
+
+            ZipFile zipFile=new ZipFile(origen);
+            zipFile.extractAll(directorio.toString());
+
+
+        }catch (ZipException e){
+            String err=e.toString();
+            Log.d("Fail ExtractZip:",err);
+        }
+
+    }
+
+    public boolean CopiarBD(){
+
+        byte[] buffer=new byte[1024];
+        OutputStream myOutput=null;
+        int length;
+        InputStream myInput=null;
+
+        try{
+
+            File filebd=new File("/data/data/com.marzam.com.appventas/databases/db.db");
+            File filedown=new File(directorio+"/db.db");
+            unZipBD(directorio + "/db_down.zip");
+            myInput=new FileInputStream(filedown);
+            myOutput=new FileOutputStream("/data/data/com.marzam.com.appventas/databases/db.db");
+            while ((length=myInput.read(buffer))>0){
+                myOutput.write(buffer,0,length);
+            }
+            myOutput.close();
+            myOutput.flush();
+            myInput.close();
+           return true;
+
+        }catch (Exception e){
+            String error=e.toString();
+            Log.d("Error al copiar BD",error);
+            return false;
+        }
+    }
+    public void AgregarColumnProductos(){
+
+        lite=new CSQLite(context);
+
+        SQLiteDatabase db=lite.getWritableDatabase();
+        try {
+
+            db.execSQL("ALTER TABLE productos ADD COLUMN isCheck int DEFAULT 0");
+            db.execSQL("ALTER TABLE productos ADD COLUMN Cantidad int DEFAULT 0 ");
+            db.execSQL("ALTER TABLE agentes ADD COLUMN Sesion int DEFAULT 0");
+        }catch (Exception e){
+            String err=e.toString();
+            Log.d("Error:",err);
+        }
+
+        db.close();
+        lite.close();
+
+    }
 
 
     /*Registro-PUSH*/
@@ -428,6 +603,7 @@ public class MainActivity extends Activity {
     }
 
     /*Comprobar fecha para el cambio de la Base de Datos*/
+
 
 
 

@@ -79,8 +79,6 @@ public class Sincronizar extends Activity {
         AlertDialog alertDialog= alert.create();
         alertDialog.show();
     }
-
-
     public void CrearDirectorioDownloads(){
 
         try {
@@ -93,8 +91,6 @@ public class Sincronizar extends Activity {
             Log.d("ErrorCrearDir", e.toString());
         }
     }
-
-
     public void unZipBD(String origen){
 
         try{
@@ -214,7 +210,6 @@ public class Sincronizar extends Activity {
         }
 
     }
-
     public void AgregarColumnProductos(){
 
         lite=new CSQLite(context);
@@ -238,6 +233,7 @@ try {
 
 
 
+
     private class UpLoadTask extends AsyncTask<String,Void,Object> {
 
         @Override
@@ -257,14 +253,12 @@ try {
                 progres.dismiss();
         }
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_sincronizar, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
