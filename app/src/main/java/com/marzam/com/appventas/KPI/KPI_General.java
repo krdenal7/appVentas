@@ -2,9 +2,11 @@ package com.marzam.com.appventas.KPI;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -15,11 +17,18 @@ import android.webkit.WebView;
 import com.marzam.com.appventas.GPS.Actualizar_Coordenadas;
 import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
+import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Tab_pedidos.pedido;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class KPI_General extends Activity {
 
     Context context;
+    CSQLite lite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +81,7 @@ public class KPI_General extends Activity {
         alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                CerrarVisita();
                 Intent intent=new Intent(context, MapsLocation.class);
                 startActivity(intent);
             }
@@ -84,6 +94,25 @@ public class KPI_General extends Activity {
         });
         AlertDialog alertDialog=alert.create();
         alertDialog.show();
+    }
+    public void CerrarVisita(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+     db.execSQL("update sesion_cliente set Sesion=2,Fecha_cierre='"+getDate()+"' where id=(select Max(id) from sesion_cliente)");
+
+        db.close();
+        lite.close();
+    }
+
+    private String getDate(){
+
+        Calendar cal = new GregorianCalendar();
+        Date dt = cal.getTime();
+        SimpleDateFormat df=new SimpleDateFormat("dd-MM-yyyy");
+        String formatteDate=df.format(dt.getTime());
+
+        return formatteDate;
     }
 
 

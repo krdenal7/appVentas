@@ -6,6 +6,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.gesture.Gesture;
 import android.gesture.GestureOverlayView;
 import android.graphics.Bitmap;
@@ -16,12 +18,18 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Adapter;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.marzam.com.appventas.Gesture.Dib_firma;
 import com.marzam.com.appventas.R;
+import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Sincronizacion.envio_pedido;
 import com.marzam.com.appventas.WebService.WebServices;
 
@@ -32,6 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 
 public class pcabecera extends Activity {
 
@@ -39,7 +48,8 @@ public class pcabecera extends Activity {
     TextView txtFpedido;
     TextView txt_idPedido;
     ProgressDialog progress;
-
+    CSQLite lite;
+    Spinner spinner;
 
 
     @Override
@@ -53,13 +63,68 @@ public class pcabecera extends Activity {
         txtFpedido.setText(getDate());
 
         txt_idPedido=(TextView)findViewById(R.id.textView9);
+        txt_idPedido.setText(Obtener_idpedido());
 
+        spinner=(Spinner)findViewById(R.id.spinner);
+        String[]tipoFac={"FD"};
+        ArrayAdapter arrayAdapter=new ArrayAdapter(context,android.R.layout.simple_spinner_dropdown_item,tipoFac);
+        spinner.setAdapter(arrayAdapter);
+
+
+
+    }
+    public String Obtener_idpedido(){
+
+        StringBuilder builder=new StringBuilder();
+
+        builder.append("P"+ObtenerAgenteActivo());
+        String consecutivo=Consecutivo();
+
+        int val=(builder.length()+consecutivo.length());
+        int falt=(12-val);
+
+        for(int i=0;i<falt;i++){
+            builder.append("0");
+        }
+        builder.append(consecutivo);
+
+
+
+        return builder.toString();
+    }
+    public String ObtenerAgenteActivo(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        String clave="";
+
+        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
+        if(rs.moveToFirst()){
+
+            clave=rs.getString(0);
+        }
+
+        return clave;
+    }
+    public String Consecutivo(){
+
+        String numero="";
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select MAX(id) from consecutivo",null);
+        if(rs.moveToFirst()){
+            numero=rs.getString(0);
+        }
+
+        return numero;
     }
 
 
     public void ShowMenu(){
 
-        CharSequence[] items={"Guardar","Agregar Firma","Agregar productos"};
+        CharSequence[] items={"Enviar pedido","Agregar Firma","Agregar productos"};
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Menú");
         alert.setItems(items,new DialogInterface.OnClickListener() {
@@ -67,8 +132,9 @@ public class pcabecera extends Activity {
             public void onClick(DialogInterface dialogInterface, int i) {
 
                 if(i==0){
-                    new UpLoadTask().execute("");
-                    progress=ProgressDialog.show(context,"Transmitiendo pedidos","Cargando..",true,false);
+
+                    ShowisEnvio();
+
                 }
 
 
@@ -81,6 +147,26 @@ public class pcabecera extends Activity {
                     Intent intent=new Intent(context,pcatalogo.class);
                     startActivity(intent);
                 }
+
+            }
+        });
+        AlertDialog alertDialog=alert.create();
+        alertDialog.show();
+    }
+    public void ShowisEnvio(){
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Aviso");
+        alert.setMessage("Desea envíar el pedido?");
+        alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                new UpLoadTask().execute("");
+                progress=ProgressDialog.show(context,"Transmitiendo pedidos","Cargando..",true,false);
+            }
+        });
+        alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
 
             }
         });
@@ -119,6 +205,7 @@ public class pcabecera extends Activity {
             if(progress.isShowing()) {
                 String res=String.valueOf(result);
                 Toast.makeText(context, res, Toast.LENGTH_SHORT).show();
+                progress.dismiss();
             }
         }
     }
@@ -158,6 +245,11 @@ public class pcabecera extends Activity {
         return  super.onKeyDown(keyEvent,event);
     }
 
+    @Override
+    protected void onResume(){
+    super.onResume();
+    txt_idPedido.setText(Obtener_idpedido());
 
+    }
 
 }

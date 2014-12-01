@@ -47,7 +47,7 @@ public class envio_pedido {
       lite=new CSQLite(context);
       SQLiteDatabase db=lite.getWritableDatabase();
 
-      Cursor rs=db.rawQuery("select * from encabezado_pedido where id_pedido='"+Obtener_idPedido()+"'",null);
+                             Cursor rs=db.rawQuery("select * from encabezado_pedido where id_pedido='"+Obtener_idPedido()+"'",null);
 
       if(rs.getCount()==0){
 
@@ -72,21 +72,80 @@ public class envio_pedido {
 
   }
 
+    public String ObtenerAgenteActivo(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        String clave="";
+
+        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
+        if(rs.moveToFirst()){
+
+            clave=rs.getString(0);
+        }
+
+        return clave;
+    }
+    public String Consecutivo(){
+
+        String numero="";
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select MAX(id) from consecutivo",null);
+        if(rs.moveToFirst()){
+            numero=rs.getString(0);
+        }
+
+        return numero;
+    }
 
    /*Obtener datos del encabezado*/
   public String Obtener_idPedido(){
+      StringBuilder builder=new StringBuilder();
+
+      builder.append("P"+ObtenerAgenteActivo());
+      String consecutivo=Consecutivo();
+
+      int val=(builder.length()+consecutivo.length());
+      int falt=(12-val);
+
+      for(int i=0;i<falt;i++){
+          builder.append("0");
+      }
+      builder.append(consecutivo);
 
 
-      return "PUHA05000001";
+
+      return builder.toString();
   }
   public String Obtener_idCliente(){
 
+      lite=new CSQLite(context);
+      SQLiteDatabase db=lite.getWritableDatabase();
+      Cursor rs=db.rawQuery("select id_cliente from sesion_cliente where Sesion=1",null);
 
-      return "A00000";
+      String cliente="";
+
+      if(rs.moveToFirst()){
+          cliente=rs.getString(0);
+      }
+
+      return cliente;
   }
   public String Obtener_NoEmpleado(){
+      lite=new CSQLite(context);
+      SQLiteDatabase db=lite.getWritableDatabase();
+      String clave="";
 
-      return "134057";
+      Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
+      if(rs.moveToFirst()){
+
+          clave=rs.getString(0);
+      }
+
+      return clave;
   }
   public void   Obtener_Valores(){
 
@@ -138,7 +197,7 @@ public class envio_pedido {
       val[1]=String.valueOf(importe);
 
       return val;
-  }
+  }//completo
   public String Obtener_firma(){
 
       File folder = android.os.Environment.getExternalStorageDirectory();
@@ -154,10 +213,7 @@ public class envio_pedido {
 
       return  code64;
   }//Conpleto
-  public String Obtener_claveagente(){
 
-      return "";
-  }
   public String Obtener_tipoOrden(){
 
       return "FD";
@@ -179,7 +235,7 @@ public class envio_pedido {
           cabecero[0] = Obtener_idPedido();
           cabecero[1] = Obtener_idCliente();
           cabecero[2] = Obtener_NoEmpleado();
-          cabecero[3] = Obtener_claveagente();
+          cabecero[3] =ObtenerAgenteActivo();
           cabecero[4] = String.valueOf(total_piezas);
           cabecero[5] = String.valueOf(importe_total);
           cabecero[6] = Obtener_tipoOrden();
@@ -202,7 +258,7 @@ public class envio_pedido {
 
 
       return cabecero;
-  }
+  }//completo
   public  boolean Insertar_Cabecero(){
       this.context=context;
 
@@ -229,7 +285,7 @@ public class envio_pedido {
 
      try {
          db.execSQL("update encabezado_pedido set id_pedido=?,id_cliente=?,numero_empleado=?,clave_agente=?,total_piezas=?,impote_total=?" +
-                 ",tipo_orden=?,fecha_captura=?,fecha_transmision=?,id_estatus=?,no_pedido_cliente=?,firma=?", valores);
+                    ",tipo_orden=?,fecha_captura=?,fecha_transmision=?,id_estatus=?,no_pedido_cliente=?,firma=? where id_pedido='"+valores[0]+"'", valores);
      }catch (Exception e){
          String err=e.toString();
          Log.d("Error al actualizar encabezado:",err);
@@ -238,7 +294,7 @@ public class envio_pedido {
 
            return true;
 
-  }
+  }//completo
   public  void Insertar_Detalle(){
 
      lite=new CSQLite(context);
@@ -282,20 +338,37 @@ public class envio_pedido {
 
 
 
-  }
+  }//completo
+
+  public Boolean Verificar_productos(){
+
+      lite=new CSQLite(context);
+      SQLiteDatabase db=lite.getWritableDatabase();
+      Cursor rs=db.rawQuery("select * from productos where isCheck=1",null);
+
+      if(rs.moveToFirst())
+          return true;
+
+          return false;
+  }//Verifica si hay productos para agregar al detalle
 
 
   public String GuardarPedido(Context context){
       this.context=context;
       String resp="";
+      if(Verificar_productos()) {
 
-      if(Insertar_Cabecero())
-           Insertar_Detalle();
-       JSONCabecera();
-       JSONDetalle();
-      resp=LimpiarBD_Insertados();
+          if (Insertar_Cabecero())
+                  Insertar_Detalle();
+          JSONCabecera();
+          JSONDetalle();
+          resp = LimpiarBD_Insertados();
+          updateConsecutivo();
 
-      return resp;
+          return resp;
+      }else {
+          return "No hay productos para agregar";
+      }
   }
   public String LimpiarBD_Insertados(){
 
@@ -310,7 +383,8 @@ public class envio_pedido {
 
      while (rs.moveToNext()){
 
-         db.execSQL("update productos set isCheck=0,Cantidad=0 where codigo='"+rs.getString(0)+"'");
+         String codigo=rs.getString(0);
+         db.execSQL("update productos set isCheck=0,Cantidad=0 where codigo='"+codigo+"'");
 
      }
 
@@ -323,7 +397,22 @@ public class envio_pedido {
       return resp;
  }
 
+  public void updateConsecutivo(){
 
+      try {
+          lite = new CSQLite(context);
+          SQLiteDatabase db = lite.getWritableDatabase();
+          int consecutivo = Integer.parseInt(Consecutivo().trim());
+          db.execSQL("update consecutivo set id=" + (consecutivo + 1) + "");
+
+          db.close();
+          lite.close();
+      }catch (Exception e){
+          String err=e.toString();
+          Log.d("Error al actualizar consecutivo",err);
+      }
+
+  }
 
 
     public Object JSONCabecera(){

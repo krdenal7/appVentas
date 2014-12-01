@@ -144,17 +144,18 @@ public class pdetalle extends Activity {
     }
     public void ShowMenu(){
 
-        CharSequence[] items={"Guardar","Agregar Firma","Agregar productos"};
+        CharSequence[] items={"Enviar pedido","Agregar Firma","Agregar productos"};
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Menú");
         alert.setItems(items,new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
-                 if(i==0){
-                     new UpLoadTask().execute("");
-                     progress=ProgressDialog.show(context,"Transmitiendo pedidos","Cargando..",true,false);
-                 }
+                if(i==0){
+
+                    ShowisEnvio();
+
+                }
 
 
                 if(i==1){
@@ -166,6 +167,26 @@ public class pdetalle extends Activity {
                     Intent intent=new Intent(context,pcatalogo.class);
                     startActivity(intent);
                 }
+
+            }
+        });
+        AlertDialog alertDialog=alert.create();
+        alertDialog.show();
+    }
+    public void ShowisEnvio(){
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Aviso");
+        alert.setMessage("Desea envíar el pedido?");
+        alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                new UpLoadTask().execute("");
+                progress=ProgressDialog.show(context,"Transmitiendo pedidos","Cargando..",true,false);
+            }
+        });
+        alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
 
             }
         });

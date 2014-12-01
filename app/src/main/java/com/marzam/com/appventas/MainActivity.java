@@ -348,7 +348,7 @@ public class MainActivity extends Activity {
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select nombre,clave_agente from agentes",null);
+        Cursor rs=db.rawQuery("select nombre,numero_empleado from agentes",null);
 
         agentes=new String[rs.getCount()];
         clave_agente=new String[rs.getCount()];
@@ -364,7 +364,7 @@ public class MainActivity extends Activity {
     public void ActualizarSesionAgente(String clave){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
-        db.execSQL("update agentes set Sesion=1 where clave_agente='"+clave+"'");
+        db.execSQL("update agentes set Sesion=1 where numero_empleado='"+clave+"'");
         db.close();
         lite.close();
     }

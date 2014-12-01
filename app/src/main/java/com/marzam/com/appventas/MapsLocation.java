@@ -39,9 +39,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-/**
- * Created by SAMSUMG on 11/11/2014.
- */
+
 public class MapsLocation extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
@@ -58,6 +56,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     String CteAct="";
 
     CSQLite lite;
+    TextView txtCte;
 
     private static final LocationRequest REQUEST = LocationRequest.create()
             .setInterval(5000)         // 5 seconds
@@ -70,8 +69,8 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         setContentView(R.layout.maps_info);
         context=this;
 
-        TextView txtCte=(TextView)findViewById(R.id.textView4);
-        txtCte.setText("Visitados: 1/10   Por visitar:9/10");
+        txtCte=(TextView)findViewById(R.id.textView4);
+        ObtenerClientesVisitados();
 
     }
 
@@ -248,7 +247,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         SQLiteDatabase db=lite.getWritableDatabase();
         String clave="";
 
-        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
+        Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
         if(rs.moveToFirst()){
 
             clave=rs.getString(0);
@@ -347,6 +346,29 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         return id;
     }
+    private void ObtenerClientesVisitados(){
+
+        ObtenerCtesHoy(ObtenerAgenteActivo());
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+         int visitados=0;
+        int total=clientesH.length;
+
+        for(int i=0;i<clientesH.length;i++){
+
+            Cursor rs=db.rawQuery("select Sesion from sesion_cliente where id_cliente='"+clientesH[i]+"'",null);
+
+            if(rs.moveToFirst()){
+                if(rs.getInt(0)==2){
+                    visitados++;
+                }
+            }
+        }
+
+        txtCte.setText("Visitados:"+visitados+"/"+total+"   Por visitar:"+(total-visitados)+"/"+total+"");
+
+    }
 
 
     @Override
@@ -398,6 +420,8 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                     .build();
         }
     }
+
+
 
 
 

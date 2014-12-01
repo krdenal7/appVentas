@@ -70,7 +70,7 @@ public class pliquidacion extends Activity {
 
     public void ShowMenu(){
 
-        CharSequence[] items={"Guardar","Agregar Firma","Agregar productos"};
+        CharSequence[] items={"Enviar pedido","Agregar Firma","Agregar productos"};
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Menú");
         alert.setItems(items,new DialogInterface.OnClickListener() {
@@ -78,8 +78,9 @@ public class pliquidacion extends Activity {
             public void onClick(DialogInterface dialogInterface, int i) {
 
                 if(i==0){
-                    new UpLoadTask().execute("");
-                    progress=ProgressDialog.show(context,"Transmitiendo pedidos","Cargando..",true,false);
+
+                    ShowisEnvio();
+
                 }
 
 
@@ -98,7 +99,26 @@ public class pliquidacion extends Activity {
         AlertDialog alertDialog=alert.create();
         alertDialog.show();
     }
+    public void ShowisEnvio(){
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Aviso");
+        alert.setMessage("Desea envíar el pedido?");
+        alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                new UpLoadTask().execute("");
+                progress=ProgressDialog.show(context,"Transmitiendo pedidos","Cargando..",true,false);
+            }
+        });
+        alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
 
+            }
+        });
+        AlertDialog alertDialog=alert.create();
+        alertDialog.show();
+    }
     public void MostrarFirma(){
 
         File folder = android.os.Environment.getExternalStorageDirectory();
@@ -113,7 +133,6 @@ public class pliquidacion extends Activity {
 
 
     }
-
     public void ObtenerValores(){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
@@ -152,6 +171,7 @@ public class pliquidacion extends Activity {
             if(progress.isShowing()) {
                 String res=String.valueOf(result);
                 Toast.makeText(context, res, Toast.LENGTH_SHORT).show();
+                progress.dismiss();
             }
         }
     }
