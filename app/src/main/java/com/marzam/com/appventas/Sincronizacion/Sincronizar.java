@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,6 +14,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
@@ -38,6 +41,12 @@ public class Sincronizar extends Activity {
     static  InputStream stream;
     CSQLite lite;
 
+    TextView txtCobranza;
+    TextView txtDevoluciones;
+    TextView txtNotas_de_venta;
+    TextView txtPedidos;
+    envio_pedidoFaltante envioPedidoFaltante;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,17 +54,47 @@ public class Sincronizar extends Activity {
         context=this;
 
         CrearDirectorioDownloads();
+        txtPedidos=(TextView)findViewById(R.id.textView49);
+        txtPedidos.setText(""+VerificarPedidosPendientes());
 
-        Button btnEnviar=(Button)findViewById(R.id.button5);
-        btnEnviar.setOnClickListener(new View.OnClickListener() {
+        Button btnCerrar=(Button)findViewById(R.id.button5);
+        btnCerrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ShowCierreDia();
             }
         });
 
+        Button btnEnviar=(Button)findViewById(R.id.button4);
+        btnEnviar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                new UpLoadTask_Envio().execute("");
+                progres=ProgressDialog.show(context,"Transmitiendo pedidos","Cargando",true,false);
+
+            }
+        });
 
 
+
+
+    }
+
+    public int VerificarPedidosPendientes(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        int Cantidad=0;
+
+        Cursor rs=db.rawQuery("select count(id_pedido) from encabezado_pedido where id_estatus=0",null);
+        if(rs.moveToFirst()){
+            Cantidad=rs.getInt(0);
+        }
+
+        db.close();
+        lite.close();
+        return Cantidad;
     }
 
     public void ShowCierreDia(){
@@ -230,7 +269,27 @@ try {
 
     }
 
+    private class UpLoadTask_Envio extends AsyncTask<String,Void,Object> {
 
+        @Override
+        protected Object doInBackground(String... strings) {
+
+            envioPedidoFaltante=new envio_pedidoFaltante();
+            String resp =envioPedidoFaltante.Enviar(context);
+
+            return resp;
+        }
+
+        @Override
+        protected void onPostExecute(Object result){
+
+            if(progres.isShowing())
+            txtPedidos.setText(""+VerificarPedidosPendientes());
+            progres.dismiss();
+            Toast.makeText(context,result.toString(),Toast.LENGTH_SHORT).show();
+
+        }
+    }
 
 
 

@@ -2,27 +2,35 @@ package com.marzam.com.appventas.Sincronizacion;
 
 
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Base64;
 import android.util.Log;
-import android.widget.TextView;
-import android.widget.Toast;
+
 
 import com.marzam.com.appventas.SQLite.CSQLite;
+import com.marzam.com.appventas.WebService.WebServices;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import org.apache.commons.codec.binary.Hex;
 
 
 public class envio_pedido {
@@ -38,8 +46,70 @@ public class envio_pedido {
 
     String[] cabecero;
     String P_noinsertados=null;
+    WebServices webServices;
+
+
 
    //File file=new File(directorio+"/dbBackup.zip");
+
+    public String GuardarPedido(Context context){
+        this.context=context;
+        String resp="";
+        webServices=new WebServices();
+        if(Verificar_productos()) {
+
+        if (Insertar_Cabecero())
+            Insertar_Detalle();
+
+            if(isOnline()==false) {
+                LimpiarBD_Insertados();
+                updateConsecutivo();
+                return "Pedido guardado localmente. Verifique su conexión y sincronize los pedidos";
+            }
+
+            String res=webServices.SincronizarPedidos(JSONCabecera(),JSONDetalle());
+
+            if(res!=null)
+             ActualizarStatusPedido(res);
+
+            resp = LimpiarBD_Insertados();
+            updateConsecutivo();
+            return resp;
+        }else {
+            return "No hay productos para agregar";
+        }
+    }  //Metodo principal
+    public void ActualizarStatusPedido(String json){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        try {
+
+
+            JSONArray array=new JSONArray(json);
+
+            for(int i=0;i<array.length();i++){
+
+                JSONObject jsonData=array.getJSONObject(i);
+
+                String id = jsonData.getString("id_pedido");
+                String estatus = jsonData.getString("id_estatus");
+
+                db.execSQL("update encabezado_pedido set id_estatus='" + estatus + "' where id_pedido='" + id + "'");
+            }
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            String err=e.toString();
+        }
+
+
+    }
+
+
 
   public void InsertarIdPedido(){
       this.context=context;
@@ -203,17 +273,70 @@ public class envio_pedido {
       File folder = android.os.Environment.getExternalStorageDirectory();
       directorio = new File(folder.getAbsolutePath() + "/Marzam/Imagenes");
       File imagen=new File(directorio+"/Firma1.jpg");
+      byte[] bytes;
+      byte[] buffer=new byte[8192];
+      int bytesRead;
+      String base="";
+
       if (imagen.exists() == false) {
           return "";
       }
 
-      byte[] img=StreamArchivo(imagen);
-      String code64= Base64.encodeToString(img,Base64.DEFAULT);
+      //byte[] img=StreamArchivo(imagen);
+      try {
+
+          InputStream input=new FileInputStream(directorio+"/Firma1.jpg");
+
+          ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
+
+          try {
+              while((bytesRead=input.read(buffer))!=-1){
+
+                  outputStream.write(buffer,0,bytesRead);
+
+              }
+
+              bytes=outputStream.toByteArray();
+              base=Base64.encodeToString(bytes,Base64.DEFAULT);
 
 
-      return  code64;
+
+          } catch (IOException e) {
+              e.printStackTrace();
+          }
+
+
+      } catch (FileNotFoundException e) {
+          e.printStackTrace();
+      }
+      return base;
   }//Conpleto
+  public String Obtener_firma_Hexa(){
 
+        File folder = android.os.Environment.getExternalStorageDirectory();
+        directorio = new File(folder.getAbsolutePath() + "/Marzam/Imagenes");
+        File imagen=new File(directorio+"/Firma1.jpg");
+        byte[] bytes = new byte[0];
+        byte[] buffer=new byte[8192];
+        int bytesRead;
+        String base="";
+        String hexa="";
+
+        if (imagen.exists() == false) {
+            return "";
+        }
+
+        byte[] img=StreamArchivo(imagen);
+
+       StringBuilder builder=new StringBuilder(img.length * 2);
+
+      for(byte b:img){
+          builder.append(String.format("%02x",b&0xff));
+      }
+
+
+        return builder.toString();
+    }//Conpleto
   public String Obtener_tipoOrden(){
 
       return "FD";
@@ -248,7 +371,7 @@ public class envio_pedido {
           cabecero[12] = Fech[1];
           cabecero[13] = Fech[2];
           cabecero[14] = Fech[3];
-          cabecero[15] = "1";
+          cabecero[15] = "0";
           cabecero[16] = "";
           cabecero[17] = Obtener_firma();
           cabecero[18] = "";
@@ -259,7 +382,7 @@ public class envio_pedido {
 
       return cabecero;
   }//completo
-  public  boolean Insertar_Cabecero(){
+  public  boolean  Insertar_Cabecero(){
       this.context=context;
 
 
@@ -295,7 +418,7 @@ public class envio_pedido {
            return true;
 
   }//completo
-  public  void Insertar_Detalle(){
+  public  void     Insertar_Detalle(){
 
      lite=new CSQLite(context);
      SQLiteDatabase db=lite.getWritableDatabase();
@@ -353,24 +476,7 @@ public class envio_pedido {
   }//Verifica si hay productos para agregar al detalle
 
 
-  public String GuardarPedido(Context context){
-      this.context=context;
-      String resp="";
-      if(Verificar_productos()) {
-
-          if (Insertar_Cabecero())
-                  Insertar_Detalle();
-          JSONCabecera();
-          JSONDetalle();
-          resp = LimpiarBD_Insertados();
-          updateConsecutivo();
-
-          return resp;
-      }else {
-          return "No hay productos para agregar";
-      }
-  }
-  public String LimpiarBD_Insertados(){
+    public String LimpiarBD_Insertados(){
 
       String resp="";
 
@@ -396,8 +502,7 @@ public class envio_pedido {
 
       return resp;
  }
-
-  public void updateConsecutivo(){
+    public void updateConsecutivo(){
 
       try {
           lite = new CSQLite(context);
@@ -415,30 +520,19 @@ public class envio_pedido {
   }
 
 
-    public Object JSONCabecera(){
+    public String JSONCabecera(){
 
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
+       lite=new CSQLite(context);
+       SQLiteDatabase db=lite.getWritableDatabase();
+       String id=Obtener_idPedido();
 
-       Cursor rs= db.rawQuery("select * from encabezado_pedido where id_pedido='"+Obtener_idPedido()+"'",null);
+       Cursor rs= db.rawQuery("select * from encabezado_pedido where id_pedido='"+id+"'",null);
        JSONObject json=new JSONObject();
        JSONArray array=new JSONArray();
        String[] date=getDate();
 
 while (rs.moveToNext()) {
     try {
-
-        SimpleDateFormat Fecha_cap=new SimpleDateFormat("dd/MM/yyyy");
-        SimpleDateFormat Hora_cap=new SimpleDateFormat("HH");
-        SimpleDateFormat Min_cap=new SimpleDateFormat("mm");
-        SimpleDateFormat Seg_cap=new SimpleDateFormat("ss");
-
-
-
-        String Fech=String.valueOf(Fecha_cap.parse(rs.getString(7)));
-        String Hora=String.valueOf(Hora_cap.parse(rs.getString(7)));
-        String Min=String.valueOf(Min_cap.parse(rs.getString(7)));
-        String seg=String.valueOf(Seg_cap.parse(rs.getString(7)));
 
         json.put("id_pedido", rs.getString(0));
         json.put("id_cliente", rs.getString(1));
@@ -447,18 +541,17 @@ while (rs.moveToNext()) {
         json.put("total_piezas", rs.getString(4));
         json.put("impote_total", rs.getString(5));
         json.put("tipo_orden", rs.getString(6));
-        json.put("fecha_captura", Fech);
-        json.put("hora_captura", Hora);
-        json.put("minuto_camptura", Min);
-        json.put("segundo_captura", seg);
-
-        json.put("fecha_transmision", date[0]);
-        json.put("hora_transmision", date[1]);
+        json.put("fecha_captura",   date[0]);
+        json.put("hora_captura",    date[1]);
+        json.put("minuto_captura", date[2]);
+        json.put("segundo_captura", date[3]);
+        json.put("fecha_transmision",  date[0]);
+        json.put("hora_transmision",   date[1]);
         json.put("minuto_transmision", date[2]);
         json.put("segundo_transmision",date[3]);
         json.put("id_estatus","0");
         json.put("no_pedido_cliente", rs.getString(10));
-        json.put("firma", rs.getString(11));
+        json.put("firma", Obtener_firma_Hexa());
         json.put("id_visita", rs.getString(12));
         array.put(json);
 
@@ -471,25 +564,24 @@ while (rs.moveToNext()) {
 }
 
 
-
-
-
-      return array;
+      return array.toString();
   }
-    public Object JSONDetalle(){
+    public String JSONDetalle(){
 
      lite=new CSQLite(context);
      SQLiteDatabase db=lite.getWritableDatabase();
-
-     Cursor rs=db.rawQuery("select * from detalle_pedido where id_pedido='"+Obtener_idPedido()+"'",null);
+     String id=Obtener_idPedido();
+     Cursor rs=db.rawQuery("select * from detalle_pedido where id_pedido='"+id+"'",null);
      JSONObject json=new JSONObject();
      JSONArray array=new JSONArray();
 
 
      while (rs.moveToNext()){
 try {
+    String codigo=rs.getString(1);
+
     json.put("id_pedido", rs.getString(0));
-    json.put("codigo", rs.getString(1));
+    json.put("codigo", codigo);
     json.put("piezas_pedidas", rs.getString(2));
     json.put("piezas_surtidas", rs.getString(3));
     json.put("precio_farmacia", rs.getString(4));
@@ -502,6 +594,7 @@ try {
     json.put("factura_marzam", rs.getString(11));
     json.put("orden", rs.getString(12));
     array.put(json);
+    json=new JSONObject();
 }catch (Exception e){
     String err=e.toString();
     Log.d("Error JSONDetalle",err);
@@ -511,7 +604,7 @@ try {
 
 
 
-        return array;
+        return array.toString();
     }
 
 
@@ -553,7 +646,7 @@ try {
 
         Calendar cal = new GregorianCalendar();
         Date dt = cal.getTime();
-        SimpleDateFormat dia=new SimpleDateFormat("dd/MM/yyyy ");
+        SimpleDateFormat dia=new SimpleDateFormat("dd-MM-yyyy ");
         SimpleDateFormat hora=new SimpleDateFormat("HH");
         SimpleDateFormat min=new SimpleDateFormat("mm");
         SimpleDateFormat seg=new SimpleDateFormat("ss");
@@ -570,6 +663,14 @@ try {
     /*Enviar Pedido por WebService*/
 
 
+    public  boolean isOnline(){
 
+        ConnectivityManager cm=(ConnectivityManager)((Activity)context).getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo=cm.getActiveNetworkInfo();
+        if(networkInfo !=null && networkInfo.isConnected()){
+            return true;
+        }
+        return false;
+    }
 
 }

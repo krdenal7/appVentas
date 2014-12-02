@@ -14,6 +14,8 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -101,8 +103,12 @@ public class MainActivity extends Activity {
         if(ExistsBD()) {
             MostrarDatos_Agente();
         }else {
-            new Task_DownBD().execute("");
-            pd=ProgressDialog.show(context,"Obteniendo información de rutas","Cargando",true,false);
+            if(isOnline()) {
+                new Task_DownBD().execute("");
+                pd = ProgressDialog.show(context, "Obteniendo información de rutas", "Cargando", true, false);
+            }else {
+                Toast.makeText(context,"Verifique su conexión de Internet.",Toast.LENGTH_SHORT).show();
+            }
         }
 
 
@@ -602,7 +608,17 @@ public class MainActivity extends Activity {
         return formatteDate;
     }
 
-    /*Comprobar fecha para el cambio de la Base de Datos*/
+    /*Comprobar si el dispositivo tiene conexión a Internet*/
+
+    public  boolean isOnline(){
+
+        ConnectivityManager cm=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo=cm.getActiveNetworkInfo();
+        if(networkInfo !=null && networkInfo.isConnected()){
+            return true;
+        }
+        return false;
+    }
 
 
 

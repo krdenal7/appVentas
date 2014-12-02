@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -13,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.TextView;
 
 import com.marzam.com.appventas.GPS.Actualizar_Coordenadas;
 import com.marzam.com.appventas.MapsLocation;
@@ -29,12 +31,16 @@ public class KPI_General extends Activity {
 
     Context context;
     CSQLite lite;
+    TextView txtUsuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kpi__general);
         context=this;
+
+        txtUsuario=(TextView)findViewById(R.id.textView55);
+        txtUsuario.setText(Obtener_Nombre());
 
         WebView webView=(WebView)findViewById(R.id.webView2);
         webView.loadUrl("file:///android_asset/www/cliente.html");
@@ -115,6 +121,27 @@ public class KPI_General extends Activity {
         return formatteDate;
     }
 
+    public String Obtener_Nombre(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        Cursor rs=db.rawQuery("select id_cliente from sesion_cliente where Sesion=1",null);
+
+        String cliente="";
+        String id="";
+
+        if(rs.moveToFirst()){
+            id=rs.getString(0);
+        }
+
+        rs=db.rawQuery("select nombre from clientes where id_cliente='"+id+"'",null);
+
+        if(rs.moveToFirst()){
+            cliente=rs.getString(0);
+        }
+
+        return cliente;
+    }
 
 
     @Override

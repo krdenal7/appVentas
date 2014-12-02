@@ -26,7 +26,7 @@ try {
     tabHost.setup(getLocalActivityManager());
 
     TabHost.TabSpec spec1 = tabHost.newTabSpec("CABECERA");
-    spec1.setIndicator("CABECERA");
+    spec1.setIndicator("GENERAL");
     Intent intent = new Intent(this, pcabecera.class);
     spec1.setContent(intent);
 
@@ -36,7 +36,7 @@ try {
     spec2.setContent(inten2);
 
     TabHost.TabSpec spec3 = tabHost.newTabSpec("LIQUIDACION");
-    spec3.setIndicator("TOTAL");
+    spec3.setIndicator("COTIZACION");
     Intent inten3 = new Intent(this, pliquidacion.class);
     spec3.setContent(inten3);
 
