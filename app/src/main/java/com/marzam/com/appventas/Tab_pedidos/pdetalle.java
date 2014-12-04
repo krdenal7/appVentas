@@ -49,7 +49,6 @@ public class pdetalle extends Activity {
     EditText txtBuscar;
     ImageButton btnClear;
     ProgressDialog progress;
-    String res_de_guardado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
