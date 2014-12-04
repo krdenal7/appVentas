@@ -49,6 +49,7 @@ public class pdetalle extends Activity {
     EditText txtBuscar;
     ImageButton btnClear;
     ProgressDialog progress;
+    /*Cambio de Prueba*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
