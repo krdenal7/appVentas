@@ -101,14 +101,37 @@ public class KPI_General extends Activity {
         AlertDialog alertDialog=alert.create();
         alertDialog.show();
     }
+
     public void CerrarVisita(){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-     db.execSQL("update sesion_cliente set Sesion=2,Fecha_cierre='"+getDate()+"' where id=(select Max(id) from sesion_cliente)");
+        db.execSQL("update sesion_cliente set Sesion=2,Fecha_cierre='"+getDate()+"' where id=(select Max(id) from sesion_cliente)");
+
+        UpdateConsecutivo_visitas();
 
         db.close();
         lite.close();
+    }
+
+
+    public void UpdateConsecutivo_visitas(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select MAX(id) from consecutivo_visitas",null);
+
+        if(rs.moveToFirst()){
+
+            int val=rs.getInt(0);
+            int total=val+1;
+            ContentValues values=new ContentValues();
+            values.put("id",total);
+            int res= db.update("consecutivo_visitas",values,null,null);
+            String a="";
+
+        }
+
     }
 
     private String getDate(){

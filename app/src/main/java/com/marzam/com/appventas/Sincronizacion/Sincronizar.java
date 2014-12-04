@@ -105,8 +105,12 @@ public class Sincronizar extends Activity {
         alert.setPositiveButton("Si", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                new UpLoadTask().execute("");
-                progres=ProgressDialog.show(context,"Realizando cierre","Cargando",true,false);
+                if(VerificarPedidosPendientes()<=0) {
+                    new UpLoadTask().execute("");
+                    progres = ProgressDialog.show(context, "Realizando cierre", "Cargando", true, false);
+                }else{
+                    Toast.makeText(context,"No se puede completar el cierre. Envíe sus pedidos pendientes",Toast.LENGTH_SHORT).show();
+                }
             }
         });
         alert.setNegativeButton("No",new DialogInterface.OnClickListener() {

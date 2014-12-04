@@ -268,11 +268,11 @@ public class envio_pedido {
 
       return val;
   }//completo
-  public String Obtener_firma(){
+  public String Obtener_firma(String id_cliente){
 
       File folder = android.os.Environment.getExternalStorageDirectory();
       directorio = new File(folder.getAbsolutePath() + "/Marzam/Imagenes");
-      File imagen=new File(directorio+"/Firma1.jpg");
+      File imagen=new File(directorio+"/"+id_cliente+".jpg");
       byte[] bytes;
       byte[] buffer=new byte[8192];
       int bytesRead;
@@ -311,11 +311,11 @@ public class envio_pedido {
       }
       return base;
   }//Conpleto
-  public String Obtener_firma_Hexa(){
+  public String Obtener_firma_Hexa(String id_cliente){
 
         File folder = android.os.Environment.getExternalStorageDirectory();
         directorio = new File(folder.getAbsolutePath() + "/Marzam/Imagenes");
-        File imagen=new File(directorio+"/Firma1.jpg");
+        File imagen=new File(directorio+"/"+id_cliente+".jpg");
         byte[] bytes = new byte[0];
         byte[] buffer=new byte[8192];
         int bytesRead;
@@ -342,6 +342,35 @@ public class envio_pedido {
       return "FD";
 
   }
+
+ public String Obtener_Idvisita(){
+
+        String id="";
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select id from consecutivo_visitas ",null);
+
+
+        if(rs.moveToFirst()){
+            id=rs.getString(0);
+        }
+
+        StringBuilder builder=new StringBuilder();
+        builder.append("V");
+        String clave=ObtenerAgenteActivo();
+        builder.append(clave);
+
+        int tam=(12-(clave.length()+1+id.length()));
+
+        for (int i=0;i<tam;i++){
+            builder.append("0");
+        }
+
+        builder.append(id);
+
+
+        return builder.toString();
+    }//GENERA EL ID CORRESPONDIENTE DE LA VISITA
 
 /*Obtener datos del detalle*/
 
@@ -373,8 +402,9 @@ public class envio_pedido {
           cabecero[14] = Fech[3];
           cabecero[15] = "0";
           cabecero[16] = "";
-          cabecero[17] = Obtener_firma();
-          cabecero[18] = "";
+          cabecero[17] = Obtener_firma(cabecero[1]);
+          cabecero[18] = Obtener_Idvisita();
+
       }catch (Exception e){
           return enc=new String[0];
       }
@@ -382,12 +412,13 @@ public class envio_pedido {
 
       return cabecero;
   }//completo
+
   public  boolean  Insertar_Cabecero(){
       this.context=context;
 
 
       String[] val=Dib_encabezado();
-      String[] valores=new String[12];
+      String[] valores=new String[13];
 
       valores[0]=val[0];
       valores[1]=val[1];
@@ -401,6 +432,7 @@ public class envio_pedido {
       valores[9]=val[15];
       valores[10]=val[16];
       valores[11]=val[17];
+      valores[12]=val[18];
 
       InsertarIdPedido();
       lite =new CSQLite(context);
@@ -408,7 +440,7 @@ public class envio_pedido {
 
      try {
          db.execSQL("update encabezado_pedido set id_pedido=?,id_cliente=?,numero_empleado=?,clave_agente=?,total_piezas=?,impote_total=?" +
-                    ",tipo_orden=?,fecha_captura=?,fecha_transmision=?,id_estatus=?,no_pedido_cliente=?,firma=? where id_pedido='"+valores[0]+"'", valores);
+                    ",tipo_orden=?,fecha_captura=?,fecha_transmision=?,id_estatus=?,no_pedido_cliente=?,firma=?,id_visita=? where id_pedido='"+valores[0]+"'", valores);
      }catch (Exception e){
          String err=e.toString();
          Log.d("Error al actualizar encabezado:",err);
@@ -551,7 +583,7 @@ while (rs.moveToNext()) {
         json.put("segundo_transmision",date[3]);
         json.put("id_estatus","0");
         json.put("no_pedido_cliente", rs.getString(10));
-        json.put("firma", Obtener_firma_Hexa());
+        json.put("firma", Obtener_firma_Hexa(rs.getString(1)));
         json.put("id_visita", rs.getString(12));
         array.put(json);
 

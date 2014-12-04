@@ -99,33 +99,11 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     }
 
 
-        final View finalConvertView = convertView;
-
-
-
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                /*Verifica si no esta seleccionado el check mostrara el popup para seleccionar la cantidad, en caso contratio
-                  pasara la cantidad a 0 y deseleccionara el ckeck*/
-
-                // if(modelitems[position].getValue()!=1) {
-
-                   //  view.setBackgroundColor(Color.TRANSPARENT);
-
-
-                     //ShowDialog(position, view);
-                //}//else{
-
-                  //  AgregarProducto(modelitems[position].getEan(),0,0);
-                  // modelitems[position].value = 0;
-                  //  view.setBackgroundColor(Color.TRANSPARENT);
-                  // checkBox.setChecked(false);
-                  //  cant.setText("Cantidad:0");
-
-              //  }
-                ShowDialog(position,view);
+                ShowDialog(position, view);
 
                    }});
 
@@ -235,7 +213,9 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
             lite.close();
             return (cantidad+pzas);
 
-        }else {
+        }
+        else {
+            view.setBackgroundColor(Color.TRANSPARENT);
             db.execSQL("update productos set  Cantidad="+cantidad+",isCheck=0 where codigo='"+ean+"'");
             LlenarModelItems();
             view.setBackgroundColor(Color.TRANSPARENT);
@@ -252,11 +232,14 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
 
 
-       int pzas=AgregarProducto(modelitems[position].getEan(),cantidad,1,view);
-       modelitems[position].value = 1;
-       modelitems[position].cantidad=pzas;
+   int pzas=AgregarProducto(modelitems[position].getEan(),cantidad,1,view);
 
-
+        if(cantidad!=0) {
+            modelitems[position].value = 1;
+            modelitems[position].cantidad = pzas;
+        }else {modelitems[position].value = 0;
+            modelitems[position].cantidad = pzas;
+        }
 
    }
     public void LlenarModelItems(){

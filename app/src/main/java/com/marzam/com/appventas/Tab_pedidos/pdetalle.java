@@ -225,7 +225,7 @@ public class pdetalle extends Activity {
            monto+=(precio*Cantidad);
         }
 
-         monto=(monto*100)/100;
+
 
         rs.close();
         db.close();

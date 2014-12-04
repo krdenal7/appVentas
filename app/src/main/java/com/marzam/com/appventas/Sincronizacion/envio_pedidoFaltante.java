@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.WebService.WebServices;
@@ -43,7 +44,9 @@ public class envio_pedidoFaltante {
         String respuesta="";
         File folder = android.os.Environment.getExternalStorageDirectory();
         directorio = new File(folder.getAbsolutePath() + "/Marzam/Imagenes");
+        services=new WebServices();
 
+       String r=services.SincronizarVisitas(jsonVisitas());
 
         if(VerificarPedidosPendientes()){ //Verifica si se tienen pedidos pendientes
 
@@ -53,7 +56,7 @@ public class envio_pedidoFaltante {
                String cabecero=Objener_JsonCabecero();
                String detalle=Obtener_Jsondetalle();
 
-            services=new WebServices();
+
 
             String res=services.SincronizarPedidos(cabecero,detalle);
 
@@ -75,11 +78,59 @@ public class envio_pedidoFaltante {
     }
 
 
-    public String Obtener_firma_Hexa(){
+    public String jsonVisitas(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select * from visitas where status_visita='0'",null);
+        JSONArray array=new JSONArray();
+        JSONObject object=new JSONObject();
+
+        while (rs.moveToNext()){
+
+            try {
+
+
+
+                object.put("numero_empleado",rs.getString(0));
+                object.put("id_cliente",rs.getString(1));
+                object.put("latitud",rs.getString(2));
+                object.put("longitud",rs.getString(3));
+                String Fecha[]=Dividirfecha(rs.getString(4));
+                object.put("fecha_visita",Fecha[0]);
+                object.put("hora_visita",Fecha[1]);
+                object.put("minuto_visita",Fecha[2]);
+                object.put("segundo_visita",Fecha[3]);
+                String[] fecha2=Dividirfecha(rs.getString(5));
+                object.put("fecha_registro",fecha2[0]);
+                object.put("hora_registro",fecha2[1]);
+                object.put("minuto_registro",fecha2[2]);
+                object.put("segundo_registro",fecha2[3]);
+                String id_visita=rs.getString(6);
+                object.put("id_visita",id_visita);
+
+                array.put(object);
+                object=new JSONObject();
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+
+        return array.toString();
+
+
+    }
+
+
+    public String Obtener_firma_Hexa(String id_cliente){
 
         File folder = android.os.Environment.getExternalStorageDirectory();
         directorio = new File(folder.getAbsolutePath() + "/Marzam/Imagenes");
-        File imagen=new File(directorio+"/Firma1.jpg");
+        File imagen=new File(directorio+"/"+id_cliente+".jpg");
         byte[] bytes = new byte[0];
         byte[] buffer=new byte[8192];
         int bytesRead;
@@ -249,7 +300,7 @@ public class envio_pedidoFaltante {
                        json.put("segundo_transmision", date[3]);
                        json.put("id_estatus", "0");
                        json.put("no_pedido_cliente", rs.getString(10));
-                       json.put("firma",Obtener_firma_Hexa());
+                       json.put("firma",Obtener_firma_Hexa(rs.getString(1)));
                        json.put("id_visita", rs.getString(12));
                        array.put(json);
                        json=new JSONObject();
@@ -336,6 +387,26 @@ public class envio_pedidoFaltante {
         return false;
     }
 
+    public String[] Dividirfecha(String fecha){
+        String[] fechreturn=new String[4];
 
+        try {
+            String[] Fecha = fecha.split(" ");
+            fechreturn[0] = Fecha[0];
+            String[] Hora = Fecha[1].split(":");
+            fechreturn[1] = Hora[0];
+            fechreturn[2] = Hora[1];
+            fechreturn[3] = Hora[2];
+        }catch (Exception e){
+            fechreturn[0]="01-01-2014";
+            fechreturn[1]="00";
+            fechreturn[2]="00";
+            fechreturn[3]="00";
+            return fechreturn;
+        }
+
+
+        return fechreturn;
+    }
 
 }

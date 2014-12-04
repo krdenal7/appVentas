@@ -147,6 +147,7 @@ public class pcatalogo extends Activity {
     public void ShowDialog(final int posicion){
 
 
+
          String Item=String.valueOf(simpleAdapter.getItem(posicion));
          final String codigo=ObtenerValoresdeFilter(Item);
 
@@ -349,6 +350,7 @@ public class pcatalogo extends Activity {
                 AgregarProducto(codigo,0,0);
                 cont[0]=0;
                 txt3.setText("0");
+
             }
         });
         boton2.setOnClickListener(new View.OnClickListener() {

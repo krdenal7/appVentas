@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -123,11 +124,12 @@ public class pliquidacion extends Activity {
 
         File folder = android.os.Environment.getExternalStorageDirectory();
         Directorio = new File(folder.getAbsolutePath() + "/Marzam/Imagenes");
-        File img=new File(Directorio+"/Firma1.jpg");
+        File img=new File(Directorio+"/"+Obtener_Idcliente()+".jpg");
 
         if(img.exists()){
             Bitmap bitmap= BitmapFactory.decodeFile(img.toString());
             ImageView imageView=(ImageView)findViewById(R.id.imageView3);
+            imageView.setBackgroundColor(Color.WHITE);
             imageView.setImageBitmap(bitmap);
         }
 
@@ -150,6 +152,20 @@ public class pliquidacion extends Activity {
         }
 
           total=subTotal+(subTotal*0.16);
+    }
+    public String Obtener_Idcliente(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        String id="00000";
+
+        Cursor rs=db.rawQuery("select id_cliente from sesion_cliente where Sesion=1",null);
+
+        if(rs.moveToFirst()){
+            id=rs.getString(0);
+        }
+
+        return id;
     }
 
     private class UpLoadTask extends AsyncTask<String,Void,Object> {

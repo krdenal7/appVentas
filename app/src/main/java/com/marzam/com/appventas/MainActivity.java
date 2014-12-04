@@ -341,7 +341,7 @@ public class MainActivity extends Activity {
         String usuario="";
 
         if(rs.moveToFirst()){
-            usuario=rs.getString(0)+"-----"+rs.getString(1);
+            usuario=rs.getString(0)+"\n"+rs.getString(1);
             txtUsuario.setText(usuario);
             nombre_agente=rs.getString(1);
         }else{

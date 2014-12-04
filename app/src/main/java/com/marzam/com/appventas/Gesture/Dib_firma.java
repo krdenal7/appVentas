@@ -3,6 +3,8 @@ package com.marzam.com.appventas.Gesture;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.gesture.GestureOverlayView;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -14,6 +16,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.marzam.com.appventas.R;
+import com.marzam.com.appventas.SQLite.CSQLite;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,6 +26,7 @@ public class Dib_firma extends Activity {
 
     File Directorio;
     Context context;
+    CSQLite lite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +87,7 @@ public class Dib_firma extends Activity {
 
         OutputStream outputStream=null;
 
-        File file=new File(Directorio.toString(),"Firma1.jpg");
+        File file=new File(Directorio.toString(),Obtener_Idcliente()+".jpg");
         try {
             outputStream = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.PNG,100,outputStream);
@@ -96,6 +100,21 @@ public class Dib_firma extends Activity {
 
 
                 return true;
+    }
+
+    public String Obtener_Idcliente(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        String id="00000";
+
+        Cursor rs=db.rawQuery("select id_cliente from sesion_cliente where Sesion=1",null);
+
+        if(rs.moveToFirst()){
+            id=rs.getString(0);
+        }
+
+        return id;
     }
 
 

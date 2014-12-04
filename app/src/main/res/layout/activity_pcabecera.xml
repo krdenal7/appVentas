@@ -33,11 +33,11 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/tipo_pedido"
         android:id="@+id/textView8"
+        android:layout_marginTop="33dp"
+        style="@android:style/TextAppearance.DeviceDefault.Small"
         android:layout_below="@+id/textView7"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="43dp"
-        style="@android:style/TextAppearance.DeviceDefault.Small" />
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -64,17 +64,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/spinner"
-        android:layout_alignBottom="@+id/textView8"
-        android:layout_alignRight="@+id/textView25"
-        android:layout_alignEnd="@+id/textView25"
-        android:layout_toRightOf="@+id/textView8"
-        android:layout_toEndOf="@+id/textView8" />
+        android:layout_toEndOf="@+id/textView8"
+        android:layout_below="@+id/textView25"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignBottom="@+id/textView8" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Observaciones:"
+        android:text="Licitación:"
         android:id="@+id/textView6"
         android:layout_marginTop="29dp"
         style="@android:style/TextAppearance.DeviceDefault.Small"
@@ -82,16 +82,28 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
-    <EditText
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/editText2"
-        android:inputType="text"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Contrato:"
+        android:id="@+id/textView56"
         android:layout_below="@+id/textView6"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="20dp"
-        android:layout_alignRight="@+id/spinner"
-        android:layout_alignEnd="@+id/spinner" />
+        android:layout_marginTop="28dp"
+        style="@android:style/TextAppearance.DeviceDefault.Small" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Fianza:"
+        android:id="@+id/textView57"
+        android:layout_marginTop="28dp"
+        style="@android:style/TextAppearance.DeviceDefault.Small"
+        android:layout_below="@+id/textView56"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

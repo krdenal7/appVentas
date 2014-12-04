@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -16,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,14 +27,22 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.marzam.com.appventas.GPS.GPSHelper;
 import com.marzam.com.appventas.Graficas.Grafica_Vendedor;
 import com.marzam.com.appventas.KPI.KPI_General;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Sincronizacion.Sincronizar;
+import com.marzam.com.appventas.Sincronizacion.envio_pedido;
+import com.marzam.com.appventas.WebService.WebServices;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -241,6 +251,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         return datos;
 
     }
+
     public String ObtenerAgenteActivo(){
 
         lite=new CSQLite(context);
@@ -256,6 +267,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         return clave;
     }
+
     public boolean VerificarSesion_Cliente(String cliente){
 
         lite=new CSQLite(context);
@@ -284,11 +296,29 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
             InsertarSesion(cliente);
             RegistrarVisiatas(cliente);
+            new UpLoadVisitas().execute("");
+
         }
 
 
            return resp;
-    } //Verifica si ya se encuentra iniciada una visita con algún cliente
+    } //Verifica si ya se encuentra iniciada una visita con algún cliente //Principal
+
+    public String ObtenerClavedeAgente(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        String clave="";
+
+        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
+        if(rs.moveToFirst()){
+
+            clave=rs.getString(0);
+        }
+
+
+        return clave;
+    }
 
     public void InsertarSesion(String cliente){
 
@@ -311,41 +341,60 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
             Log.d("Error al insertar Sesion:",error);
             Toast.makeText(context,"Error al insertar visita",Toast.LENGTH_SHORT).show();
         }
-    }
+    }//INSERTA EL CLIENTE CON EL QUE SE INICIO VISITA
+
+
     public void RegistrarVisiatas(String cliente){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
-
         GPSHelper gpsHelper=new GPSHelper(context);
-
-
         ContentValues values=new ContentValues();
         values.put("numero_empleado",ObtenerAgenteActivo());
         values.put("id_cliente",cliente);
         values.put("latitud",gpsHelper.getLatitude());
         values.put("longitud", gpsHelper.getLongitude());
-        values.put("fecha_visita",getDate());
+        values.put("fecha_registro",getDate());
         values.put("id_visita",Obtener_Idvisita());
-
+        values.put("status_visita","0");
         Long res= db.insert("visitas",null,values);
 
         db.close();
         lite.close();
-    }
+    }//sE REGISTRA LA VISITA Y SE ENVIA HACIA EL WEB SERVICE
 
     public String Obtener_Idvisita(){
         String id="";
+        int num_id=0;
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select MAX(id) from sesion_cliente",null);
+        Cursor rs=db.rawQuery("select id from consecutivo_visitas",null);
+
 
         if(rs.moveToFirst()){
-            id=rs.getString(0);
+
+
+                id=rs.getString(0);
+
         }
 
+        StringBuilder builder=new StringBuilder();
+        builder.append("V");
+        String clave=ObtenerClavedeAgente();
+        builder.append(clave);
 
-        return id;
-    }
+        int tam=(12-(clave.length()+1+id.length()));
+
+        for (int i=0;i<tam;i++){
+            builder.append("0");
+        }
+
+       builder.append(id);
+
+
+
+        return builder.toString();
+    }//GENERA EL ID CORRESPONDIENTE DE LA VISITA
+
     private void ObtenerClientesVisitados(){
 
         ObtenerCtesHoy(ObtenerAgenteActivo());
@@ -368,6 +417,102 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         txtCte.setText("Visitados:"+visitados+"/"+total+"   Por visitar:"+(total-visitados)+"/"+total+"");
 
+    }//HACE EL CALCULO PARA MOSTRAR EN LA PANTALLA LOS CLIENTES QUE HAN SIDO VISITADOS Y LOS FALTANTES
+
+
+    private String jsonVisitas(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select * from visitas where id_visita='"+Obtener_Idvisita()+"'",null);
+        JSONArray array=new JSONArray();
+        JSONObject object=new JSONObject();
+
+        if(rs.moveToFirst()){
+
+            try {
+
+
+
+                object.put("numero_empleado",rs.getString(0));
+                object.put("id_cliente",rs.getString(1));
+                object.put("latitud",rs.getString(2));
+                object.put("longitud",rs.getString(3));
+                String Fecha[]=Dividirfecha(rs.getString(4));
+                object.put("fecha_visita",Fecha[0]);
+                object.put("hora_visita",Fecha[1]);
+                object.put("minuto_visita",Fecha[2]);
+                object.put("segundo_visita",Fecha[3]);
+                String[] fecha2=Dividirfecha(rs.getString(5));
+                object.put("fecha_registro",fecha2[0]);
+                object.put("hora_registro",fecha2[1]);
+                object.put("minuto_registro",fecha2[2]);
+                object.put("segundo_registro",fecha2[3]);
+                object.put("id_visita",rs.getString(6));
+                array.put(object);
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+
+        return array.toString();
+
+    }//CREA EL JSON DE LAS VISITAS
+
+    private void  ActualizarStatusVisita(String json){
+
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        try {
+
+
+            JSONArray array=new JSONArray(json);
+
+            for(int i=0;i<array.length();i++){
+
+                JSONObject jsonData=array.getJSONObject(i);
+
+                String id = jsonData.getString("id_Visita");
+                db.execSQL("update visitas set status_visita='10' where id_visita='" + id + "'");
+
+            }
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            String err=e.toString();
+        }
+
+
+    }
+
+    private class UpLoadVisitas extends AsyncTask<String,Void,Object> {
+
+        @Override
+        protected Object doInBackground(String... strings) {
+            WebServices web=new WebServices();
+            String json=jsonVisitas();
+            String resp= web.SincronizarVisitas(json);
+
+            if(resp!=null)
+                ActualizarStatusVisita(resp);
+
+            return "";
+        }
+
+        @Override
+        protected void onPostExecute(Object result){
+
+
+        }
     }
 
 
@@ -395,8 +540,11 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                     .getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
-                mMap.setMyLocationEnabled(true);
+
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                mMap.setMyLocationEnabled(true);//muestra el boton para ir a mi ubicacion
                 mMap.setOnMyLocationButtonClickListener(this);
+
                 addMarker();
             }
         }
@@ -409,6 +557,17 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         mMap.addMarker(new MarkerOptions().position(new LatLng(19.56101015234801,  -99.05210955714722)).title("Farmacia Guadalajara"));
         mMap.addMarker(new MarkerOptions().position(new LatLng(19.56317359796029,  -99.04562934016724)).title("Wal-Mart Ecatepec"));
 
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+
+                Toast.makeText(context,"Entro",Toast.LENGTH_SHORT).show();
+
+                return false;
+            }
+        });
+
+
     }
 
     private void setUpGoogleApiClientIfNeeded() {
@@ -420,9 +579,6 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                     .build();
         }
     }
-
-
-
 
 
     @Override
@@ -523,5 +679,27 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         String formatteDate=df.format(dt.getTime());
 
         return formatteDate;
+    }
+
+    public String[] Dividirfecha(String fecha){
+        String[] fechreturn=new String[4];
+
+        try {
+            String[] Fecha = fecha.split(" ");
+            fechreturn[0] = Fecha[0];
+            String[] Hora = Fecha[1].split(":");
+            fechreturn[1] = Hora[0];
+            fechreturn[2] = Hora[1];
+            fechreturn[3] = Hora[2];
+        }catch (Exception e){
+            fechreturn[0]="01-01-2014";
+            fechreturn[1]="00";
+            fechreturn[2]="00";
+            fechreturn[3]="00";
+            return fechreturn;
+        }
+
+
+        return fechreturn;
     }
 }

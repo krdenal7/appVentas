@@ -90,5 +90,37 @@ public class WebServices {
 
     }
 
+    public String SincronizarVisitas(String json){
+        String SOAP_ACTION="http://tempuri.org/SincronizarVisitas";
+        String OPERATION_NAME="SincronizarVisitas";
+        String WSDL_TARGET_NAMESPACE="http://tempuri.org/";
+        String SOAP_ADDRESS="http://190.1.4.120/WebService/WebService.asmx";
+
+        SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
+        request.addProperty("visitas",json);
+
+
+        SoapSerializationEnvelope envelope=new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.dotNet=true;
+
+        envelope.setOutputSoapObject(request);
+
+        HttpTransportSE httpTransportSE=new HttpTransportSE(SOAP_ADDRESS);
+        Object response=null;
+
+        try{
+
+            httpTransportSE.call(SOAP_ACTION,envelope);
+            response=envelope.getResponse();
+
+        }catch (Exception e){
+            String a=e.toString();
+            Log.d("WebServiceBakError",a);
+            return null;
+        }
+
+        return response.toString();
+    }
+
 
 }
