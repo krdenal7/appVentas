@@ -32,6 +32,7 @@ import com.marzam.com.appventas.Sincronizacion.envio_pedido;
 import com.marzam.com.appventas.WebService.WebServices;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -64,7 +65,8 @@ public class pdetalle extends Activity {
         lista=(ListView)findViewById(R.id.listView);
         simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
         lista.setAdapter(simpleAdapter);
-        txtMonto.setText("Monto actual: $"+String.format("%.2f", monto));
+        DecimalFormat dec=new DecimalFormat("###,###,##");
+        txtMonto.setText("Monto actual: $"+dec.format(monto));
 
         lista.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -274,7 +276,7 @@ public class pdetalle extends Activity {
                 progress.dismiss();
 
                 String res=String.valueOf(result);
-                Toast.makeText(context,res,Toast.LENGTH_SHORT).show();
+                Toast.makeText(context,res,Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -292,7 +294,8 @@ public class pdetalle extends Activity {
         super.onResume();
         monto=0.00;
         Productos();
-        txtMonto.setText("Monto actual: $"+String.format("%.2f", monto));
+        DecimalFormat dec=new DecimalFormat("###,###.##");
+        txtMonto.setText("Monto actual: $"+dec.format(monto));
         simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
         lista.setAdapter(simpleAdapter);
     }

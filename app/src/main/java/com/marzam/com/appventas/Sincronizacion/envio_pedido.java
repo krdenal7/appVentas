@@ -59,7 +59,7 @@ public class envio_pedido {
         if(Verificar_productos()) {
 
         if (Insertar_Cabecero())
-            Insertar_Detalle();
+                 Insertar_Detalle();
 
             if(isOnline()==false) {
                 LimpiarBD_Insertados();
@@ -69,8 +69,14 @@ public class envio_pedido {
 
             String res=webServices.SincronizarPedidos(JSONCabecera(),JSONDetalle());
 
+            if(res==null) {
+                LimpiarBD_Insertados();
+                updateConsecutivo();
+                return "Fallo al envíar pedidos. Sincronize el dispositivo para envíarlos nuevamente";
+            }
+
             if(res!=null)
-             ActualizarStatusPedido(res);
+                ActualizarStatusPedido(res);
 
             resp = LimpiarBD_Insertados();
             updateConsecutivo();
@@ -528,8 +534,6 @@ public class envio_pedido {
 
      if(P_noinsertados!=null) {
          resp="Estos productos no se agregaron favor de verificar!";
-     }else {
-         resp="Datos agregados correctamente";
      }
 
       return resp;

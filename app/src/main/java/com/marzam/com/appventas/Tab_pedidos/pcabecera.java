@@ -204,7 +204,7 @@ public class pcabecera extends Activity {
 
             if(progress.isShowing()) {
                 String res=String.valueOf(result);
-                Toast.makeText(context, res, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, res, Toast.LENGTH_LONG).show();
                 progress.dismiss();
             }
         }
