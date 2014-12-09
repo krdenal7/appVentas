@@ -82,7 +82,7 @@ public class envio_pedidoFaltante {
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select * from visitas where status_visita='0'",null);
+        Cursor rs=db.rawQuery("select * from visitas where status_visita='10'",null);
         JSONArray array=new JSONArray();
         JSONObject object=new JSONObject();
 
@@ -222,7 +222,7 @@ public class envio_pedidoFaltante {
 
 
 
-        Cursor rs=db.rawQuery("select id_pedido from encabezado_pedido where id_estatus=0",null);
+        Cursor rs=db.rawQuery("select id_pedido from encabezado_pedido where id_estatus=10",null);
 
         if(rs.getCount()>0){
 

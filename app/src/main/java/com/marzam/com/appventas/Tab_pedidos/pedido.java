@@ -46,6 +46,9 @@ try {
     tabHost.addTab(spec3);
     tabHost.setCurrentTab(1);
 
+    Intent intent1=new Intent(this,pcatalogo.class);
+    startActivity(intent1);
+
 }catch (Exception e){
 
     Log.d("ErrorTab:",e.toString());

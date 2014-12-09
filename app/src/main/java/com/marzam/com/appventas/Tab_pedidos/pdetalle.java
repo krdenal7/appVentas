@@ -13,18 +13,22 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.NumberPicker;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.marzam.com.appventas.CustomAdapter;
 import com.marzam.com.appventas.Gesture.Dib_firma;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
@@ -49,6 +53,16 @@ public class pdetalle extends Activity {
     EditText txtBuscar;
     ImageButton btnClear;
     ProgressDialog progress;
+    AlertDialog alertDialog;
+    AlertDialog alertDialog_picker;
+    Button boton1;
+    Button boton2;
+    Button boton3;
+    Button boton4;
+    Button boton5;
+    Button boton6;
+    NumberPicker picker;
+
     /*Cambio de Prueba*/
 
     @Override
@@ -65,18 +79,15 @@ public class pdetalle extends Activity {
         lista=(ListView)findViewById(R.id.listView);
         simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
         lista.setAdapter(simpleAdapter);
-        DecimalFormat dec=new DecimalFormat("###,###,##");
+        DecimalFormat dec=new DecimalFormat("###,###.##");
         txtMonto.setText("Monto actual: $"+dec.format(monto));
 
-        lista.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-               ShowEliminar(i);
-
-                return false;
-            }
-        });
+      lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+          @Override
+          public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+              ShowDialog(i);
+          }
+      });
 
         txtBuscar.addTextChangedListener(new TextWatcher() {
             @Override
@@ -114,6 +125,41 @@ public class pdetalle extends Activity {
                 lista.setAdapter(simpleAdapter);
             }
         });
+
+    }
+
+
+    public void ShowDialog(final int posicion){
+
+
+
+         String Item=String.valueOf(simpleAdapter.getItem(posicion));
+         final String codigo=ObtenerValoresdeFilter(Item);
+
+        LayoutInflater inflater=getLayoutInflater();
+        View viewButton=inflater.inflate(R.layout.botones_cantidad,null);
+        Eventos_Button(viewButton,codigo);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        alertDialogBuilder.setTitle( "Seleccione una cantidad");
+        alertDialogBuilder.setView(viewButton);
+        alertDialogBuilder.setCancelable(false);
+        alertDialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int id) {
+
+
+               Actualizar();
+
+            }
+
+        });
+
+
+
+        alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+
 
     }
 
@@ -195,6 +241,54 @@ public class pdetalle extends Activity {
         AlertDialog alertDialog=alert.create();
         alertDialog.show();
     }
+    public void ShowDialog_picker(final String codigo){
+
+        llenar_picker();
+
+        AlertDialog.Builder alert1=new AlertDialog.Builder(context);
+        alert1.setTitle("Seleccione una cantidad");
+        alert1.setView(picker);
+        alert1.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                AgregarProducto(codigo,0,1);
+                AgregarProducto(codigo,(picker.getValue())-1,1);
+
+
+            }
+        });
+        alert1.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+
+        alertDialog_picker=alert1.create();
+        alertDialog_picker.show();
+
+
+
+    }
+
+    public void llenar_picker(){
+
+        picker = new NumberPicker(context);
+        String[] nums = new String[1000];
+        for(int i=0; i<nums.length; i++)
+            nums[i] = Integer.toString(i);
+
+        picker.setMinValue(1);
+        picker.setMaxValue(nums.length);
+        picker.setWrapSelectorWheel(false);
+        picker.setDisplayedValues(nums);
+        picker.setValue(2);
+
+
+
+
+    }
 
     public void Productos(){
 
@@ -249,6 +343,154 @@ public class pdetalle extends Activity {
 
     }
 
+    public String ObtenerValoresdeFilter(String Item){
+
+        String[] split=Item.replace("{","").replace("}","").split(",");
+
+        String cantidad= split[3].replace("C=Cantidad: ","").trim();
+        String codigo=split[0].replace("D=codigo: ","");
+
+
+
+
+        return codigo;
+    }
+    public String[] ObtenerInfoProductos(String ean){
+        String[] info=new String[3];
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        Cursor rs=db.rawQuery("select descripcion,precio,Cantidad from productos where codigo='"+ean+"'",null);
+
+        if(rs.moveToFirst()){
+            info[0]=rs.getString(0);
+            info[1]=rs.getString(1);
+            info[2]=rs.getString(2);
+        }
+
+
+        return info;
+    }
+
+    public void AgregarProducto(String ean,int cantidad,int isChecked){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        if(cantidad!=0){
+            Cursor rs=db.rawQuery("select Cantidad from productos where codigo='"+ean+"'",null);
+            int pzas=0;
+            if(rs.moveToFirst()){
+
+                pzas=rs.getInt(0);
+
+            }
+            db.execSQL("update productos set  Cantidad="+(cantidad+pzas)+",isCheck="+isChecked+" where codigo='"+ean+"'");
+
+            Actualizar();
+
+            db.close();
+            lite.close();
+
+
+        }else {
+            db.execSQL("update productos set  Cantidad=" + cantidad + ",isCheck=0 where codigo='" + ean + "'");
+
+            Actualizar();
+            db.close();
+            lite.close();
+        }
+
+
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
+    }
+
+
+    public void Eventos_Button(View view, final String  codigo){
+
+        boton1=(Button)view.findViewById(R.id.button12);
+        boton2=(Button)view.findViewById(R.id.button13);
+        boton3=(Button)view.findViewById(R.id.button14);
+        boton4=(Button)view.findViewById(R.id.button15);
+        boton5=(Button)view.findViewById(R.id.button16);
+        boton6=(Button)view.findViewById(R.id.button17);
+
+        TextView txt1=(TextView)view.findViewById(R.id.textView50);
+        TextView txt2=(TextView)view.findViewById(R.id.textView52);
+        final TextView txt3=(TextView)view.findViewById(R.id.textView54);
+
+        final String[] info=ObtenerInfoProductos(codigo);
+
+        txt1.setText(info[0]);
+        txt2.setText(info[1]);
+        txt3.setText(info[2]);
+
+        final int[] cont = {0};
+
+        boton1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AgregarProducto(codigo,0,0);
+                cont[0]=0;
+                txt3.setText("0");
+                Actualizar();
+
+
+            }
+        });
+        boton2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AgregarProducto(codigo,1,1);
+                int val=Integer.parseInt(info[2]);
+                txt3.setText(""+((val+ cont[0])+1));
+                cont[0]++;
+
+            }
+        });
+        boton3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AgregarProducto(codigo, 2, 1);
+                int val=Integer.parseInt(info[2]);
+                txt3.setText(""+((val+ cont[0])+2));
+                cont[0]+=2;
+            }
+        });
+        boton4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AgregarProducto(codigo,5,1);
+                int val=Integer.parseInt(info[2]);
+                txt3.setText(""+((val+ cont[0])+5));
+                cont[0]+=5;
+
+            }
+        });
+        boton5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AgregarProducto(codigo,10,1);
+                int val=Integer.parseInt(info[2]);
+                txt3.setText(""+((val+ cont[0])+10));
+                cont[0]+=10;
+            }
+        });
+        boton6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                alertDialog.dismiss();
+                ShowDialog_picker(codigo);
+            }
+        });
+
+    }
 
     private class UpLoadTask extends AsyncTask<String,Void,Object> {
 
@@ -292,12 +534,7 @@ public class pdetalle extends Activity {
     @Override
     protected void onResume(){
         super.onResume();
-        monto=0.00;
-        Productos();
-        DecimalFormat dec=new DecimalFormat("###,###.##");
-        txtMonto.setText("Monto actual: $"+dec.format(monto));
-        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
-        lista.setAdapter(simpleAdapter);
+        Actualizar();
     }
 
     @Override
@@ -321,5 +558,16 @@ public class pdetalle extends Activity {
 
 
         return  super.onKeyDown(keyEvent,event);
+    }
+
+    public void Actualizar(){
+        monto=0.00;
+        Productos();
+        lista=(ListView)findViewById(R.id.listView);
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
+        lista.setAdapter(simpleAdapter);
+        DecimalFormat dec=new DecimalFormat("###,###.##");
+        txtMonto.setText("Monto actual: $"+dec.format(monto));
+        txtBuscar.setText("");
     }
 }

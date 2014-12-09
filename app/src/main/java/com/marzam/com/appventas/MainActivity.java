@@ -93,12 +93,14 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
+        setTitle("Ventas");
         context=this;
 
         txtUsuario=(TextView)findViewById(R.id.textView);
         locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
         CrearDirectorioDownloads();
 
+        //EliminarBD();
 
         if(ExistsBD()) {
             MostrarDatos_Agente();
@@ -476,14 +478,22 @@ public class MainActivity extends Activity {
         lite=new CSQLite(context);
 
         SQLiteDatabase db=lite.getWritableDatabase();
-        try {
 
-            db.execSQL("ALTER TABLE productos ADD COLUMN isCheck int DEFAULT 0");
-            db.execSQL("ALTER TABLE productos ADD COLUMN Cantidad int DEFAULT 0 ");
-            db.execSQL("ALTER TABLE agentes ADD COLUMN Sesion int DEFAULT 0");
-        }catch (Exception e){
-            String err=e.toString();
-            Log.d("Error:",err);
+        String[] query={"ALTER TABLE productos ADD COLUMN isCheck int DEFAULT 0","ALTER TABLE productos ADD COLUMN Cantidad int DEFAULT 0 ",
+                "ALTER TABLE agentes ADD COLUMN   Sesion int DEFAULT 0","ALTER TABLE productos ADD COLUMN precio_final varchar(50)",
+                "ALTER TABLE visitas ADD COLUMN status_visita varchar(50) "};
+
+        for(int i=0;i<query.length;i++) {
+
+            try {
+
+                db.execSQL(query[i]);
+
+            } catch (Exception e) {
+                String err = e.toString();
+                Log.d("Error:", err);
+                continue;
+            }
         }
 
         db.close();

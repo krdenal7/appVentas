@@ -26,10 +26,13 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.marzam.com.appventas.GPS.GPSHelper;
@@ -82,6 +85,8 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         txtCte=(TextView)findViewById(R.id.textView4);
         ObtenerClientesVisitados();
 
+
+
     }
 
     public void ShowMenu(){
@@ -121,7 +126,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
-                if(VerificarSesion_Cliente(clientesH[i])){                   // InsertarSesion(clientesH[i]);
+                if(VerificarSesion_Cliente(clientesH[i])){
                     Intent intent = new Intent(context, KPI_General.class);
                            startActivity(intent);
                 }else {
@@ -136,7 +141,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     }
     public void ShowCteT(){
-        final CharSequence[] list=ObtenerCteTotales("134057");
+        final CharSequence[] list=ObtenerCteTotales(ObtenerAgenteActivo());
 
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
@@ -151,6 +156,8 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         alertDialogT.show();
 
     }
+
+
 
     public void ShowSesionActiva(){
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
@@ -176,7 +183,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     public CharSequence[] ObtenerCtesHoy(String agente){
 
-        String[] valor={agente,"Miercoles"};
+        String[] valor={agente,Obtener_Dia()};
         CharSequence[] datos=null;
 
 
@@ -198,10 +205,10 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         Cursor rs = null;
        for(int i=0;i<clientesH.length;i++){
 
-        rs=db.rawQuery("select nombre from clientes where id_cliente='"+clientesH[i]+"'",null);
+        rs=db.rawQuery("select id_cliente,nombre from clientes where id_cliente='"+clientesH[i]+"'",null);
 
            if(rs.moveToFirst()){
-               datos[i]=rs.getString(0);
+               datos[i]=rs.getString(0)+"-"+rs.getString(1);
            }
 
        }
@@ -221,7 +228,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor cursor=db.rawQuery("select id_cliente from  agenda where numero_empleado='134057'",null);
+        Cursor cursor=db.rawQuery("select id_cliente from  agenda where numero_empleado='"+agente+"'",null);
 
         clientes=new CharSequence[cursor.getCount()];
         datos=new CharSequence[cursor.getCount()];
@@ -235,10 +242,10 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
          for(int i=0;i<datos.length;i++){
 
-             rs=db.rawQuery("select nombre from clientes where id_cliente='"+clientes[i]+"' ",null);
+             rs=db.rawQuery("select id_cliente,nombre from clientes where id_cliente='"+clientes[i]+"' ",null);
 
              if(rs.moveToFirst()){
-                 datos[i]=rs.getString(0);
+                 datos[i]=rs.getString(0)+"-"+rs.getString(1);
              }
 
          }
@@ -355,7 +362,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         values.put("longitud", gpsHelper.getLongitude());
         values.put("fecha_registro",getDate());
         values.put("id_visita",Obtener_Idvisita());
-        values.put("status_visita","0");
+        values.put("status_visita","10");
         Long res= db.insert("visitas",null,values);
 
         db.close();
@@ -480,7 +487,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                 JSONObject jsonData=array.getJSONObject(i);
 
                 String id = jsonData.getString("id_Visita");
-                db.execSQL("update visitas set status_visita='10' where id_visita='" + id + "'");
+                db.execSQL("update visitas set status_visita='20' where id_visita='" + id + "'");
 
             }
 
@@ -515,6 +522,23 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         }
     }
 
+    private class Task_Create_PrecioFinal extends AsyncTask<String,Void,Object> {
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+
+            return "";
+        }
+
+        @Override
+        protected void onPostExecute(Object result){
+
+
+        }
+
+    }
+
 
     @Override
     protected void onResume() {
@@ -544,6 +568,11 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                 mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 mMap.setMyLocationEnabled(true);//muestra el boton para ir a mi ubicacion
                 mMap.setOnMyLocationButtonClickListener(this);
+
+
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(19.56317359796029,  -99.04562934016724),12.0f));
+
+
 
                 addMarker();
             }
@@ -594,6 +623,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     @Override
     public void onLocationChanged(Location location) {
 
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()),12.0f));
     }
 
     @Override
@@ -681,6 +711,45 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         return formatteDate;
     }
 
+    private String Obtener_Dia(){
+
+        String dia="";
+
+        Calendar cal = new GregorianCalendar();
+        Date dt = cal.getTime();
+
+        GregorianCalendar FechaCalendario=new GregorianCalendar();
+        FechaCalendario.setTime(dt);
+
+        int numDia=FechaCalendario.get(Calendar.DAY_OF_WEEK);
+
+        switch (numDia){
+            case 1:
+                dia="Domingo";
+            break;
+            case 2:
+                dia="Lunes";
+                break;
+            case 3:
+                dia="Martes";
+                break;
+            case 4:
+                dia="Miercoles";
+                break;
+            case 5:
+                dia="Jueves";
+                break;
+            case 6:
+                dia="Viernes";
+                break;
+            case 7:
+                dia="sabado";
+
+        }
+
+        return dia;
+    }
+
     public String[] Dividirfecha(String fecha){
         String[] fechreturn=new String[4];
 
@@ -702,4 +771,5 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         return fechreturn;
     }
+
 }

@@ -406,7 +406,7 @@ public class envio_pedido {
           cabecero[12] = Fech[1];
           cabecero[13] = Fech[2];
           cabecero[14] = Fech[3];
-          cabecero[15] = "0";
+          cabecero[15] = "10";
           cabecero[16] = "";
           cabecero[17] = Obtener_firma(cabecero[1]);
           cabecero[18] = Obtener_Idvisita();

@@ -1,14 +1,18 @@
 package com.marzam.com.appventas.WebService;
 
-import android.util.Base64;
-import android.util.Log;
 
+import android.util.Log;
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import org.kobjects.base64.Base64;
 
-import java.util.Objects;
 
 /**
  * Created by SAMSUMG on 15/11/2014.
@@ -16,19 +20,26 @@ import java.util.Objects;
 public class WebServices {
 
 
-    public Object Down_BD(byte[] bit){
+    public Object Upload_BD(String zip,String nombre){
 
-        byte[] enc=bit;
-        String cadena=Base64.encodeToString(enc,Base64.DEFAULT);
+           String cadena="";
 
-        String SOAP_ACTION="http://tempuri.org/SincronizarBAK";
-        String OPERATION_NAME="SincronizarBAK";
+        try {
+            cadena=EncodeToBase64(zip);
+
+        }catch (Exception e){
+            String err=e.toString();
+        }
+
+
+        String SOAP_ACTION="http://tempuri.org/TransfiereBAK";
+        String OPERATION_NAME="TransfiereBAK";
         String WSDL_TARGET_NAMESPACE="http://tempuri.org/";
         String SOAP_ADDRESS="http://190.1.4.120/WebService/WebService.asmx";
 
         SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
         request.addProperty("docBinary",cadena);
-        request.addProperty("docName","Backup.zip");
+        request.addProperty("docName",nombre);
 
 
         SoapSerializationEnvelope envelope=new SoapSerializationEnvelope(SoapEnvelope.VER11);
@@ -45,9 +56,10 @@ public class WebServices {
             response=envelope.getResponse();
 
         }catch (Exception e){
+
             String a=e.toString();
             Log.d("WebServiceBakError",a);
-            return "";
+            return null;
         }
 
 
@@ -122,5 +134,52 @@ public class WebServices {
         return response.toString();
     }
 
+
+    public String toBinary(byte[] bytes){
+
+        StringBuilder sb=new StringBuilder(bytes.length*Byte.SIZE);
+        for(int i=0;i<Byte.SIZE*bytes.length;i++)
+              sb.append((bytes[i/Byte.SIZE]<<i% Byte.SIZE & 0x80)==0?'0':'1');
+
+        return sb.toString();
+    }
+
+
+
+    public byte[] ConvertToByte(File file){
+        byte[] bytes=null;
+        try {
+            InputStream in = new FileInputStream(file);
+            long length=file.length();
+            if(length>Integer.MAX_VALUE){
+
+            }
+             bytes=new byte[(int)length];
+            int offset=0;
+            int numRead=0;
+            while (offset<bytes.length && (numRead=in.read(bytes,offset,bytes.length-offset))>=0){
+                offset+=numRead;
+            }
+            if(offset<bytes.length){
+                throw new IOException("El archivo no se completo");
+            }
+               in.close();
+
+
+            }catch (Exception e){
+            String err=e.toString();
+            }
+        return bytes;
+    }
+    public String EncodeToBase64(String Archivo)throws IOException{
+
+             File file=new File(Archivo);
+             byte[] bytes=ConvertToByte(file);
+            String encode= Base64.encode(bytes);
+
+        Log.i("BIT", encode);
+
+        return encode;
+    }
 
 }
