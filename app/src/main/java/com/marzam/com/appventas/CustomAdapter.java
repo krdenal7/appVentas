@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +33,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     NumberPicker picker;
     TextView Cantidad;
     TextView Precio;
+    TextView Precio_neto;
 
     CSQLite lite;
 
@@ -84,7 +86,13 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     Cantidad.setText("Cantidad:"+valor);//Envia la cantidad Inicial del producto
 
     Precio=(TextView)convertView.findViewById(R.id.textView28);
-    Precio.setText("Precio: $"+modelitems[position].getPrecio()+" Oferta: 0%");
+    Precio.setPaintFlags(Precio.getPaintFlags()| Paint.STRIKE_THRU_TEXT_FLAG);
+    Precio.setText("Precio Lista: $"+modelitems[position].getPrecio());
+
+
+    Precio_neto=(TextView)convertView.findViewById(R.id.textView58);
+    Precio_neto.setText("Precio Final: $"+modelitems[position].getPrecio_neto());
+
 
 
     name.setText(modelitems[position].getName());//Asigna el nombre a los Texview
@@ -249,7 +257,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
         Cursor rs=null;
 
         try {
-            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,codigo  from productos limit 1000",null);
+            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,codigo,precio_final  from productos limit 1000",null);
         }catch (Exception e){
             String err="Error:"+e.toString();
             Log.d("Error:", err);
@@ -262,7 +270,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
         int cont=0;
 
         while (rs.moveToNext()){
-            modelitems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4));
+            modelitems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5));
             cont++;
         }
 
@@ -279,7 +287,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
-        Cursor rs=db.rawQuery("select descripcion,precio,Cantidad from productos where codigo='"+modelitems[posicion].getEan()+"'",null);
+        Cursor rs=db.rawQuery("select descripcion,precio_final,Cantidad from productos where codigo='"+modelitems[posicion].getEan()+"'",null);
 
         if(rs.moveToFirst()){
             info[0]=rs.getString(0);

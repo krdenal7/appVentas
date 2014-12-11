@@ -41,6 +41,8 @@ public class envio_pedido {
     int total_piezas=0;
     double subTotal=0.00;
     double importe_total=0.00;
+    double iva=0.00;
+    double ieps=0.00;
     static File directorio;
     static InputStream stream;
 
@@ -56,7 +58,11 @@ public class envio_pedido {
         this.context=context;
         String resp="";
         webServices=new WebServices();
+
+
         if(Verificar_productos()) {
+
+            webServices.SincronizarVisitas(jsonVisitas());
 
         if (Insertar_Cabecero())
                  Insertar_Detalle();
@@ -169,7 +175,7 @@ public class envio_pedido {
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select MAX(id) from consecutivo",null);
+        Cursor rs=db.rawQuery("select id from consecutivo",null);
         if(rs.moveToFirst()){
             numero=rs.getString(0);
         }
@@ -227,30 +233,35 @@ public class envio_pedido {
 
       lite=new CSQLite(context);
       SQLiteDatabase db=lite.getWritableDatabase();
+      iva=0.00;
+      ieps=0.00;
 
-      Cursor rs=db.rawQuery("select precio,Cantidad from productos where isCheck=1",null);
+      Cursor rs=db.rawQuery("select precio_final,Cantidad,ieps,iva from productos where isCheck=1",null);
       // CantProductos=rs.getCount();
       while (rs.moveToNext()){
 
           Double precio=Double.parseDouble(rs.getString(0));
           int cantidad=Integer.parseInt(rs.getString(1));
+          Double ieps1=Double.parseDouble(rs.getString(2));
+          Double iva1=Double.parseDouble(rs.getString(3));
+
+
+
+
+          Double cant1=(precio*ieps1/100);
+          Double cant=((precio)+cant1);
+          Double cant2=(cant*iva1/100);
+
+          ieps+=cant1;
+          iva+=cant2;
 
           total_piezas+=cantidad;
           subTotal+=(precio*cantidad);
 
       }
 
-      importe_total=subTotal+(subTotal*0.16);
 
-      String[] val=Obtener_ValoresEncabezado();
-
-      total_piezas=total_piezas+Integer.parseInt(val[0]);
-      importe_total=importe_total+Double.parseDouble(val[1]);
-
-
-      rs.close();
-      db.close();
-      lite.close();
+      importe_total=subTotal+ieps+iva;
 
   }//Completo
   public String[] Obtener_ValoresEncabezado(){
@@ -347,6 +358,36 @@ public class envio_pedido {
 
       return "FD";
 
+  }
+  public String Obtener_descuentoComercial(){
+
+
+      SQLiteDatabase db=lite.getWritableDatabase();
+      Cursor rs=db.rawQuery("select descuento_comercial from clientes where id_cliente=(select id_cliente from sesion_cliente where Sesion=1)",null);
+
+      String desc="";
+
+      if(rs.moveToFirst()){
+          desc=rs.getString(0);
+      }
+
+      return desc;
+
+  }
+  public String Obtener_oferta(String codigo){
+
+      SQLiteDatabase db=lite.getWritableDatabase();
+
+      String oferta="0";
+      String Fecha=getDate2();
+      Cursor rs=db.rawQuery("select descuento from ofertas where codigo='" + codigo + "'  and vigencia_incio >='" + Fecha + "'   and vigencia_fin <= '" + Fecha + "'", null);
+
+
+      if (rs.moveToFirst())
+           oferta = rs.getString(0);
+
+
+      return oferta;
   }
 
  public String Obtener_Idvisita(){
@@ -464,7 +505,7 @@ public class envio_pedido {
      Cursor rs=null;
       try{
 
-          rs=db.rawQuery("select codigo,Cantidad,precio,clasificacion_fiscal,iva,ieps from productos where isCheck=1 ", null);
+          rs=db.rawQuery("select codigo,Cantidad,precio,clasificacion_fiscal,iva,ieps,precio_final from productos where isCheck=1 ", null);
 
       }catch (Exception e) {
           String err=e.toString();
@@ -474,11 +515,12 @@ public class envio_pedido {
      int cantidad=rs.getColumnCount();
      String id_pedido=Obtener_idPedido();
      String orden=Obtener_tipoOrden();
+     String desc=Obtener_descuentoComercial();
 
      while (rs.moveToNext()){
 
          String query="insert into detalle_pedido(id_pedido,codigo,piezas_pedidas,piezas_surtidas,precio_farmacia,clasfificacion_fiscal,oferta,desc_comercial,precio_neto,iva,ieps,factura_marzam,orden)values" +
-        "('"+id_pedido+"','"+rs.getString(0)+"',"+rs.getString(1)+",0,"+rs.getString(2)+",'"+rs.getString(3)+"',0,0,10,"+rs.getString(4)+","+rs.getString(5)+",'','"+orden+"')";
+        "('"+id_pedido+"','"+rs.getString(0)+"',"+rs.getString(1)+",0,"+rs.getString(2)+",'"+rs.getString(3)+"',"+Obtener_oferta(rs.getString(0))+","+desc+","+rs.getString(6)+","+rs.getString(4)+","+rs.getString(5)+",'','"+orden+"')";
 
          try {
 
@@ -642,6 +684,52 @@ try {
 
         return array.toString();
     }
+    public String jsonVisitas(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select * from visitas where status_visita='10'",null);
+        JSONArray array=new JSONArray();
+        JSONObject object=new JSONObject();
+
+        while (rs.moveToNext()){
+
+            try {
+
+
+
+                object.put("numero_empleado",rs.getString(0));
+                object.put("id_cliente",rs.getString(1));
+                object.put("latitud",rs.getString(2));
+                object.put("longitud",rs.getString(3));
+                String Fecha[]=Dividirfecha(rs.getString(4));
+                object.put("fecha_visita",Fecha[0]);
+                object.put("hora_visita",Fecha[1]);
+                object.put("minuto_visita",Fecha[2]);
+                object.put("segundo_visita",Fecha[3]);
+                String[] fecha2=Dividirfecha(rs.getString(5));
+                object.put("fecha_registro",fecha2[0]);
+                object.put("hora_registro",fecha2[1]);
+                object.put("minuto_registro",fecha2[2]);
+                object.put("segundo_registro",fecha2[3]);
+                String id_visita=rs.getString(6);
+                object.put("id_visita",id_visita);
+
+                array.put(object);
+                object=new JSONObject();
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+
+        return array.toString();
+
+
+    }
 
 
     public static byte[] StreamArchivo(File file){
@@ -694,11 +782,40 @@ try {
 
         return fecha;
     }//Completo
+    private String getDate2(){
+
+        Calendar cal = new GregorianCalendar();
+        Date dt = cal.getTime();
+        SimpleDateFormat df=new SimpleDateFormat("yyyyMMdd");
+        String formatteDate=df.format(dt.getTime());
+
+        return formatteDate;
+    }//retorna la fecha en formato yyyyMMdd
 
 
     /*Enviar Pedido por WebService*/
 
+    public String[] Dividirfecha(String fecha){
+        String[] fechreturn=new String[4];
 
+        try {
+            String[] Fecha = fecha.split(" ");
+            fechreturn[0] = Fecha[0];
+            String[] Hora = Fecha[1].split(":");
+            fechreturn[1] = Hora[0];
+            fechreturn[2] = Hora[1];
+            fechreturn[3] = Hora[2];
+        }catch (Exception e){
+            fechreturn[0]="01-01-2014";
+            fechreturn[1]="00";
+            fechreturn[2]="00";
+            fechreturn[3]="00";
+            return fechreturn;
+        }
+
+
+        return fechreturn;
+    }
     public  boolean isOnline(){
 
         ConnectivityManager cm=(ConnectivityManager)((Activity)context).getSystemService(Context.CONNECTIVITY_SERVICE);

@@ -11,6 +11,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import org.kobjects.base64.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -344,10 +345,51 @@ public class Sincronizar extends Activity {
         @Override
         protected Object doInBackground(String... strings) {
             WebServices web=new WebServices();
-            String archivoBack=ObtenerAgenteActivo()+getDate();
+            String nomAgente=ObtenerAgenteActivo();
+            String archivoBack=nomAgente+getDate();
+            File back=new File(directorio+"/"+archivoBack+".zip");
+
+            String bd64=web.Down_DB(nomAgente+".zip");
+
+            if(back.exists()){
+
+                Object archivo=web.Upload_BD(directorio+"/"+archivoBack+".zip",archivoBack+".zip");
+
+                if(archivo!=null)
+                       back.delete();
+
+                return archivo;
+            }
+
+            if(bd64==null)
+                  return null;
+
+            byte[] data = new byte[0];
+
+            try {
+                 data = Base64.decode(bd64);
+            }catch (Exception e){
+                return null;
+            }
+
+            unStreamZip(data);
+               File f=new File(directorio+"/db_down.zip");
+
+            if(!f.exists())
+                  return null;
+
+
+
             CopiarBD(archivoBack);
+
+            if(f.exists())
+                  f.delete();
+
             AgregarColumnProductos();
             Object archivo=web.Upload_BD(directorio+"/"+archivoBack+".zip",archivoBack+".zip");
+
+               if(archivo!=null)
+                   back.delete();
 
             return archivo;
         }

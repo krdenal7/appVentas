@@ -40,11 +40,15 @@ public class pliquidacion extends Activity {
     CSQLite lite;
     Double subTotal=0.00;
     Double total=0.00;
+    Double iva=0.00;
+    Double ieps=0.00;
     int CantProductos=0;
 
     TextView txtSubtotal;
     TextView txtTotal;
     TextView txtCantp;
+    TextView txtIva;
+    TextView txtIeps;
 
     ProgressDialog progress;
 
@@ -59,9 +63,13 @@ public class pliquidacion extends Activity {
         txtSubtotal=(TextView)findViewById(R.id.textView14);
         txtTotal=(TextView)findViewById(R.id.textView22);
         txtCantp=(TextView)findViewById(R.id.textView24);
+        txtIva=(TextView)findViewById(R.id.textView16);
+        txtIeps=(TextView)findViewById(R.id.textView18);
 
         txtSubtotal.setText("$"+String.format("%.2f",subTotal));
         txtTotal.setText("$"+String.format("%.2f",total));
+        txtIeps.setText("$"+String.format("%.2f",ieps));
+        txtIva.setText("$"+String.format("%.2f",iva));
         txtCantp.setText(""+CantProductos);
 
     }
@@ -135,23 +143,40 @@ public class pliquidacion extends Activity {
 
 
     }
+
     public void ObtenerValores(){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
+        iva=0.00;
+        ieps=0.00;
 
-        Cursor rs=db.rawQuery("select precio,Cantidad from productos where isCheck=1",null);
+        Cursor rs=db.rawQuery("select precio_final,Cantidad,ieps,iva from productos where isCheck=1",null);
        // CantProductos=rs.getCount();
         while (rs.moveToNext()){
 
             Double precio=Double.parseDouble(rs.getString(0));
             int cantidad=Integer.parseInt(rs.getString(1));
+            Double ieps1=Double.parseDouble(rs.getString(2));
+            Double iva1=Double.parseDouble(rs.getString(3));
+
+
+
+
+            Double cant1=(precio*ieps1/100);
+            Double cant=((precio)+cant1);
+            Double cant2=(cant*iva1/100);
+
+            ieps+=cant1;
+            iva+=cant2;
 
             CantProductos+=cantidad;
             subTotal+=(precio*cantidad);
 
         }
 
-          total=subTotal+(subTotal*0.16);
+
+          total=subTotal+ieps+iva;
+
     }
     public String Obtener_Idcliente(){
         lite=new CSQLite(context);
@@ -186,7 +211,10 @@ public class pliquidacion extends Activity {
 
             if(progress.isShowing()) {
                 String res=String.valueOf(result);
-                Toast.makeText(context, res, Toast.LENGTH_LONG).show();
+                if(res!="")
+                    Toast.makeText(context,res,Toast.LENGTH_LONG).show();
+                else
+                    Toast.makeText(context,"Pedido envíado exitosamente",Toast.LENGTH_LONG).show();
                 progress.dismiss();
             }
         }
@@ -232,6 +260,8 @@ public class pliquidacion extends Activity {
         ObtenerValores();
         txtSubtotal.setText("$"+String.format("%.2f",subTotal));
         txtTotal.setText("$"+String.format("%.2f",total));
+        txtIeps.setText("$"+String.format("%.2f",ieps));
+        txtIva.setText("$"+String.format("%.2f",iva));
         txtCantp.setText(""+CantProductos);
 
         MostrarFirma();

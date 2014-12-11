@@ -23,8 +23,6 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,8 +34,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.WebService.WebServices;
 
-import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.util.Zip4jConstants;
+
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
@@ -53,13 +50,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
-import java.util.Objects;
 
 
 public class MainActivity extends Activity {
 
     Context context;
-    Toast presMenu;
     boolean press=false;
 
     private GoogleCloudMessaging gcm;
@@ -87,7 +82,7 @@ public class MainActivity extends Activity {
     String nombre_agente;
     String[] clave_agente;
     TextView txtUsuario;
-
+    String nombreBD="UHA05.zip";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +95,7 @@ public class MainActivity extends Activity {
         locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
         CrearDirectorioDownloads();
 
-        //EliminarBD();
+               //  EliminarBD();
 
         if(ExistsBD()) {
             MostrarDatos_Agente();
@@ -308,6 +303,12 @@ public class MainActivity extends Activity {
         txtPas.setText("");
     }
 
+    @Override
+    protected void onPause(){
+        super.onPause();
+        finish();
+    }
+
 
     /*Comprobar Ruta y Base de datos*/
     public void EliminarBD(){
@@ -392,6 +393,7 @@ public class MainActivity extends Activity {
         });
         AlertDialog alertDialog=alert.create();
         alertDialog.show();
+
     } //Si no esta configurado un usuario mostrara la ventana para que sea seleccionado uno
 
     private class Task_DownBD extends AsyncTask<String,Void,Object> {
@@ -399,12 +401,14 @@ public class MainActivity extends Activity {
         @Override
         protected Object doInBackground(String... strings) {
             WebServices web=new WebServices();
+
+
             if(CopiarBD()) {
-                AgregarColumnProductos();
+                  AgregarColumnProductos();
             }else {
                 return "0";
             }
-            File file=new File(directorio+"/dbBackup.zip");
+            //File file=new File(directorio+"/dbBackup.zip");
             //    Object archivo=web.Down_BD(StreamZip(file));
 
             if(ExistsBD())
@@ -459,9 +463,11 @@ public class MainActivity extends Activity {
             unZipBD(directorio + "/db_down.zip");
             myInput=new FileInputStream(filedown);
             myOutput=new FileOutputStream("/data/data/com.marzam.com.appventas/databases/db.db");
+
             while ((length=myInput.read(buffer))>0){
                 myOutput.write(buffer,0,length);
             }
+
             myOutput.close();
             myOutput.flush();
             myInput.close();
@@ -631,6 +637,21 @@ public class MainActivity extends Activity {
     }
 
 
+    public String ObtenerAgenteActivo(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        String clave="";
+
+        Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
+        if(rs.moveToFirst()){
+
+            clave=rs.getString(0);
+        }
+
+
+        return clave;
+    }
 
 
 

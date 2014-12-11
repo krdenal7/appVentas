@@ -8,7 +8,6 @@ import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import org.kobjects.base64.Base64;
@@ -135,6 +134,41 @@ public class WebServices {
     }
 
 
+    public String Down_DB(String agente){
+
+        String SOAP_ACTION="http://tempuri.org/SincronizaCatalogo";
+        String OPERATION_NAME="SincronizaCatalogo";
+        String WSDL_TARGET_NAMESPACE="http://tempuri.org/";
+        String SOAP_ADDRESS="http://190.1.4.120/WebService/WebService.asmx";
+
+        SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
+        request.addProperty("docName",agente);
+
+
+        SoapSerializationEnvelope envelope=new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.dotNet=true;
+
+        envelope.setOutputSoapObject(request);
+
+        HttpTransportSE httpTransportSE=new HttpTransportSE(SOAP_ADDRESS);
+        Object response=null;
+
+        try{
+
+            httpTransportSE.call(SOAP_ACTION,envelope);
+            response=envelope.getResponse();
+
+        }catch (Exception e){
+
+            String a=e.toString();
+            Log.d("WebServiceBakError",a);
+            return null;
+        }
+
+        return response.toString();
+
+    }
+
     public String toBinary(byte[] bytes){
 
         StringBuilder sb=new StringBuilder(bytes.length*Byte.SIZE);
@@ -143,6 +177,8 @@ public class WebServices {
 
         return sb.toString();
     }
+
+
 
 
 

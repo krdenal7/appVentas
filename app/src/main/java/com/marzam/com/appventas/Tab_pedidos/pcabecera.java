@@ -113,7 +113,8 @@ public class pcabecera extends Activity {
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select MAX(id) from consecutivo",null);
+        Cursor rs=db.rawQuery("select " +
+                "id from consecutivo",null);
         if(rs.moveToFirst()){
             numero=rs.getString(0);
         }
@@ -204,7 +205,10 @@ public class pcabecera extends Activity {
 
             if(progress.isShowing()) {
                 String res=String.valueOf(result);
-                Toast.makeText(context, res, Toast.LENGTH_LONG).show();
+                if(res!="")
+                    Toast.makeText(context,res,Toast.LENGTH_LONG).show();
+                else
+                    Toast.makeText(context,"Pedido envíado exitosamente",Toast.LENGTH_LONG).show();
                 progress.dismiss();
             }
         }

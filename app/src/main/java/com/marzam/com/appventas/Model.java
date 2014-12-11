@@ -10,13 +10,15 @@ public class Model {
     int cantidad;
     String precio;
     String ean;
+    String precio_neto;
 
-    public Model(String name, int value,int cantidad,String precio,String ean){
+    public Model(String name, int value,int cantidad,String precio,String ean,String precio_neto){
         this.name=name;
         this.value=value;
         this.cantidad=cantidad;
         this.precio=precio;
         this.ean=ean;
+        this.precio_neto=precio_neto;
     }
     public String getName(){
         return this.name;
@@ -28,6 +30,7 @@ public class Model {
         return this.cantidad;
     }
     public String getPrecio(){return  this.precio;}
+    public String getPrecio_neto(){return  this.precio_neto;}
     public String getEan(){return  this.ean;}
 
 }

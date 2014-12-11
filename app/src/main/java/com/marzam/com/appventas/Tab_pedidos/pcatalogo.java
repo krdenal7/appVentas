@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -35,6 +36,7 @@ import com.marzam.com.appventas.SQLite.CSQLite;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.zip.Inflater;
 
 
 public class pcatalogo extends Activity {
@@ -76,8 +78,7 @@ public class pcatalogo extends Activity {
         adapter1=new CustomAdapter(this,modelItems);
         lproductos.setAdapter(adapter1);
 
-        LlenarHasmap();//llena el arreglo para el simpleAdapter
-        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
+         LLenarList();//Llena el listview
 
         EditBuscar.addTextChangedListener(new TextWatcher() {
             @Override
@@ -165,8 +166,7 @@ public class pcatalogo extends Activity {
                 LlenarModelItems();
                 adapter1=new CustomAdapter(context,modelItems);
                 lproductos.setAdapter(adapter1);
-                LlenarHasmap();//llena el arreglo para el simpleAdapter
-                simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
+                LLenarList();
                 EditBuscar.setText("");
 
             }
@@ -196,9 +196,7 @@ public class pcatalogo extends Activity {
                 LlenarModelItems();
                 adapter1=new CustomAdapter(context,modelItems);
                 lproductos.setAdapter(adapter1);
-                LlenarHasmap();//llena el arreglo para el simpleAdapter
-                simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
-
+                LLenarList();
                 EditBuscar.setText("");
 
             }
@@ -241,7 +239,7 @@ public class pcatalogo extends Activity {
 
         Cursor rs=null;
 
-        String query="select descripcion,precio,Cantidad,codigo  from productos limit 1000";
+        String query="select descripcion,precio,Cantidad,codigo,precio_final  from productos limit 1000";
 
         rs=db.rawQuery(query,null);
         data=new ArrayList<HashMap<String, ?>>();
@@ -249,9 +247,10 @@ public class pcatalogo extends Activity {
 
         while (rs.moveToNext()){
             producto_row.put("A",rs.getString(0));
-            producto_row.put("B","Precio: $"+rs.getString(1)+" Oferta: 0%");
+            producto_row.put("B","Precio Lista: $"+rs.getString(1));
             producto_row.put("C","Cantidad: "+rs.getString(2));
             producto_row.put("D",rs.getString(3));
+            producto_row.put("E","Precio Final: $"+rs.getString(4));
             data.add(producto_row);
             producto_row=new HashMap<String, String>();
         }
@@ -269,7 +268,7 @@ public class pcatalogo extends Activity {
       Cursor rs=null;
 
         try {
-            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,codigo  from productos limit 1000",null);
+            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,codigo,precio_final  from productos limit 1000",null);
         }catch (Exception e){
             String err="Error:"+e.toString();
             Log.d("Error:",err);
@@ -282,7 +281,7 @@ public class pcatalogo extends Activity {
         int cont=0;
 
         while (rs.moveToNext()){
-            modelItems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4));
+            modelItems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5));
             cont++;
         }
 
@@ -310,7 +309,7 @@ public class pcatalogo extends Activity {
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
-        Cursor rs=db.rawQuery("select descripcion,precio,Cantidad from productos where codigo='"+ean+"'",null);
+        Cursor rs=db.rawQuery("select descripcion,precio_final,Cantidad from productos where codigo='"+ean+"'",null);
 
         if(rs.moveToFirst()){
             info[0]=rs.getString(0);
@@ -433,11 +432,17 @@ public class pcatalogo extends Activity {
             lite.close();
         }
 
+        LLenarList();
+
+        }
+
+
+    public void LLenarList(){
+
         LlenarHasmap();//llena el arreglo para el simpleAdapter
-        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","E","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView60,R.id.textView32});
+
     }
-
-
 
 
 

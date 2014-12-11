@@ -77,7 +77,7 @@ public class pdetalle extends Activity {
 
         Productos();
         lista=(ListView)findViewById(R.id.listView);
-        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64});
         lista.setAdapter(simpleAdapter);
         DecimalFormat dec=new DecimalFormat("###,###.##");
         txtMonto.setText("Monto actual: $"+dec.format(monto));
@@ -105,7 +105,7 @@ public class pdetalle extends Activity {
                         lista.setAdapter(simpleAdapter);
                 }else {
 
-                        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
+                        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64});
                         lista.setAdapter(simpleAdapter);
 
                 }
@@ -121,7 +121,7 @@ public class pdetalle extends Activity {
             @Override
             public void onClick(View view) {
                 txtBuscar.setText("");
-                simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
+                simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64});
                 lista.setAdapter(simpleAdapter);
             }
         });
@@ -173,11 +173,7 @@ public class pdetalle extends Activity {
 
                 String ean=data.get(posicion).get("D").toString().replace("codigo:","").trim();
                 EliminarProducto(ean);
-                monto=0.00;
-                Productos();
-                txtMonto.setText("Monto actual: $"+ String.format("%.2f", monto));
-                simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
-                lista.setAdapter(simpleAdapter);
+                Actualizar();
 
             }
         });
@@ -300,7 +296,7 @@ public class pdetalle extends Activity {
         int Cantidad=0;
         Double precio=0.00;
 
-        String query="select descripcion,precio,Cantidad,codigo  from productos where isCheck=1";
+        String query="select descripcion,precio_final,Cantidad,codigo  from productos where isCheck=1";
 
         rs=db.rawQuery(query,null);
         data=new ArrayList<HashMap<String, ?>>();
@@ -360,7 +356,7 @@ public class pdetalle extends Activity {
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
-        Cursor rs=db.rawQuery("select descripcion,precio,Cantidad from productos where codigo='"+ean+"'",null);
+        Cursor rs=db.rawQuery("select descripcion,precio_final,Cantidad from productos where codigo='"+ean+"'",null);
 
         if(rs.moveToFirst()){
             info[0]=rs.getString(0);
@@ -401,9 +397,9 @@ public class pdetalle extends Activity {
             lite.close();
         }
 
+            Actualizar();
 
-        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
-    }
+          }
 
 
     public void Eventos_Button(View view, final String  codigo){
@@ -510,15 +506,14 @@ public class pdetalle extends Activity {
 
             if(progress.isShowing()) {
 
-                monto=0.00;
-                Productos();
-                txtMonto.setText("Monto actual: $"+String.format("%.2f", monto));
-                simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
-                lista.setAdapter(simpleAdapter);
+                Actualizar();
                 progress.dismiss();
 
                 String res=String.valueOf(result);
+                if(res!="")
                 Toast.makeText(context,res,Toast.LENGTH_LONG).show();
+                else
+                Toast.makeText(context,"Pedido envíado exitosamente",Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -564,7 +559,7 @@ public class pdetalle extends Activity {
         monto=0.00;
         Productos();
         lista=(ListView)findViewById(R.id.listView);
-        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView32});
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64});
         lista.setAdapter(simpleAdapter);
         DecimalFormat dec=new DecimalFormat("###,###.##");
         txtMonto.setText("Monto actual: $"+dec.format(monto));

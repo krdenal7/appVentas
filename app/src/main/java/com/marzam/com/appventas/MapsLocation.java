@@ -1,6 +1,7 @@
 package com.marzam.com.appventas;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -39,6 +40,7 @@ import com.marzam.com.appventas.GPS.GPSHelper;
 import com.marzam.com.appventas.Graficas.Grafica_Vendedor;
 import com.marzam.com.appventas.KPI.KPI_General;
 import com.marzam.com.appventas.SQLite.CSQLite;
+import com.marzam.com.appventas.Sincronizacion.Crear_precioFinal;
 import com.marzam.com.appventas.Sincronizacion.Sincronizar;
 import com.marzam.com.appventas.Sincronizacion.envio_pedido;
 import com.marzam.com.appventas.WebService.WebServices;
@@ -67,6 +69,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     AlertDialog alertDialogAct;
     String[] clientesH;
     String CteAct="";
+    ProgressDialog progressDialog;
 
     CSQLite lite;
     TextView txtCte;
@@ -80,6 +83,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.maps_info);
+        setTitle("Mápa");
         context=this;
 
         txtCte=(TextView)findViewById(R.id.textView4);
@@ -126,12 +130,10 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
-                if(VerificarSesion_Cliente(clientesH[i])){
-                    Intent intent = new Intent(context, KPI_General.class);
-                           startActivity(intent);
-                }else {
+                if(!VerificarSesion_Cliente(clientesH[i])){
 
-                           ShowSesionActiva();
+                    ShowSesionActiva();
+
                 }
 
             }
@@ -293,7 +295,9 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
             rs=db.rawQuery("select id_cliente from sesion_cliente where Sesion=1 and id_cliente='"+cliente+"'",null);
 
             if(rs.moveToFirst()){
-                resp=true;//La sesion corresponde al cliente seleccionado
+                Intent intent = new Intent(context, KPI_General.class);
+                startActivity(intent);
+                resp=true;
             }
             else {
 
@@ -303,6 +307,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
             InsertarSesion(cliente);
             RegistrarVisiatas(cliente);
+            progressDialog = ProgressDialog.show(context, "Generando precios finales", "Cargando", true, false);
             new UpLoadVisitas().execute("");
 
         }
@@ -367,7 +372,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         db.close();
         lite.close();
-    }//sE REGISTRA LA VISITA Y SE ENVIA HACIA EL WEB SERVICE
+    }//SE REGISTRA LA VISITA Y SE ENVIA HACIA EL WEB SERVICE
 
     public String Obtener_Idvisita(){
         String id="";
@@ -507,10 +512,13 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         protected Object doInBackground(String... strings) {
             WebServices web=new WebServices();
             String json=jsonVisitas();
-            String resp= web.SincronizarVisitas(json);
 
+            Crear_precioFinal precioFinal=new Crear_precioFinal();
+            precioFinal.Ejecutar(context);
+
+            String resp= web.SincronizarVisitas(json);
             if(resp!=null)
-                ActualizarStatusVisita(resp);
+                     ActualizarStatusVisita(resp);
 
             return "";
         }
@@ -518,6 +526,12 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         @Override
         protected void onPostExecute(Object result){
 
+            if(progressDialog.isShowing()){
+                progressDialog.dismiss();
+                Intent intent = new Intent(context, KPI_General.class);
+                startActivity(intent);
+
+            }
 
         }
     }

@@ -46,9 +46,11 @@ public class envio_pedidoFaltante {
         directorio = new File(folder.getAbsolutePath() + "/Marzam/Imagenes");
         services=new WebServices();
 
-       String r=services.SincronizarVisitas(jsonVisitas());
+
 
         if(VerificarPedidosPendientes()){ //Verifica si se tienen pedidos pendientes
+
+            String r=services.SincronizarVisitas(jsonVisitas());
 
             if(isOnline()==false)
                 return "Verifique su conexión a Internet e intente nuevamente.";
