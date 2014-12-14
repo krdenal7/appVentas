@@ -23,6 +23,7 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,6 +39,8 @@ import com.marzam.com.appventas.WebService.WebServices;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
+
+import org.kobjects.base64.Base64;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,6 +59,7 @@ public class MainActivity extends Activity {
 
     Context context;
     boolean press=false;
+    boolean isPress=false;
 
     private GoogleCloudMessaging gcm;
     private String regid;
@@ -82,7 +86,7 @@ public class MainActivity extends Activity {
     String nombre_agente;
     String[] clave_agente;
     TextView txtUsuario;
-    String nombreBD="UHA05.zip";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,18 +95,21 @@ public class MainActivity extends Activity {
         setTitle("Ventas");
         context=this;
 
+
+
+
         txtUsuario=(TextView)findViewById(R.id.textView);
         locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
         CrearDirectorioDownloads();
-
                //  EliminarBD();
 
         if(ExistsBD()) {
-            MostrarDatos_Agente();
+                MostrarDatos_Agente();
         }else {
             if(isOnline()) {
-                new Task_DownBD().execute("");
-                pd = ProgressDialog.show(context, "Obteniendo información de rutas", "Cargando", true, false);
+
+                  Show_IngresarUsuario();
+
             }else {
                 Toast.makeText(context,"Verifique su conexión de Internet.",Toast.LENGTH_SHORT).show();
             }
@@ -181,6 +188,43 @@ public class MainActivity extends Activity {
             alertDialog.show();
         }
     }
+    public void Show_IngresarUsuario(){
+
+        LayoutInflater inflate=getLayoutInflater();
+        final View view=inflate.inflate(R.layout.input_text,null);
+
+
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Ingrese su numero de agente");
+        alert.setView(view);
+        alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                String agente=((EditText)view.findViewById(R.id.editText2)).getText().toString();
+
+                if(!ExistsBD()) {
+                    new Task_DownBD().execute(agente);
+                    pd = ProgressDialog.show(context, "Obteniendo información de rutas", "Cargando", true, false);
+                }else{
+                    ActualizarSesionAgente(agente);
+                    MostrarDatos_Agente();
+                }
+
+            }
+        });
+        alert.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+
+            }
+        });
+        AlertDialog alertDialog=alert.create();
+        alertDialog.show();
+
+
+    }
 
 
     public boolean VerificaContraseña(String password,String nombre){
@@ -205,50 +249,46 @@ public class MainActivity extends Activity {
 
         return false;
     }
-    public void    CambiarEstatus(String password){
 
-        String[] valor={password};
-
-        lite=new CSQLite(context);
-
-        SQLiteDatabase bd=lite.getWritableDatabase();
-
-        try {
-            Cursor cursor=bd.rawQuery("update agentes set id_estatus=1 where numero_empleado=?",valor);
-        }catch (Exception e){
-            String err="BD:"+e.toString();
-            String error;
-        }
-
-
-
-
-
-    }
 
 
     @Override
     public boolean onKeyDown(int keyCode,KeyEvent event){
 
-       switch (keyCode){
+         if(keyCode==KeyEvent.KEYCODE_VOLUME_UP){
 
-           case KeyEvent.KEYCODE_VOLUME_UP:
-               Vibrator v=(Vibrator)getSystemService(getApplicationContext().VIBRATOR_SERVICE);
-               v.vibrate(2000);
-               press=true;
-               return true;
+             if(press==true);
+                     press=false;
+             if(press==false)
+                     press=true;
 
-           case KeyEvent.KEYCODE_MENU:
-               if(press==true)
-                          press=false;
+             return true;
+         }
 
-
-               return true;
-
-       }
+        if(keyCode==KeyEvent.KEYCODE_MENU){
 
 
+            if(press==true && isPress==false){
+                isPress=true;
+            }
 
+            return true;
+        }
+
+        if(keyCode==KeyEvent.KEYCODE_VOLUME_DOWN){
+
+            if(press==true && isPress==true) {
+
+                Show_IngresarUsuario();
+            }
+            else
+                Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show();
+
+            press=false;
+            isPress=false;
+
+            return true;
+        }
 
         return super.onKeyDown(keyCode,event);
     }
@@ -348,7 +388,7 @@ public class MainActivity extends Activity {
             txtUsuario.setText(usuario);
             nombre_agente=rs.getString(1);
         }else{
-            Show_SelectRutaAgente();
+            Show_IngresarUsuario();
         }
     } //Si existe la base de datos y esta seleccionado el usuario lo mostrara en la pantalla
     public String[] Obtener_Agentes(){
@@ -373,28 +413,30 @@ public class MainActivity extends Activity {
     public void ActualizarSesionAgente(String clave){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
-        db.execSQL("update agentes set Sesion=1 where numero_empleado='"+clave+"'");
+        db.execSQL("update agentes set Sesion=0");
+        db.close();
+        db=lite.getWritableDatabase();
+        db.execSQL("update agentes set Sesion=1 where clave_agente='"+clave+"'");
         db.close();
         lite.close();
     }
+    public void  unStreamZip(byte[] data){
 
-    public void Show_SelectRutaAgente(){
 
-        String[] usuarios=Obtener_Agentes();
+        try{
 
-        AlertDialog.Builder alert=new AlertDialog.Builder(context);
-        alert.setTitle("Seleccione un usuario");
-        alert.setItems(usuarios, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                 ActualizarSesionAgente(clave_agente[i]);
-                 MostrarDatos_Agente();
-            }
-        });
-        AlertDialog alertDialog=alert.create();
-        alertDialog.show();
+            File of =new File(directorio,"db_down.zip");
+            FileOutputStream osf=new FileOutputStream(of);
+            osf.write(data);
+            osf.flush();
 
-    } //Si no esta configurado un usuario mostrara la ventana para que sea seleccionado uno
+        }catch (Exception e){
+            String error=e.toString();
+            Log.d("Error al crear zip",e.toString());
+        }
+
+    }
+
 
     private class Task_DownBD extends AsyncTask<String,Void,Object> {
 
@@ -402,20 +444,40 @@ public class MainActivity extends Activity {
         protected Object doInBackground(String... strings) {
             WebServices web=new WebServices();
 
+            String bd64=web.Down_DB(strings+".zip");
 
-            if(CopiarBD()) {
-                  AgregarColumnProductos();
-            }else {
-                return "0";
+               if(bd64==null)
+                   return "Error al descargar la base de datos.Intente nuevamente";
+
+            byte[] data = new byte[0];
+
+            try {
+                data = Base64.decode(bd64);
+
+            }catch (Exception e){
+                return "Error al copiar archivo intente nuevamente";
             }
-            //File file=new File(directorio+"/dbBackup.zip");
-            //    Object archivo=web.Down_BD(StreamZip(file));
 
-            if(ExistsBD())
-                  return "1";
-            else
-                  return  "0";
+               unStreamZip(data);
+            File f=new File(directorio+"/db_down.zip");
 
+            if(!f.exists())
+                return "No se descargo correctamente el archivo intente nuevamente";
+
+              if( CopiarBD()==false)
+                  return "No se pudo copiar la base de datos Intente nuevamente";
+
+            AgregarColumnProductos();
+
+               if(f.exists())
+                     f.delete();
+
+
+            ActualizarSesionAgente(strings.toString());
+
+
+
+            return  "1";
 
         }
 
@@ -425,9 +487,10 @@ public class MainActivity extends Activity {
             if(pd.isShowing()) {
 
                 if(result=="1"){
-                    Show_SelectRutaAgente();
+                    MostrarDatos_Agente();
+                    Toast.makeText(context,"BD agregada correctamente",Toast.LENGTH_SHORT).show();
                 }else {
-                    Toast.makeText(context,"Error al agregar la base de datos. Verifique su conexion a Internet e intente nuevamente",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context,result.toString(),Toast.LENGTH_SHORT).show();
                 }
 
                 pd.dismiss();

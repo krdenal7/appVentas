@@ -214,7 +214,7 @@ public class Sincronizar extends Activity {
     }
     public void  unStreamZip(byte[] data){
 
-        String result=directorio+"/db_down.zip";
+
         try{
 
             File of =new File(directorio,"db_down.zip");
@@ -313,7 +313,6 @@ public class Sincronizar extends Activity {
 
         }
     }
-
     public String ObtenerAgenteActivo(){
 
         lite=new CSQLite(context);
