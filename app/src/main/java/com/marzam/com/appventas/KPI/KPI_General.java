@@ -107,8 +107,8 @@ public class KPI_General extends Activity {
         SQLiteDatabase db=lite.getWritableDatabase();
 
         db.execSQL("update sesion_cliente set Sesion=2,Fecha_cierre='"+getDate()+"' where id=(select Max(id) from sesion_cliente)");
-
         UpdateConsecutivo_visitas();
+        UpdateProductos();
 
         db.close();
         lite.close();
@@ -132,6 +132,19 @@ public class KPI_General extends Activity {
 
         }
 
+    }
+    public void UpdateProductos(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        ContentValues values=new ContentValues();
+        values.put("isCheck",0);
+        values.put("Cantidad",0);
+        values.put("precio_final",0);
+        db.update("productos",values,null,null);
+
+        lite.close();
+        db.close();
     }
 
     private String getDate(){

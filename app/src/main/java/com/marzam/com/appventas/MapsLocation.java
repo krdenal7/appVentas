@@ -511,7 +511,9 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         @Override
         protected Object doInBackground(String... strings) {
             WebServices web=new WebServices();
-            String json=jsonVisitas();
+                            String json=jsonVisitas();
+
+
 
             Crear_precioFinal precioFinal=new Crear_precioFinal();
             precioFinal.Ejecutar(context);

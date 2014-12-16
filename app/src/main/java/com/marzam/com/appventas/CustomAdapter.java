@@ -291,8 +291,9 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
         if(rs.moveToFirst()){
             info[0]=rs.getString(0);
-            info[1]=rs.getString(1);
             info[2]=rs.getString(2);
+            info[1]=rs.getString(1);
+
         }
 
 

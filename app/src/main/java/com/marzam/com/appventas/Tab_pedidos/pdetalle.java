@@ -37,8 +37,10 @@ import com.marzam.com.appventas.WebService.WebServices;
 
 import java.io.File;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class pdetalle extends Activity {
 
@@ -69,6 +71,7 @@ public class pdetalle extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pdetalle);
+
         context=this;
 
         txtMonto=(TextView)findViewById(R.id.textView10);
@@ -79,7 +82,8 @@ public class pdetalle extends Activity {
         lista=(ListView)findViewById(R.id.listView);
         simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64});
         lista.setAdapter(simpleAdapter);
-        DecimalFormat dec=new DecimalFormat("###,###.##");
+        NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
+        DecimalFormat dec=(DecimalFormat)nf;
         txtMonto.setText("Monto actual: $"+dec.format(monto));
 
       lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -561,7 +565,8 @@ public class pdetalle extends Activity {
         lista=(ListView)findViewById(R.id.listView);
         simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64});
         lista.setAdapter(simpleAdapter);
-        DecimalFormat dec=new DecimalFormat("###,###.##");
+        NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
+        DecimalFormat dec=(DecimalFormat)nf;
         txtMonto.setText("Monto actual: $"+dec.format(monto));
         txtBuscar.setText("");
     }

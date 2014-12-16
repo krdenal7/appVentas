@@ -15,6 +15,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * Created by SAMSUMG on 08/12/2014.
@@ -54,7 +55,7 @@ public class Crear_precioFinal {
 
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        db.execSQL("update productos set precio_final=precio where precio_final is null");
+        db.execSQL("update productos set precio_final=precio where precio_final=''");
 
         db.close();
 
@@ -204,8 +205,7 @@ public class Crear_precioFinal {
                Double total = precio2;
 
 
-               String Stotal = String.format("%.2f", total);
-
+               String Stotal = String.format(Locale.US,"%.2f", total);
                db.execSQL("update productos set precio_final='" + Stotal + "' where codigo='" + codigo + "'");
 
 
@@ -274,8 +274,7 @@ public class Crear_precioFinal {
                Double total = precio1;
 
 
-               String Stotal = String.format("%.2f", total);
-
+               String Stotal = String.format(Locale.US, "%.2f", total);
                db.execSQL("update productos set precio_final='" + Stotal + "' where codigo='" + codigo + "'");
 
 

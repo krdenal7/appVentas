@@ -12,7 +12,9 @@
         android:id="@+id/textView4"
         android:background="#ffff8a3c"
         android:textColor="@android:color/white"
-        android:layout_weight="0.08" />
+        android:layout_weight="0.08"
+        android:textSize="18dp"
+        android:textStyle="italic" />
 
     <RelativeLayout
         android:layout_width="match_parent"

@@ -101,7 +101,7 @@ public class MainActivity extends Activity {
         txtUsuario=(TextView)findViewById(R.id.textView);
         locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
         CrearDirectorioDownloads();
-               //  EliminarBD();
+        //EliminarBD();
 
         if(ExistsBD()) {
                 MostrarDatos_Agente();
@@ -444,7 +444,8 @@ public class MainActivity extends Activity {
         protected Object doInBackground(String... strings) {
             WebServices web=new WebServices();
 
-            String bd64=web.Down_DB(strings+".zip");
+
+            String bd64=web.Down_DB(strings[0]+".zip");
 
                if(bd64==null)
                    return "Error al descargar la base de datos.Intente nuevamente";
@@ -473,7 +474,7 @@ public class MainActivity extends Activity {
                      f.delete();
 
 
-            ActualizarSesionAgente(strings.toString());
+            ActualizarSesionAgente(strings[0]);
 
 
 

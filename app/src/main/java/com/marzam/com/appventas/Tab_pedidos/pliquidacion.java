@@ -30,7 +30,10 @@ import com.marzam.com.appventas.WebService.WebServices;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Objects;
 
 public class pliquidacion extends Activity {
@@ -66,10 +69,10 @@ public class pliquidacion extends Activity {
         txtIva=(TextView)findViewById(R.id.textView16);
         txtIeps=(TextView)findViewById(R.id.textView18);
 
-        txtSubtotal.setText("$"+String.format("%.2f",subTotal));
-        txtTotal.setText("$"+String.format("%.2f",total));
-        txtIeps.setText("$"+String.format("%.2f",ieps));
-        txtIva.setText("$"+String.format("%.2f",iva));
+        txtSubtotal.setText("$"+String.format(Locale.US,"%.2f",subTotal));
+        txtTotal.setText("$"+String.format(Locale.US,"%.2f",total));
+        txtIeps.setText("$"+String.format(Locale.US,"%.2f",ieps));
+        txtIva.setText("$"+String.format(Locale.US,"%.2f",iva));
         txtCantp.setText(""+CantProductos);
 
     }
@@ -258,10 +261,11 @@ public class pliquidacion extends Activity {
         total=0.00;
         CantProductos=0;
         ObtenerValores();
-        txtSubtotal.setText("$"+String.format("%.2f",subTotal));
-        txtTotal.setText("$"+String.format("%.2f",total));
-        txtIeps.setText("$"+String.format("%.2f",ieps));
-        txtIva.setText("$"+String.format("%.2f",iva));
+
+        txtSubtotal.setText("$"+String.format(Locale.US,"%.2f",subTotal));
+        txtTotal.setText("$"+String.format(Locale.US,"%.2f",total));
+        txtIeps.setText("$"+String.format(Locale.US,"%.2f",ieps));
+        txtIva.setText("$"+String.format(Locale.US,"%.2f",iva));
         txtCantp.setText(""+CantProductos);
 
         MostrarFirma();

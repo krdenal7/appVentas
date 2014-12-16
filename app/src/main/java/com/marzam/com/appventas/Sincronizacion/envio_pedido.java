@@ -62,7 +62,10 @@ public class envio_pedido {
 
         if(Verificar_productos()) {
 
-            webServices.SincronizarVisitas(jsonVisitas());
+           String visita=webServices.SincronizarVisitas(jsonVisitas());
+
+                 if(visita!=null)
+                      ActualizarStatusVisita(visita);
 
         if (Insertar_Cabecero())
                  Insertar_Detalle();
@@ -120,6 +123,37 @@ public class envio_pedido {
 
 
     }
+    private void  ActualizarStatusVisita(String json){
+
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        try {
+
+
+
+            JSONArray array=new JSONArray(json);
+
+            for(int i=0;i<array.length();i++){
+
+                JSONObject jsonData=array.getJSONObject(i);
+
+                String id = jsonData.getString("id_Visita");
+                String status = jsonData.getString("estatus_visita");
+                db.execSQL("update visitas set status_visita='"+status+"' where id_visita='" + id + "'");
+
+            }
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            String err=e.toString();
+        }
+
+
+    }
 
 
 
@@ -129,11 +163,11 @@ public class envio_pedido {
       lite=new CSQLite(context);
       SQLiteDatabase db=lite.getWritableDatabase();
 
-                             Cursor rs=db.rawQuery("select * from encabezado_pedido where id_pedido='"+Obtener_idPedido()+"'",null);
+                              Cursor rs=db.rawQuery("select * from encabezado_pedido where id_pedido='"+Obtener_idPedido()+"'",null);
 
       if(rs.getCount()==0){
 
-                             db.execSQL("insert into encabezado_pedido (id_pedido) values ('"+Obtener_idPedido()+"')");
+                              db.execSQL("insert into encabezado_pedido (id_pedido) values ('"+Obtener_idPedido()+"')");
       }
 
       rs.close();
@@ -627,11 +661,12 @@ while (rs.moveToNext()) {
         json.put("hora_transmision",   date[1]);
         json.put("minuto_transmision", date[2]);
         json.put("segundo_transmision",date[3]);
-        json.put("id_estatus","0");
+        json.put("id_estatus","10");
         json.put("no_pedido_cliente", rs.getString(10));
         json.put("firma", Obtener_firma_Hexa(rs.getString(1)));
         json.put("id_visita", rs.getString(12));
         array.put(json);
+
 
     }catch (Exception e){
 
