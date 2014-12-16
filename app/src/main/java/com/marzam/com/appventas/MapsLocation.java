@@ -164,7 +164,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     public void ShowSesionActiva(){
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Aviso");
-        alert.setMessage("Ya se encuentra una visita activa. Desea ir con el cliente?");
+        alert.setMessage("Visita activa. Cierre primero la sesion para poder continuar con los demas clientes");
         alert.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -365,6 +365,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         values.put("id_cliente",cliente);
         values.put("latitud",gpsHelper.getLatitude());
         values.put("longitud", gpsHelper.getLongitude());
+        values.put("fecha_visita",getDate());
         values.put("fecha_registro",getDate());
         values.put("id_visita",Obtener_Idvisita());
         values.put("status_visita","10");
@@ -451,21 +452,17 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                 object.put("id_cliente",rs.getString(1));
                 object.put("latitud",rs.getString(2));
                 object.put("longitud",rs.getString(3));
-                String Fecha[]=Dividirfecha(rs.getString(4));
-                object.put("fecha_visita",Fecha[0]);
-                object.put("hora_visita",Fecha[1]);
-                object.put("minuto_visita",Fecha[2]);
-                object.put("segundo_visita",Fecha[3]);
-                String[] fecha2=Dividirfecha(rs.getString(5));
-                object.put("fecha_registro",fecha2[0]);
-                object.put("hora_registro",fecha2[1]);
-                object.put("minuto_registro",fecha2[2]);
-                object.put("segundo_registro",fecha2[3]);
+                String Fecha=rs.getString(4);
+                object.put("fecha_visita", Fecha!=null ? Fecha.replaceAll(":","|"):"01-01-2014 00|00|00");
+                String Fecha2=rs.getString(5);
+                object.put("fecha_registro",Fecha2!=null ? Fecha2.replaceAll(":","|"):"01-01-2014 00|00|00");
                 object.put("id_visita",rs.getString(6));
                 array.put(object);
 
+                String a= 5==6 ? null:"B";
 
             } catch (JSONException e) {
+
                 e.printStackTrace();
             }
 

@@ -48,7 +48,7 @@ public class Actualizar_Coordenadas extends Activity {
 
                 gps=new GPSHelper(Actualizar_Coordenadas.this);
                 txtLat.setText(gps.getLatitude());
-                txtLon.setText("-"+gps.getLongitude());
+                txtLon.setText(gps.getLongitude());
 
             }
         });
@@ -81,7 +81,7 @@ public class Actualizar_Coordenadas extends Activity {
     @Override
     public void onBackPressed(){
         startActivity(new Intent(getBaseContext(), KPI_General.class)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                      .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
         finish();
     }
 

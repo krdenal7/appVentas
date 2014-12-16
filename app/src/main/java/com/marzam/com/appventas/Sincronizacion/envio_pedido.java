@@ -46,7 +46,7 @@ public class envio_pedido {
     static File directorio;
     static InputStream stream;
 
-    String[] cabecero;
+    String[] cabecero=new String[13];
     String P_noinsertados=null;
     WebServices webServices;
 
@@ -62,10 +62,17 @@ public class envio_pedido {
 
         if(Verificar_productos()) {
 
-           String visita=webServices.SincronizarVisitas(jsonVisitas());
+            String json=jsonVisitas();
+            String visita;
 
-                 if(visita!=null)
+
+
+                visita = json==null ? null:webServices.SincronizarVisitas(jsonVisitas());
+
+                 if(visita != null)
                       ActualizarStatusVisita(visita);
+
+
 
         if (Insertar_Cabecero())
                  Insertar_Detalle();
@@ -456,64 +463,29 @@ public class envio_pedido {
 /*Obtener datos del detalle*/
 
 
-  public String[] Dib_encabezado(){
-      String[] enc=null;
 
-      cabecero=new String[19];
-      Obtener_Valores();
-      String[] Fech=getDate();
-
-      try {
-
-          cabecero[0] = Obtener_idPedido();
-          cabecero[1] = Obtener_idCliente();
-          cabecero[2] = Obtener_NoEmpleado();
-          cabecero[3] =ObtenerAgenteActivo();
-          cabecero[4] = String.valueOf(total_piezas);
-          cabecero[5] = String.valueOf(importe_total);
-          cabecero[6] = Obtener_tipoOrden();
-          cabecero[7] = Fech[0];
-          cabecero[8] = Fech[1];
-          cabecero[9] = Fech[2];
-          cabecero[10] = Fech[3];
-          Fech = getDate();
-          cabecero[11] = Fech[0];
-          cabecero[12] = Fech[1];
-          cabecero[13] = Fech[2];
-          cabecero[14] = Fech[3];
-          cabecero[15] = "10";
-          cabecero[16] = "";
-          cabecero[17] = Obtener_firma(cabecero[1]);
-          cabecero[18] = Obtener_Idvisita();
-
-      }catch (Exception e){
-          return enc=new String[0];
-      }
-
-
-      return cabecero;
-  }//completo
 
   public  boolean  Insertar_Cabecero(){
       this.context=context;
 
+      Obtener_Valores();
+      String fec=getDate();
 
-      String[] val=Dib_encabezado();
-      String[] valores=new String[13];
 
-      valores[0]=val[0];
-      valores[1]=val[1];
-      valores[2]=val[2];
-      valores[3]=val[3];
-      valores[4]=val[4];
-      valores[5]=val[5];
-      valores[6]=val[6];
-      valores[7]=val[7]+" "+val[8]+":"+val[9]+":"+val[10];
-      valores[8]=val[11]+" "+val[12]+":"+val[13]+":"+val[14];
-      valores[9]=val[15];
-      valores[10]=val[16];
-      valores[11]=val[17];
-      valores[12]=val[18];
+      cabecero[0] = Obtener_idPedido();
+      cabecero[1] = Obtener_idCliente();
+      cabecero[2] = Obtener_NoEmpleado();
+      cabecero[3] =ObtenerAgenteActivo();
+      cabecero[4] = String.valueOf(total_piezas);
+      cabecero[5] = String.valueOf(importe_total);
+      cabecero[6] = Obtener_tipoOrden();
+      cabecero[7] = fec;
+              fec = getDate();
+      cabecero[8] = fec;
+      cabecero[9] = "10";
+      cabecero[10] = "";
+      cabecero[11] = Obtener_firma(cabecero[1]);
+      cabecero[12] = Obtener_Idvisita();
 
       InsertarIdPedido();
       lite =new CSQLite(context);
@@ -521,7 +493,7 @@ public class envio_pedido {
 
      try {
          db.execSQL("update encabezado_pedido set id_pedido=?,id_cliente=?,numero_empleado=?,clave_agente=?,total_piezas=?,impote_total=?" +
-                    ",tipo_orden=?,fecha_captura=?,fecha_transmision=?,id_estatus=?,no_pedido_cliente=?,firma=?,id_visita=? where id_pedido='"+valores[0]+"'", valores);
+                    ",tipo_orden=?,fecha_captura=?,fecha_transmision=?,id_estatus=?,no_pedido_cliente=?,firma=?,id_visita=? where id_pedido='"+cabecero[0]+"'", cabecero);
      }catch (Exception e){
          String err=e.toString();
          Log.d("Error al actualizar encabezado:",err);
@@ -641,7 +613,7 @@ public class envio_pedido {
        Cursor rs= db.rawQuery("select * from encabezado_pedido where id_pedido='"+id+"'",null);
        JSONObject json=new JSONObject();
        JSONArray array=new JSONArray();
-       String[] date=getDate();
+
 
 while (rs.moveToNext()) {
     try {
@@ -653,14 +625,8 @@ while (rs.moveToNext()) {
         json.put("total_piezas", rs.getString(4));
         json.put("impote_total", rs.getString(5));
         json.put("tipo_orden", rs.getString(6));
-        json.put("fecha_captura",   date[0]);
-        json.put("hora_captura",    date[1]);
-        json.put("minuto_captura", date[2]);
-        json.put("segundo_captura", date[3]);
-        json.put("fecha_transmision",  date[0]);
-        json.put("hora_transmision",   date[1]);
-        json.put("minuto_transmision", date[2]);
-        json.put("segundo_transmision",date[3]);
+        json.put("fecha_captura", rs.getString(7)!=null ?   rs.getString(7).replace(":","|"):"01-01-2014 00|00|00");
+        json.put("fecha_transmision", getDate().replace(":","|"));
         json.put("id_estatus","10");
         json.put("no_pedido_cliente", rs.getString(10));
         json.put("firma", Obtener_firma_Hexa(rs.getString(1)));
@@ -737,16 +703,10 @@ try {
                 object.put("id_cliente",rs.getString(1));
                 object.put("latitud",rs.getString(2));
                 object.put("longitud",rs.getString(3));
-                String Fecha[]=Dividirfecha(rs.getString(4));
-                object.put("fecha_visita",Fecha[0]);
-                object.put("hora_visita",Fecha[1]);
-                object.put("minuto_visita",Fecha[2]);
-                object.put("segundo_visita",Fecha[3]);
-                String[] fecha2=Dividirfecha(rs.getString(5));
-                object.put("fecha_registro",fecha2[0]);
-                object.put("hora_registro",fecha2[1]);
-                object.put("minuto_registro",fecha2[2]);
-                object.put("segundo_registro",fecha2[3]);
+                String fechavisita=rs.getString(4);
+                object.put("fecha_visita",fechavisita!=null ? fechavisita.replaceAll(":","|"):"01-01-2014 00|00|00");
+                String fecharegistro=rs.getString(5);
+                object.put("fecha_registro", fecharegistro!=null ? fecharegistro.replaceAll(":","|"):"01-01-2014 00|00|00");
                 String id_visita=rs.getString(6);
                 object.put("id_visita",id_visita);
 
@@ -755,15 +715,15 @@ try {
 
 
             } catch (JSONException e) {
+                String err=e.toString();
                 e.printStackTrace();
             }
 
 
         }
 
-        return array.toString();
 
-
+        return array.length()== 0 ? null: array.toString();
     }
 
 
@@ -799,23 +759,16 @@ try {
 
         return  bytes;
     }
-    public String[] getDate(){
-
-        String fecha[]=new String[4];
+    public String getDate(){
 
         Calendar cal = new GregorianCalendar();
         Date dt = cal.getTime();
-        SimpleDateFormat dia=new SimpleDateFormat("dd-MM-yyyy ");
-        SimpleDateFormat hora=new SimpleDateFormat("HH");
-        SimpleDateFormat min=new SimpleDateFormat("mm");
-        SimpleDateFormat seg=new SimpleDateFormat("ss");
+        SimpleDateFormat fecha=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-        fecha[0]=dia.format(dt.getTime());
-        fecha[1]=hora.format(dt.getTime());
-        fecha[2]=min.format(dt.getTime());
-        fecha[3]=seg.format(dt.getTime());
 
-        return fecha;
+        String formatteDate=fecha.format(dt.getTime());
+
+        return formatteDate;
     }//Completo
     private String getDate2(){
 
@@ -829,28 +782,6 @@ try {
 
 
     /*Enviar Pedido por WebService*/
-
-    public String[] Dividirfecha(String fecha){
-        String[] fechreturn=new String[4];
-
-        try {
-            String[] Fecha = fecha.split(" ");
-            fechreturn[0] = Fecha[0];
-            String[] Hora = Fecha[1].split(":");
-            fechreturn[1] = Hora[0];
-            fechreturn[2] = Hora[1];
-            fechreturn[3] = Hora[2];
-        }catch (Exception e){
-            fechreturn[0]="01-01-2014";
-            fechreturn[1]="00";
-            fechreturn[2]="00";
-            fechreturn[3]="00";
-            return fechreturn;
-        }
-
-
-        return fechreturn;
-    }
     public  boolean isOnline(){
 
         ConnectivityManager cm=(ConnectivityManager)((Activity)context).getSystemService(Context.CONNECTIVITY_SERVICE);

@@ -50,7 +50,11 @@ public class envio_pedidoFaltante {
 
         if(VerificarPedidosPendientes()){ //Verifica si se tienen pedidos pendientes
 
-            String r=services.SincronizarVisitas(jsonVisitas());
+            String json=jsonVisitas();
+            String visita;
+            visita = json==null ? null:services.SincronizarVisitas(jsonVisitas());
+
+
 
             if(isOnline()==false)
                 return "Verifique su conexión a Internet e intente nuevamente.";
@@ -98,16 +102,8 @@ public class envio_pedidoFaltante {
                 object.put("id_cliente",rs.getString(1));
                 object.put("latitud",rs.getString(2));
                 object.put("longitud",rs.getString(3));
-                String Fecha[]=Dividirfecha(rs.getString(4));
-                object.put("fecha_visita",Fecha[0]);
-                object.put("hora_visita",Fecha[1]);
-                object.put("minuto_visita",Fecha[2]);
-                object.put("segundo_visita",Fecha[3]);
-                String[] fecha2=Dividirfecha(rs.getString(5));
-                object.put("fecha_registro",fecha2[0]);
-                object.put("hora_registro",fecha2[1]);
-                object.put("minuto_registro",fecha2[2]);
-                object.put("segundo_registro",fecha2[3]);
+                object.put("fecha_visita",rs.getString(4).replace(":","|"));
+                object.put("fecha_registro",rs.getString(5).replace(":","|"));
                 String id_visita=rs.getString(6);
                 object.put("id_visita",id_visita);
 
@@ -122,8 +118,7 @@ public class envio_pedidoFaltante {
 
         }
 
-        return array.toString();
-
+        return array.length()==0 ? null: array.toString();
 
     }
 
@@ -258,32 +253,14 @@ public class envio_pedidoFaltante {
 
         JSONObject json=new JSONObject();
         JSONArray array=new JSONArray();
-        String F="";
-        String H="";
-        String M="";
-        String S="";
-
-
 
                for(int i=0;i<id_pedidos.length;i++){
                rs= db.rawQuery("select * from encabezado_pedido where id_pedido='"+id_pedidos[i]+"'",null);
 
                while (rs.moveToNext()) {
                    try {
-                         try {
 
-                             String[] Fecha = rs.getString(7).split(" ");
-                             F=Fecha[0];
-                             String[] Hora = Fecha[2].split(":");
-                             H=Hora[0];
-                             M=Hora[1];
-                             S=Hora[2];
-
-                         }catch (Exception e){
-
-                         }
-
-                       String[] date=getDate();
+                       String fec=getDate();
 
                        json.put("id_pedido", rs.getString(0));
                        json.put("id_cliente", rs.getString(1));
@@ -292,14 +269,8 @@ public class envio_pedidoFaltante {
                        json.put("total_piezas", rs.getString(4));
                        json.put("impote_total", rs.getString(5));
                        json.put("tipo_orden", rs.getString(6));
-                       json.put("fecha_captura", F);
-                       json.put("hora_captura", H);
-                       json.put("minuto_captura", M);
-                       json.put("segundo_captura", S);
-                       json.put("fecha_transmision", date[0]);
-                       json.put("hora_transmision", date[1]);
-                       json.put("minuto_transmision", date[2]);
-                       json.put("segundo_transmision", date[3]);
+                       json.put("fecha_captura", rs.getString(8)!=null?  rs.getString(8).replace(":","|"):"01-01-2014 00|00|00");
+                       json.put("fecha_transmision", fec.replace(":","|"));
                        json.put("id_estatus", "0");
                        json.put("no_pedido_cliente", rs.getString(10));
                        json.put("firma",Obtener_firma_Hexa(rs.getString(1)));
@@ -361,21 +332,16 @@ public class envio_pedidoFaltante {
     }
 
 
-    public String[] getDate(){
+    public String getDate(){
 
-        String fecha[]=new String[4];
 
         Calendar cal = new GregorianCalendar();
         Date dt = cal.getTime();
-        SimpleDateFormat dia=new SimpleDateFormat("dd-MM-yyyy ");
-        SimpleDateFormat hora=new SimpleDateFormat("HH");
-        SimpleDateFormat min=new SimpleDateFormat("mm");
-        SimpleDateFormat seg=new SimpleDateFormat("ss");
+        SimpleDateFormat dia=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-        fecha[0]=dia.format(dt.getTime());
-        fecha[1]=hora.format(dt.getTime());
-        fecha[2]=min.format(dt.getTime());
-        fecha[3]=seg.format(dt.getTime());
+
+        String fecha=dia.format(dt.getTime());
+
 
         return fecha;
     }//Completo

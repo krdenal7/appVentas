@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <title></title>
- <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
- <link rel="stylesheet" type="text/css" href="css/jquery.mobile.structure-1.4.5.min.css">
- <link rel="stylesheet" type="text/css" href="css/marzamcss.css"/>
- <link rel="stylesheet" type="text/css" href="css/jquery.mobile.icons.min.css">
- <link rel="stylesheet" href="css/jquery-ui.css" >
- <script src="js/amcharts.js"></script>
- <script src="js/gauge.js"></script>
- <script src="js/jquery.js"></script>
- <script src="js/jquery.mobile-1.4.4.js"></script>
- <script src="js/jquery-ui.js"></script>
- <script src="js/highcharts.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" type="text/css" href="css/jquery.mobile.structure-1.4.5.min.css">
+<link rel="stylesheet" type="text/css" href="css/marzamcss.css"/>
+<link rel="stylesheet" type="text/css" href="css/jquery.mobile.icons.min.css">
+<link rel="stylesheet" href="css/jquery-ui.css" >
+<script src="js/jquery.js"></script>
+<script src="js/jquery.mobile-1.4.4.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script src="js/highcharts.js"></script>
+<script src="js/amcharts.js"></script>
+<script src="js/gauge.js"></script>
 <script>
 function graficar(ritmo,pres,venta,numinter)
 {	
@@ -49,14 +49,20 @@ function graficar(ritmo,pres,venta,numinter)
 			"bands": [{
 				"color": "red",
 				"endValue": mayor*.9,
+				"innerRadius":113,
+				"radius":100,
+
 				"startValue": 0
 				}, {"color": "yellow",
+				"innerRadius":113,
+				"radius":100,
 				"endValue": mayor,
 	            "startValue": mayor*.9
 				}, {
 					"color": "green",
+					"innerRadius":113,
+                    "radius":100,
 					"endValue": endvalue,
-					"innerRadius": "95%",
 					"startValue": mayor
 					}],
 					}],
@@ -78,109 +84,100 @@ function graficar(ritmo,pres,venta,numinter)
 </head>
 <body class="ui-mobile-viewport ui-overlay-a" onLoad="graficar(28666,33125,5500,5);">
 <div data-role="page" class="jqm-demos ui-page ui-page-theme-a ui-page-header-fixed ui-page-footer-fixed ui-page-active" id="Ventas" data-title="Ventas" data-url="panel-fixed-page1" tabindex="0" style="padding-top: 44px; padding-bottom: 44px;">
-
- <!--   <div data-role="header" data-position="fixed" role="banner" class="ui-header ui-bar-inherit ui-header-fixed slidedown ui-fixed-hidden">
-        <h1 class="ui-title" role="heading" aria-level="1">Ventas</h1>
-        <a href="#nav-panel" data-icon="bars" data-iconpos="notext" class="ui-link ui-btn-left ui-btn ui-icon-bars ui-btn-icon-notext ui-shadow ui-corner-all" data-role="button" role="button">Menú</a>
-    </div><!-- /header -->
-    <div class="ui-panel-wrapper">
-    	<div role="main" class="ui-content jqm-content jqm-fullwidth">
-        <div id="inf" style=" width:90%; margin:0px auto;  border-radius:12px 12px 0px 0px; font-size:12px;">           
-        	<span>Nombre:</span>
-            <span id="nombre">Miguel Ángel Rodriguez Gonzalez</span>
+  <!--<div data-role="header" data-position="fixed" role="banner" class="ui-header ui-bar-inherit ui-header-fixed slidedown ui-fixed-hidden">
+    <h1 class="ui-title" role="heading" aria-level="1">Ventas</h1>
+    <a href="#nav-panel" data-icon="bars" data-iconpos="notext" class="ui-link ui-btn-left ui-btn ui-icon-bars ui-btn-icon-notext ui-shadow ui-corner-all" data-role="button" role="button">Menú</a> </div>
+  <!-- /header -->
+  <div class="ui-panel-wrapper">
+    <div role="main" class="ui-content jqm-content jqm-fullwidth">
+      <div id="inf" style=" width:90%; margin:0px auto; background:rgba(204,204,204,0.3); border-radius:12px 12px 0px 0px; font-size:12px;">
+      <span id="nombre">Miguel Ángel Rodriguez Gonzalez</span> </div>
+      <div style="width:90%; background:rgba(204,204,204,0.3); border-radius:0px 0px 12px 12px; margin:1px auto;">
+        <div id="chartdiv" style="width:90%; height:200px;"></div>
+        <div style="width:100%; margin:0px auto; font-size:12px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Presupuesto </th>
+                <th>Vendido </th>
+                <th>Ritmo </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span id="precol" style="color:green;">█</span> <span id="presupuesto">$33,125.00&nbsp;</span></td>
+                <td><span id="vencol" style="color:silver;">█</span><span id="vendido">$2,222.00&nbsp;</span></td>
+                <td><span id="ritcol" style="color:blue;">█</span><span id="ritmo">$28,666.00&nbsp;</span></td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th> </th>
+              </tr>
+            </tfoot>
+          </table>
         </div>
-        <div style="width:90%;  border-radius:0px 0px 12px 12px; margin:1px auto;">
-        	<div id="chartdiv" style="width:90%; height:200px;"></div>
-            <div style="width:100%; margin:0px auto; font-size:12px;">
-            	<table>
-                	<thead>
-                    	<tr>
-                        	<th>Presupuesto
-                            </th>
-                            <th>Vendido
-                            </th>
-                            <th>Ritmo
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    	<tr>
-                        	<td>
-                            	<span id="precol" style="color:green;">█</span> <span id="presupuesto">$33,125.00&nbsp;</span>
-                            </td>
-                            <td>
-                            	<span id="vencol" style="color:silver;">█</span><span id="vendido">$5,500.00&nbsp;</span>
-                            </td>
-                            <td>
-                            	<span id="ritcol" style="color:blue;">█</span><span id="ritmo">$28,666.00&nbsp;</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                    <tfoot>
-                    	<tr>
-                        	<th>
-                            </th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
+      </div>
+    </div>
+    <!--main--> 
+  </div>
+  <!-- /content -->
+  
+  <!--<div data-role="footer" data-position="fixed" role="contentinfo" class="ui-footer ui-bar-inherit ui-footer-fixed slideup ui-fixed-hidden">
+    <h4 class="ui-title" role="heading" aria-level="1">Casa Marzam S.A de C.V. &copy;</h4>
+  </div>
+  <!-- /footer -->
+  
+  <div data-role="panel" data-position-fixed="true" data-display="push" data-theme="b" id="nav-panel" class="ui-panel ui-panel-position-left ui-panel-display-push ui-panel-closed ui-body-b ui-panel-fixed ui-panel-animate">
+    <div class="ui-panel-inner">
+      <ul data-role="listview" class="ui-listview">
+        <li data-icon="delete" class="ui-first-child"><a href="#" data-rel="close" class="ui-btn ui-btn-icon-right ui-icon-delete">Menú</a></li>
+      </ul>
+    </div>
+  </div>
+  <!-- /panel -->
+  
+  <div data-role="panel" data-position="right" data-position-fixed="true" data-display="overlay" data-theme="a" id="add-form" class="ui-panel ui-panel-position-right ui-panel-display-overlay ui-panel-closed ui-body-a ui-panel-fixed ui-panel-animate">
+    <div class="ui-panel-inner">
+      <form class="userform">
+        <h2>Login</h2>
+        <label for="name">Username:</label>
+        <div class="ui-input-text ui-body-inherit ui-corner-all ui-mini ui-shadow-inset ui-input-has-clear">
+          <input type="text" name="name" id="name" value="" data-clear-btn="true" data-mini="true">
+          <a href="#" tabindex="-1" aria-hidden="true" class="ui-input-clear ui-btn ui-icon-delete ui-btn-icon-notext ui-corner-all ui-input-clear-hidden" title="Clear text">Clear text</a></div>
+        <label for="password">Password:</label>
+        <div class="ui-input-text ui-body-inherit ui-corner-all ui-mini ui-shadow-inset ui-input-has-clear">
+          <input type="password" name="password" id="password" value="" data-clear-btn="true" autocomplete="off" data-mini="true">
+          <a href="#" tabindex="-1" aria-hidden="true" class="ui-input-clear ui-btn ui-icon-delete ui-btn-icon-notext ui-corner-all ui-input-clear-hidden" title="Clear text">Clear text</a></div>
+        <div class="ui-grid-a">
+          <div class="ui-block-a"><a href="#" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-btn-b ui-mini">Cancel</a></div>
+          <div class="ui-block-b"><a href="#" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-btn-a ui-mini">Save</a></div>
         </div>
-                       
-        </div><!--main-->            
-    </div><!-- /content -->
-
-   
-
-	<div data-role="panel" data-position-fixed="true" data-display="push" data-theme="b" id="nav-panel" class="ui-panel ui-panel-position-left ui-panel-display-push ui-panel-closed ui-body-b ui-panel-fixed ui-panel-animate">
-
-		<div class="ui-panel-inner"><ul data-role="listview" class="ui-listview">
-            <li data-icon="delete" class="ui-first-child"><a href="#" data-rel="close" class="ui-btn ui-btn-icon-right ui-icon-delete">Menú</a></li>
-            
-		</ul></div>
-	</div><!-- /panel -->
-
-	<div data-role="panel" data-position="right" data-position-fixed="true" data-display="overlay" data-theme="a" id="add-form" class="ui-panel ui-panel-position-right ui-panel-display-overlay ui-panel-closed ui-body-a ui-panel-fixed ui-panel-animate">
-
-        <div class="ui-panel-inner"><form class="userform">
-
-        	<h2>Login</h2>
-
-            <label for="name">Username:</label>
-            <div class="ui-input-text ui-body-inherit ui-corner-all ui-mini ui-shadow-inset ui-input-has-clear"><input type="text" name="name" id="name" value="" data-clear-btn="true" data-mini="true"><a href="#" tabindex="-1" aria-hidden="true" class="ui-input-clear ui-btn ui-icon-delete ui-btn-icon-notext ui-corner-all ui-input-clear-hidden" title="Clear text">Clear text</a></div>
-
-            <label for="password">Password:</label>
-            <div class="ui-input-text ui-body-inherit ui-corner-all ui-mini ui-shadow-inset ui-input-has-clear"><input type="password" name="password" id="password" value="" data-clear-btn="true" autocomplete="off" data-mini="true"><a href="#" tabindex="-1" aria-hidden="true" class="ui-input-clear ui-btn ui-icon-delete ui-btn-icon-notext ui-corner-all ui-input-clear-hidden" title="Clear text">Clear text</a></div>
-
-            <div class="ui-grid-a">
-                <div class="ui-block-a"><a href="#" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-btn-b ui-mini">Cancel</a></div>
-                <div class="ui-block-b"><a href="#" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-btn-a ui-mini">Save</a></div>
-			</div>
-        </form></div>
-
-	</div><!-- /panel -->
-
-</div><!-- /page -->
+      </form>
+    </div>
+  </div>
+  <!-- /panel --> 
+  
+</div>
+<!-- /page -->
 
 <div data-role="page" id="panel-fixed-page2" data-url="panel-fixed-page2">
+  <div data-role="header">
+    <h1>Landing page</h1>
+  </div>
+  <!-- /header -->
+  
+  <div role="main" class="ui-content jqm-content"> </div>
+  <!-- /content --> 
+  
+</div>
+<!-- /page -->
 
-    <div data-role="header">
-        <h1>Landing page</h1>
-    </div><!-- /header -->
+<div class="ui-loader ui-corner-all ui-body-a ui-loader-default"><span class="ui-icon-loading"></span>
+  <h1>loading</h1>
+</div>
+<div class="ui-panel-dismiss"></div>
+<div class="ui-panel-dismiss"></div>
 
-    <div role="main" class="ui-content jqm-content">
-    </div><!-- /content -->
-
-</div><!-- /page -->
-
-
-
-<div class="ui-loader ui-corner-all ui-body-a ui-loader-default"><span class="ui-icon-loading"></span><h1>loading</h1></div><div class="ui-panel-dismiss"></div><div class="ui-panel-dismiss"></div>
-<script>
- 	$(function() {
-		$( "#progressbar").progressbar({
-			value:(125555*100)/288630
-			});
-		});
- </script>
 </body>
 </html>

@@ -133,7 +133,6 @@ public class WebServices {
         return response.toString();
     }
 
-
     public String Down_DB(String agente){
 
         String SOAP_ACTION="http://tempuri.org/SincronizaCatalogo";

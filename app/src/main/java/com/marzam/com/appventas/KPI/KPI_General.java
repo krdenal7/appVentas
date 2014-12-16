@@ -140,7 +140,7 @@ public class KPI_General extends Activity {
         ContentValues values=new ContentValues();
         values.put("isCheck",0);
         values.put("Cantidad",0);
-        values.put("precio_final",0);
+        values.put("precio_final","");
         db.update("productos",values,null,null);
 
         lite.close();
