@@ -112,7 +112,7 @@ public class Sincronizar extends Activity {
                 if(VerificarPedidosPendientes()<=0) {
                     if(isOnline()) {
                         new UpLoadTask().execute("");
-                        progres = ProgressDialog.show(context, "Realizando cierre", "Cargando", true, false);
+                        //progres = ProgressDialog.show(context, "Realizando cierre", "Cargando", true, false);
                     }else {
                         Toast.makeText(context,"Verifique su conexión a internet e intente nuevamente",Toast.LENGTH_LONG).show();
                           }
@@ -214,7 +214,7 @@ public class Sincronizar extends Activity {
     }
     public void  unStreamZip(byte[] data){
 
-
+        String result=directorio+"/db_down.zip";
         try{
 
             File of =new File(directorio,"db_down.zip");
@@ -313,6 +313,7 @@ public class Sincronizar extends Activity {
 
         }
     }
+
     public String ObtenerAgenteActivo(){
 
         lite=new CSQLite(context);
@@ -342,17 +343,28 @@ public class Sincronizar extends Activity {
     private class UpLoadTask extends AsyncTask<String,Void,Object> {
 
         @Override
+        protected void onPreExecute(){
+            super.onPreExecute();
+            progres=new ProgressDialog(context);
+            progres.setTitle("Sincronizando");
+            progres.setMessage("Cargando");
+            progres.setIndeterminate(false);
+            progres.setCancelable(false);
+            progres.show();
+        }
+
+        @Override
         protected Object doInBackground(String... strings) {
             WebServices web=new WebServices();
             String nomAgente=ObtenerAgenteActivo();
             String archivoBack=nomAgente+getDate();
-            File back=new File(directorio+"/"+archivoBack+".zip");
 
-            String bd64=web.Down_DB(nomAgente+".zip");
+            File back=new File(directorio+"/"+archivoBack+".zip");
+            String bd64="";//web.Down_DB(nomAgente+".zip");
 
             if(back.exists()){
 
-                Object archivo=web.Upload_BD(directorio+"/"+archivoBack+".zip",archivoBack+".zip");
+                Object archivo=web.cargarBack(directorio+"/"+archivoBack+".zip",archivoBack+".zip");
 
                 if(archivo!=null)
                        back.delete();
@@ -385,7 +397,7 @@ public class Sincronizar extends Activity {
                   f.delete();
 
             AgregarColumnProductos();
-            Object archivo=web.Upload_BD(directorio+"/"+archivoBack+".zip",archivoBack+".zip");
+            Object archivo=web.cargarBack(directorio+"/"+archivoBack+".zip",archivoBack+".zip");
 
                if(archivo!=null)
                    back.delete();
@@ -409,6 +421,14 @@ public class Sincronizar extends Activity {
 
 
 
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        if (progres!=null){
+            progres.dismiss();
+            progres=null;
+        }
+    }
 
 
     @Override

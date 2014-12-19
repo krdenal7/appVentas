@@ -3,9 +3,12 @@ package com.marzam.com.appventas.GPS;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,6 +20,15 @@ import android.widget.Toast;
 import com.marzam.com.appventas.KPI.KPI_General;
 import com.marzam.com.appventas.MainActivity;
 import com.marzam.com.appventas.R;
+import com.marzam.com.appventas.SQLite.CSQLite;
+import com.marzam.com.appventas.WebService.WebServices;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.kobjects.base64.Base64;
+
+import java.io.File;
 
 public class Actualizar_Coordenadas extends Activity {
 
@@ -26,7 +38,9 @@ public class Actualizar_Coordenadas extends Activity {
     Context context;
     LocationManager lmanager;
     LocationListener list;
-
+    CSQLite lite;
+    String lat="0";
+    String lon="0";
     GPSHelper gps;
 
     @Override
@@ -47,13 +61,57 @@ public class Actualizar_Coordenadas extends Activity {
 
 
                 gps=new GPSHelper(Actualizar_Coordenadas.this);
-                txtLat.setText(gps.getLatitude());
-                txtLon.setText(gps.getLongitude());
+
+                lat=gps.getLatitude();
+                lon=gps.getLongitude();
+
+                txtLat.setText(lat);
+                txtLon.setText(lon);
+
+
+
 
             }
         });
 
     }
+
+    public String ObtenerClienteActivo(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        Cursor rs=db.rawQuery("select id_cliente from sesion_cliente where Sesion=1",null);
+
+
+        String id="";
+
+        if(rs.moveToFirst()){
+            id=rs.getString(0);
+        }
+        return id;
+    }
+
+    public String ObtenerjsonGP(){
+
+        JSONArray array=new JSONArray();
+        JSONObject object=new JSONObject();
+
+        try {
+
+            object.put("id_cliente",ObtenerClienteActivo());
+            object.put("latitud",lat);
+            object.put("longitud",lon);
+            array.put(object);
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return array.toString();
+    }
+
+
+
 
 
     @Override

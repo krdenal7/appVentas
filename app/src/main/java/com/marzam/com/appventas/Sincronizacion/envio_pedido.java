@@ -58,6 +58,7 @@ public class envio_pedido {
         this.context=context;
         String resp="";
         webServices=new WebServices();
+        String agente=ObtenerAgenteActivo();
 
 
         if(Verificar_productos()) {
@@ -79,7 +80,7 @@ public class envio_pedido {
 
             if(isOnline()==false) {
                 LimpiarBD_Insertados();
-                updateConsecutivo();
+                updateConsecutivo(agente);
                 return "Pedido guardado localmente. Verifique su conexión y sincronize los pedidos";
             }
 
@@ -87,7 +88,7 @@ public class envio_pedido {
 
             if(res==null) {
                 LimpiarBD_Insertados();
-                updateConsecutivo();
+                updateConsecutivo(agente);
                 return "Fallo al envíar pedidos. Sincronize el dispositivo para envíarlos nuevamente";
             }
 
@@ -95,13 +96,13 @@ public class envio_pedido {
                 ActualizarStatusPedido(res);
 
             resp = LimpiarBD_Insertados();
-            updateConsecutivo();
+            updateConsecutivo(agente);
             return resp;
         }else {
             return "No hay productos para agregar";
         }
     }  //Metodo principal
-    public void ActualizarStatusPedido(String json){
+    public void   ActualizarStatusPedido(String json){
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
@@ -209,14 +210,14 @@ public class envio_pedido {
 
         return clave;
     }
-    public String Consecutivo(){
+    public String Consecutivo(String agente){
 
         String numero="";
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select id from consecutivo",null);
+        Cursor rs=db.rawQuery("select id from consecutivo where clave_agente='"+agente+"'",null);
         if(rs.moveToFirst()){
             numero=rs.getString(0);
         }
@@ -228,8 +229,9 @@ public class envio_pedido {
   public String Obtener_idPedido(){
       StringBuilder builder=new StringBuilder();
 
-      builder.append("P"+ObtenerAgenteActivo());
-      String consecutivo=Consecutivo();
+      String agente=ObtenerAgenteActivo();
+      builder.append("P"+agente);
+      String consecutivo=Consecutivo(agente);
 
       int val=(builder.length()+consecutivo.length());
       int falt=(12-val);
@@ -586,13 +588,13 @@ public class envio_pedido {
 
       return resp;
  }
-    public void updateConsecutivo(){
+    public void updateConsecutivo(String agente){
 
       try {
           lite = new CSQLite(context);
           SQLiteDatabase db = lite.getWritableDatabase();
-          int consecutivo = Integer.parseInt(Consecutivo().trim());
-          db.execSQL("update consecutivo set id=" + (consecutivo + 1) + "");
+          int consecutivo = Integer.parseInt(Consecutivo(agente).trim());
+          db.execSQL("update consecutivo set id=" + (consecutivo + 1) + " where clave_agente='"+agente+"'");
 
           db.close();
           lite.close();

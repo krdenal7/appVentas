@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
@@ -22,6 +23,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.util.Xml;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,18 +43,25 @@ import net.lingala.zip4j.exception.ZipException;
 
 
 import org.kobjects.base64.Base64;
+import org.xmlpull.v1.XmlSerializer;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+
+import static android.content.Context.MODE_PRIVATE;
 
 
 public class MainActivity extends Activity {
@@ -86,6 +95,7 @@ public class MainActivity extends Activity {
     String nombre_agente;
     String[] clave_agente;
     TextView txtUsuario;
+    String txt="datos.txt";
 
 
     @Override
@@ -98,10 +108,13 @@ public class MainActivity extends Activity {
 
 
 
-        txtUsuario=(TextView)findViewById(R.id.textView);
-        locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
-        CrearDirectorioDownloads();
-        //EliminarBD();
+       txtUsuario=(TextView)findViewById(R.id.textView);
+       locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
+       CrearDirectorioDownloads();
+       //EliminarBD();
+
+          if(!existTxt(txt))
+                    CrearTXT();
 
         if(ExistsBD()) {
                 MostrarDatos_Agente();
@@ -110,8 +123,6 @@ public class MainActivity extends Activity {
 
                   Show_IngresarUsuario();
 
-            }else {
-                Toast.makeText(context,"Verifique su conexión de Internet.",Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -141,10 +152,13 @@ public class MainActivity extends Activity {
                 password=((EditText)findViewById(R.id.editText)).getText().toString();
 
                 if(VerificaContraseña(password,nombre_agente)){
+                    finish();
                     startActivity(i);
                 }else {
                    Toast toast=Toast.makeText(context,"Password incorrecto",Toast.LENGTH_SHORT);
-                    toast.show();
+                   toast.show();
+                   EditText pas=(EditText)findViewById(R.id.editText);
+                   pas.setText("");
                 }
 
             }
@@ -175,6 +189,7 @@ public class MainActivity extends Activity {
                     Intent settingIntent=new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                     settingIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                     startActivity(settingIntent);
+
 
                 }
             });
@@ -228,23 +243,28 @@ public class MainActivity extends Activity {
 
 
     public boolean VerificaContraseña(String password,String nombre){
+try {
+    String[] valor = {password, nombre};
 
-        String[] valor={password,nombre};
+    lite = new CSQLite(context);
+    lite.getDataBase();
 
-       lite=new CSQLite(context);
-       lite.getDataBase();
+    SQLiteDatabase db = lite.getWritableDatabase();
 
-        SQLiteDatabase db=lite.getWritableDatabase();
+    String query = "Select * From agentes where numero_empleado=? and nombre=?";
+    Cursor cursor = db.rawQuery(query, valor);
 
-        String query="Select * From agentes where numero_empleado=? and nombre=?";
-        Cursor cursor = db.rawQuery(query,valor);
+    while (cursor.moveToFirst()) {
+        db.close();
+        lite.close();
+        return true;
+    }
+}catch (Exception e){
 
-        while (cursor.moveToFirst()){
-            db.close();
-            lite.close();
-            return true;
-        }
+    Toast.makeText(context,"La base de datos no se encuentra cargada",Toast.LENGTH_SHORT).show();
 
+    return  false;
+}
 
 
         return false;
@@ -377,19 +397,20 @@ public class MainActivity extends Activity {
     }  //Verifica si existe la base de Datos
     public void MostrarDatos_Agente(){
 
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
+    lite = new CSQLite(context);
+    SQLiteDatabase db = lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select numero_empleado,nombre from agentes where Sesion=1",null);
-        String usuario="";
+    Cursor rs = db.rawQuery("select numero_empleado,nombre from agentes where Sesion=1", null);
+    String usuario = "";
 
-        if(rs.moveToFirst()){
-            usuario=rs.getString(0)+"\n"+rs.getString(1);
-            txtUsuario.setText(usuario);
-            nombre_agente=rs.getString(1);
-        }else{
-            Show_IngresarUsuario();
-        }
+    if (rs.moveToFirst()) {
+        usuario = rs.getString(0) + "\n" + rs.getString(1);
+        txtUsuario.setText(usuario);
+        nombre_agente = rs.getString(1);
+    } else {
+        Show_IngresarUsuario();
+    }
+
     } //Si existe la base de datos y esta seleccionado el usuario lo mostrara en la pantalla
     public String[] Obtener_Agentes(){
         String[] agentes=null;
@@ -435,6 +456,16 @@ public class MainActivity extends Activity {
             Log.d("Error al crear zip",e.toString());
         }
 
+    }
+    public String ObtenerjsonConsecutivos(String agente){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=null;
+
+
+        return "";
     }
 
 
@@ -717,6 +748,74 @@ public class MainActivity extends Activity {
         return clave;
     }
 
+
+    public void ObtenerArchivos(){
+        File directorio = new File("/data/data/com.marzam.com.appventas/databases/file__0");
+        File[] files=directorio.listFiles();
+
+
+       // CopiarArchivos(files);
+    }
+    public void CopiarArchivos2(File[] files){
+        byte[] buffer=new byte[1024];
+        int length;
+        FileOutputStream myOuput=null;
+        try {
+
+            FileInputStream myInput=null;
+
+            File folder = android.os.Environment.getExternalStorageDirectory();
+            File directorio2 = new File(folder.getAbsolutePath() + "/Marzam/preferencias");
+
+
+
+            for(int i=0;i<files.length;i++){
+ try {
+     myInput = new FileInputStream(files[i]);
+     String archivo = files[i].getName();
+     myOuput = new FileOutputStream(directorio2 + "/" + archivo);
+     while ((length = myInput.read(buffer)) > 0) {
+         myOuput.write(buffer, 0, length);
+     }
+
+
+     myInput.close();
+ }catch (Exception e){continue;}
+
+            }
+            myOuput.close();
+            myOuput.flush();
+        }
+        catch (Exception e){
+            String err=e.toString();
+            Log.e("ErrorCopiar:",e.toString());
+        }
+    }
+
+
+    public void CrearTXT(){
+
+        try{
+
+            OutputStreamWriter out=new OutputStreamWriter(openFileOutput(txt,Context.MODE_PRIVATE));
+            out.write("A:0"+"\nB:0"+"\nC:0");
+            out.close();
+
+        }catch (Exception e){
+            String error=e.toString();
+            e.printStackTrace();
+        }
+
+    }
+    public Boolean existTxt(String fileName){
+
+          for(String tmp:fileList()){
+              if(tmp.equals(fileName))
+        return true;
+          }
+
+        return false;
+    }
 
 
 }

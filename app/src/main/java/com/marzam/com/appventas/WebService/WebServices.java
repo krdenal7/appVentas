@@ -3,13 +3,17 @@ package com.marzam.com.appventas.WebService;
 
 import android.util.Log;
 import org.ksoap2.SoapEnvelope;
+import org.ksoap2.serialization.PropertyInfo;
 import org.ksoap2.serialization.SoapObject;
+import org.ksoap2.serialization.SoapPrimitive;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Proxy;
+
 import org.kobjects.base64.Base64;
 
 
@@ -18,12 +22,13 @@ import org.kobjects.base64.Base64;
  */
 public class WebServices {
 
-
+static String ip="http://190.1.4.120/WebService/WebService.asmx";
     public Object Upload_BD(String zip,String nombre){
 
            String cadena="";
 
         try {
+
             cadena=EncodeToBase64(zip);
 
         }catch (Exception e){
@@ -34,7 +39,7 @@ public class WebServices {
         String SOAP_ACTION="http://tempuri.org/TransfiereBAK";
         String OPERATION_NAME="TransfiereBAK";
         String WSDL_TARGET_NAMESPACE="http://tempuri.org/";
-        String SOAP_ADDRESS="http://190.1.4.120/WebService/WebService.asmx";
+        String SOAP_ADDRESS=ip;
 
         SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
         request.addProperty("docBinary",cadena);
@@ -72,7 +77,7 @@ public class WebServices {
         String SOAP_ACTION="http://tempuri.org/SincronizarPedidos";
         String OPERATION_NAME="SincronizarPedidos";
         String WSDL_TARGET_NAMESPACE="http://tempuri.org/";
-        String SOAP_ADDRESS="http://190.1.4.120/WebService/WebService.asmx";
+        String SOAP_ADDRESS=ip;
 
         SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
         request.addProperty("encabezado",encabezado);
@@ -105,7 +110,7 @@ public class WebServices {
         String SOAP_ACTION="http://tempuri.org/SincronizarVisitas";
         String OPERATION_NAME="SincronizarVisitas";
         String WSDL_TARGET_NAMESPACE="http://tempuri.org/";
-        String SOAP_ADDRESS="http://190.1.4.120/WebService/WebService.asmx";
+        String SOAP_ADDRESS=ip;
 
         SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
         request.addProperty("visitas",json);
@@ -133,12 +138,61 @@ public class WebServices {
         return response.toString();
     }
 
+    public String cargarBack(String archivo,String name){
+
+        File file=new File(archivo);
+        byte[] bytes=ConvertToByte(file);
+        String cadena= Base64.encode(bytes);
+        String respuesta="";
+
+        String SOAP_ACTION="http://tempuri.org/TransfiereBAK";
+        String OPERATION_NAME="TransfiereBAK";
+        String WSDL_TARGET_NAMESPACE="http://tempuri.org/";
+        String SOAP_ADDRESS=ip;
+
+        SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
+        PropertyInfo parameterfilebyte=new PropertyInfo();
+        parameterfilebyte.setName("docBinary");
+        parameterfilebyte.setValue(cadena);
+        parameterfilebyte.setType(String.class);
+        request.addProperty(parameterfilebyte);
+
+        PropertyInfo parameterfilename=new PropertyInfo();
+        parameterfilename.setName("docName");
+        parameterfilename.setValue(name);
+        parameterfilename.setType(String.class);
+        request.addProperty(parameterfilename);
+
+        SoapSerializationEnvelope envelope=new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.dotNet=true;
+        envelope.implicitTypes=true;
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidhttpTransport=new HttpTransportSE(Proxy.NO_PROXY,SOAP_ADDRESS,60000);
+
+        try {
+
+            androidhttpTransport.call(SOAP_ACTION,envelope);
+            SoapPrimitive response=(SoapPrimitive)envelope.getResponse();
+
+            respuesta=response.toString();
+
+        }catch (Exception e){
+            String err=e.toString();
+            e.printStackTrace();
+            respuesta=null;
+        }
+
+
+        return respuesta;
+    }
+
+
     public String Down_DB(String agente){
 
         String SOAP_ACTION="http://tempuri.org/SincronizaCatalogo";
         String OPERATION_NAME="SincronizaCatalogo";
         String WSDL_TARGET_NAMESPACE="http://tempuri.org/";
-        String SOAP_ADDRESS="http://190.1.4.120/WebService/WebService.asmx";
+        String SOAP_ADDRESS=ip;
 
         SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
         request.addProperty("docName",agente);

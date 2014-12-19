@@ -83,7 +83,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.maps_info);
-        setTitle("Mápa");
+        setTitle("Mapa");
         context=this;
 
         txtCte=(TextView)findViewById(R.id.textView4);
@@ -185,14 +185,14 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     public CharSequence[] ObtenerCtesHoy(String agente){
 
-        String[] valor={agente,Obtener_Dia()};
+
         CharSequence[] datos=null;
 
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor cursor=db.rawQuery("select id_cliente from agenda where numero_empleado=? and dia=?",valor);
+        Cursor cursor=db.rawQuery("select id_cliente from agenda where numero_empleado='"+agente+"' and id_frecuencia in"+where()+"",null);
 
         clientesH=new String[cursor.getCount()];
         datos=new CharSequence[cursor.getCount()];
@@ -306,7 +306,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         }else {
 
             InsertarSesion(cliente);
-            RegistrarVisiatas(cliente);
+            RegistrarVisitas(cliente);
             progressDialog = ProgressDialog.show(context, "Generando precios finales", "Cargando", true, false);
             new UpLoadVisitas().execute("");
 
@@ -356,18 +356,19 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     }//INSERTA EL CLIENTE CON EL QUE SE INICIO VISITA
 
 
-    public void RegistrarVisiatas(String cliente){
+    public void RegistrarVisitas(String cliente){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
         GPSHelper gpsHelper=new GPSHelper(context);
         ContentValues values=new ContentValues();
-        values.put("numero_empleado",ObtenerAgenteActivo());
+        String agente=ObtenerAgenteActivo();
+        values.put("numero_empleado",agente);
         values.put("id_cliente",cliente);
         values.put("latitud",gpsHelper.getLatitude());
         values.put("longitud", gpsHelper.getLongitude());
         values.put("fecha_visita",getDate());
         values.put("fecha_registro",getDate());
-        values.put("id_visita",Obtener_Idvisita());
+        values.put("id_visita",Obtener_Idvisita(agente));
         values.put("status_visita","10");
         Long res= db.insert("visitas",null,values);
 
@@ -375,12 +376,12 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         lite.close();
     }//SE REGISTRA LA VISITA Y SE ENVIA HACIA EL WEB SERVICE
 
-    public String Obtener_Idvisita(){
+    public String Obtener_Idvisita(String agente){
         String id="";
         int num_id=0;
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select id from consecutivo_visitas",null);
+        Cursor rs=db.rawQuery("select id from consecutivo_visitas where clave_agente='"+agente+"'",null);
 
 
         if(rs.moveToFirst()){
@@ -437,8 +438,8 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
-
-        Cursor rs=db.rawQuery("select * from visitas where id_visita='"+Obtener_Idvisita()+"'",null);
+        String agente=ObtenerAgenteActivo();
+        Cursor rs=db.rawQuery("select * from visitas where id_visita='"+Obtener_Idvisita(agente)+"'",null);
         JSONArray array=new JSONArray();
         JSONObject object=new JSONObject();
 
@@ -724,17 +725,33 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         return formatteDate;
     }
 
-    private String Obtener_Dia(){
+    private String where(){
 
         String dia="";
 
         Calendar cal = new GregorianCalendar();
         Date dt = cal.getTime();
+        SimpleDateFormat df=new SimpleDateFormat("dd");
+        int diames=Integer.parseInt(df.format(dt.getTime()));
 
         GregorianCalendar FechaCalendario=new GregorianCalendar();
         FechaCalendario.setTime(dt);
 
+
+
+
         int numDia=FechaCalendario.get(Calendar.DAY_OF_WEEK);
+
+
+        String where="(";
+
+        int resultado= diames%7>0?(diames/7)+1:diames/7;
+
+        where+= resultado==1?"'M1','Q1','SS')": resultado==2?"'M2','Q2','SS')":
+                           resultado==3?"'M3','Q1','SS')": resultado==4?"'M4','Q2','SS')":
+                                        "'M1','Q1','SS')";
+
+
 
         switch (numDia){
             case 1:
@@ -760,29 +777,11 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         }
 
-        return dia;
+        where+=" and dia='"+dia+"'";
+
+        return where;
     }
 
-    public String[] Dividirfecha(String fecha){
-        String[] fechreturn=new String[4];
 
-        try {
-            String[] Fecha = fecha.split(" ");
-            fechreturn[0] = Fecha[0];
-            String[] Hora = Fecha[1].split(":");
-            fechreturn[1] = Hora[0];
-            fechreturn[2] = Hora[1];
-            fechreturn[3] = Hora[2];
-        }catch (Exception e){
-            fechreturn[0]="01-01-2014";
-            fechreturn[1]="00";
-            fechreturn[2]="00";
-            fechreturn[3]="00";
-            return fechreturn;
-        }
-
-
-        return fechreturn;
-    }
 
 }

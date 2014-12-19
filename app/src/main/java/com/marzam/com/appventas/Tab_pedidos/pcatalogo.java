@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -29,10 +30,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.marzam.com.appventas.CustomAdapter;
+import com.marzam.com.appventas.KPI.KPI_General;
 import com.marzam.com.appventas.MainActivity;
 import com.marzam.com.appventas.Model;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
+import com.marzam.com.appventas.Sincronizacion.Crear_precioFinal;
+import com.marzam.com.appventas.WebService.WebServices;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,11 +78,12 @@ public class pcatalogo extends Activity {
          lproductos=(ListView)findViewById(R.id.listView2);
 
 
+        new UpdateList().execute("");
         LlenarModelItems();
         adapter1=new CustomAdapter(this,modelItems);
         lproductos.setAdapter(adapter1);
 
-         LLenarList();//Llena el listview
+
 
         EditBuscar.addTextChangedListener(new TextWatcher() {
             @Override
@@ -92,7 +97,8 @@ public class pcatalogo extends Activity {
                   String charseq=charSequence.toString();
                   int cant=charSequence.length();
 
-                 if(charSequence.length()>0) {
+                 if(charSequence.length()>=2) {
+
 
                      pcatalogo.this.simpleAdapter.getFilter().filter(charSequence);
                      Filter cont =  simpleAdapter.getFilter();
@@ -166,8 +172,8 @@ public class pcatalogo extends Activity {
                 LlenarModelItems();
                 adapter1=new CustomAdapter(context,modelItems);
                 lproductos.setAdapter(adapter1);
-                LLenarList();
                 EditBuscar.setText("");
+                new UpdateList().execute("");
 
             }
 
@@ -193,11 +199,10 @@ public class pcatalogo extends Activity {
 
                 AgregarProducto(codigo,0,1);
                 AgregarProducto(codigo,(picker.getValue())-1,1);
-                LlenarModelItems();
                 adapter1=new CustomAdapter(context,modelItems);
                 lproductos.setAdapter(adapter1);
-                LLenarList();
                 EditBuscar.setText("");
+                new UpdateList().execute("");
 
             }
         });
@@ -239,7 +244,7 @@ public class pcatalogo extends Activity {
 
         Cursor rs=null;
 
-        String query="select descripcion,precio,Cantidad,codigo,precio_final  from productos limit 1000";
+        String query="select descripcion,precio,Cantidad,codigo,precio_final  from productos";
 
         rs=db.rawQuery(query,null);
         data=new ArrayList<HashMap<String, ?>>();
@@ -268,7 +273,7 @@ public class pcatalogo extends Activity {
       Cursor rs=null;
 
         try {
-            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,codigo,precio_final  from productos limit 1000",null);
+            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,codigo,precio_final  from productos limit 1000 ",null);
         }catch (Exception e){
             String err="Error:"+e.toString();
             Log.d("Error:",err);
@@ -432,16 +437,36 @@ public class pcatalogo extends Activity {
             lite.close();
         }
 
-        LLenarList();
+
 
         }
 
 
     public void LLenarList(){
 
+
         LlenarHasmap();//llena el arreglo para el simpleAdapter
         simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","E","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView60,R.id.textView32});
 
+    }
+
+    private class UpdateList extends AsyncTask<String,Void,Object> {
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+            LLenarList();
+
+            return "";
+        }
+
+        @Override
+        protected void onPostExecute(Object result){
+
+
+
+
+        }
     }
 
 

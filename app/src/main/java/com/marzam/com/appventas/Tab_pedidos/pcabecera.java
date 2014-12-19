@@ -77,8 +77,9 @@ public class pcabecera extends Activity {
 
         StringBuilder builder=new StringBuilder();
 
-        builder.append("P"+ObtenerAgenteActivo());
-        String consecutivo=Consecutivo();
+        String agente=ObtenerAgenteActivo();
+        builder.append("P"+agente);
+        String consecutivo=Consecutivo(agente);
 
         int val=(builder.length()+consecutivo.length());
         int falt=(12-val);
@@ -106,7 +107,7 @@ public class pcabecera extends Activity {
 
         return clave;
     }
-    public String Consecutivo(){
+    public String Consecutivo(String agente){
 
         String numero="";
 
@@ -114,7 +115,7 @@ public class pcabecera extends Activity {
         SQLiteDatabase db=lite.getWritableDatabase();
 
         Cursor rs=db.rawQuery("select " +
-                "id from consecutivo",null);
+                "id from consecutivo where clave_agente='"+agente+"'",null);
         if(rs.moveToFirst()){
             numero=rs.getString(0);
         }

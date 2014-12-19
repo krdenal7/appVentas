@@ -9,10 +9,14 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.widget.TextView;
 
@@ -22,10 +26,15 @@ import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Tab_pedidos.pedido;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+
+
 
 public class KPI_General extends Activity {
 
@@ -45,7 +54,31 @@ public class KPI_General extends Activity {
         WebView webView=(WebView)findViewById(R.id.webView2);
         webView.loadUrl("file:///android_asset/www/cliente.html");
         WebSettings settings=webView.getSettings();
-        settings.setJavaScriptEnabled(true);
+          settings.setJavaScriptEnabled(true);
+          settings.setDatabaseEnabled(true);
+          String path=this.getApplicationContext().getDir("databases",Context.MODE_PRIVATE).getPath();
+          settings.setDatabasePath("/data/data/com.marzam.com.appventas/databases");
+          settings.setDomStorageEnabled(true);
+          settings.setAllowContentAccess(true);
+          settings.setAllowFileAccess(true);
+
+
+        //   File directorio = new File("/data/data/com.marzam.com.appventas/databases/");
+        //  File[] files=directorio.listFiles();
+        //CopiarArchivos(files);
+
+
+
+
+
+        webView.setWebChromeClient(new WebChromeClient(){
+           @Override
+        public void onExceededDatabaseQuota(String url,String databaseIdentifier, long currenteQuota, long estimatedSize,long totalusedQuota,WebStorage.QuotaUpdater quotaUpdater){
+
+               quotaUpdater.updateQuota(estimatedSize*2);
+               String val="";
+           }
+        });
     }
 
     public void ShowMenu(){
@@ -87,7 +120,8 @@ public class KPI_General extends Activity {
         alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                CerrarVisita();
+                String agente=ObtenerClavedeAgente();
+                CerrarVisita(agente);
                 Intent intent=new Intent(context, MapsLocation.class);
                 startActivity(intent);
             }
@@ -102,12 +136,12 @@ public class KPI_General extends Activity {
         alertDialog.show();
     }
 
-    public void CerrarVisita(){
+    public void CerrarVisita(String agente){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
         db.execSQL("update sesion_cliente set Sesion=2,Fecha_cierre='"+getDate()+"' where id=(select Max(id) from sesion_cliente)");
-        UpdateConsecutivo_visitas();
+        UpdateConsecutivo_visitas(agente);
         UpdateProductos();
 
         db.close();
@@ -115,11 +149,11 @@ public class KPI_General extends Activity {
     }
 
 
-    public void UpdateConsecutivo_visitas(){
+    public void UpdateConsecutivo_visitas(String agente){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select MAX(id) from consecutivo_visitas",null);
+        Cursor rs=db.rawQuery("select MAX(id) from consecutivo_visitas where clave_agente='"+agente+"'",null);
 
         if(rs.moveToFirst()){
 
@@ -177,6 +211,57 @@ public class KPI_General extends Activity {
         }
 
         return cliente;
+    }
+    public String ObtenerClavedeAgente(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        String clave="";
+
+        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
+        if(rs.moveToFirst()){
+
+            clave=rs.getString(0);
+        }
+
+
+        return clave;
+    }
+
+
+    public void CopiarArchivos(File[] files){
+        byte[] buffer=new byte[1024];
+        int length;
+        FileOutputStream myOuput=null;
+        try {
+
+            FileInputStream myInput=null;
+
+            File folder = android.os.Environment.getExternalStorageDirectory();
+            File directorio = new File(folder.getAbsolutePath() + "/Marzam/preferencias");
+
+
+
+            for(int i=0;i<files.length;i++){
+
+                myInput=new FileInputStream(files[i]);
+                String archivo=files[i].getName();
+                myOuput=new FileOutputStream(directorio+"/"+archivo);
+                while ((length=myInput.read(buffer))>0){
+                    myOuput.write(buffer,0,length);
+                }
+
+
+                myInput.close();
+
+            }
+            myOuput.close();
+            myOuput.flush();
+        }
+        catch (Exception e){
+            String err=e.toString();
+            Log.e("ErrorCopiar:",e.toString());
+        }
     }
 
 

@@ -12,6 +12,7 @@
 <script src="js/jquery.mobile-1.4.4.js"></script>
 <script src="js/jquery-ui.js"></script>
 <script src="js/highcharts.js"></script>
+<script src="js/phonegap.js" type="text/javascript"></script>
 <script>
     $(function () {
 		var disponible=2500.00,D30=800.00,D60=1500.00,D90=4500.00,MD90=9000.00;
@@ -95,6 +96,35 @@ function conComas(valor,Deci) {
     return res+"."+Deci;
 }
 </script>
+<script>
+
+    $(document).ready(function(){
+
+        var db=openDatabase('db','1','db.db',200000);
+
+        if(db!=null){
+            db.transaction(function(tx){
+
+            tx.executeSql('CREATE TABLE IF NOT EXISTS presupuesto_clientes(id_cliente varchar(11),presupuesto_mes numeric,presupuesto_dia numeric,saldo numeric,limite_credito numeric,cartera_vencida numeric,cartera_novencida numeric,venta_mes_anterior numeric,venta_mes_actual numeric,ritmo numeric,fecha_actualizacion datetime)',[]);
+
+            });
+            db.transaction(function(tx){
+                console.log(db);
+                tx.executeSql('select * from presupuesto_clientes',[],function(tx,result){
+
+                      var len= result.rows.length;
+                      //alert("Row: "+len);
+                },null);
+            });
+        }else{
+        alert("Error al cargar Base de datos");
+        }
+
+    });
+
+</script>
+
+
 </head>
 <body class="ui-mobile-viewport ui-overlay-a">
 <div data-role="page" class="jqm-demos ui-page ui-page-theme-a ui-page-header-fixed ui-page-footer-fixed ui-page-active" id="Ventas" data-title="Ventas" data-url="panel-fixed-page1" tabindex="0" style="padding-top: 44px; padding-bottom: 44px;">
