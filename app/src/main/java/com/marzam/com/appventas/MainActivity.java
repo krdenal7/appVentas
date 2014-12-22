@@ -98,6 +98,7 @@ public class MainActivity extends Activity {
     String txt="datos.txt";
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,7 +112,8 @@ public class MainActivity extends Activity {
        txtUsuario=(TextView)findViewById(R.id.textView);
        locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
        CrearDirectorioDownloads();
-       //EliminarBD();
+
+      // EliminarBD();
 
           if(!existTxt(txt))
                     CrearTXT();
@@ -172,6 +174,11 @@ public class MainActivity extends Activity {
             directorio = new File(folder.getAbsolutePath() + "/Marzam/preferencias");
             if (directorio.exists() == false) {
                 directorio.mkdirs();
+            }
+
+            File database=new File("/data/data/com.marzam.com.appventas/databases");
+            if(database.exists()==false){
+                database.mkdirs();
             }
         }catch (Exception e){
             Log.d("ErrorCrearDir", e.toString());
@@ -557,15 +564,23 @@ try {
             File filedown=new File(directorio+"/db.db");
             unZipBD(directorio + "/db_down.zip");
             myInput=new FileInputStream(filedown);
+            File fi=new File("/data/data/com.marzam.com.appventas");
+            File[] files=fi.listFiles();
             myOutput=new FileOutputStream("/data/data/com.marzam.com.appventas/databases/db.db");
 
             while ((length=myInput.read(buffer))>0){
                 myOutput.write(buffer,0,length);
             }
 
+
+
             myOutput.close();
             myOutput.flush();
             myInput.close();
+
+            if(filedown.exists())
+                  filedown.delete();
+
            return true;
 
         }catch (Exception e){
@@ -749,12 +764,13 @@ try {
     }
 
 
-    public void ObtenerArchivos(){
-        File directorio = new File("/data/data/com.marzam.com.appventas/databases/file__0");
+    public void ObtenerArchivos2(){
+
+        File directorio = new File("/data/data/com.marzam.com.appventas/files");
         File[] files=directorio.listFiles();
 
 
-       // CopiarArchivos(files);
+       CopiarArchivos2(files);
     }
     public void CopiarArchivos2(File[] files){
         byte[] buffer=new byte[1024];

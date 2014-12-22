@@ -39,6 +39,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.marzam.com.appventas.GPS.GPSHelper;
 import com.marzam.com.appventas.Graficas.Grafica_Vendedor;
 import com.marzam.com.appventas.KPI.KPI_General;
+import com.marzam.com.appventas.KPI.estatus_respuestas;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Sincronizacion.Crear_precioFinal;
 import com.marzam.com.appventas.Sincronizacion.Sincronizar;
@@ -87,6 +88,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         context=this;
 
         txtCte=(TextView)findViewById(R.id.textView4);
+        ObtenerCtesHoy(ObtenerAgenteActivo());
         ObtenerClientesVisitados();
 
 
@@ -95,7 +97,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     public void ShowMenu(){
 
-        final CharSequence[] items={"Clientes de hoy","Clientes totales","Sincronización"};
+        final CharSequence[] items={"Clientes de hoy","Clientes totales","Estatus de pedidos","Sincronización"};
 
         AlertDialog.Builder alert = new AlertDialog.Builder(context);
         alert.setTitle( "Menú");
@@ -108,6 +110,11 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                 if(i==1)
                     ShowCteT();
                 if(i==2){
+
+                    Intent intent=new Intent(context, estatus_respuestas.class);
+                    startActivity(intent);
+                }
+                if(i==3){
                     Intent intent=new Intent(context, Sincronizar.class);
                     startActivity(intent);
                 }
@@ -191,8 +198,9 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
+        String query="select id_cliente from agenda where numero_empleado='"+agente+"' and id_frecuencia in"+where()+"";
 
-        Cursor cursor=db.rawQuery("select id_cliente from agenda where numero_empleado='"+agente+"' and id_frecuencia in"+where()+"",null);
+        Cursor cursor=db.rawQuery(query,null);
 
         clientesH=new String[cursor.getCount()];
         datos=new CharSequence[cursor.getCount()];
@@ -215,9 +223,12 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
        }
 
-        cursor.close();
+        if(cursor!=null)
+           cursor.close();
+        if(rs!=null)
         rs.close();
-        db.close();
+        if(db!=null)
+         db.close();
         lite.close();
 
         return datos;
@@ -252,9 +263,13 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
          }
 
+        if(cursor!=null)
         cursor.close();
+        if(rs!=null)
         rs.close();
+        if(db!=null)
         db.close();
+        if(lite!=null)
         lite.close();
 
         return datos;
@@ -307,7 +322,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
             InsertarSesion(cliente);
             RegistrarVisitas(cliente);
-            progressDialog = ProgressDialog.show(context, "Generando precios finales", "Cargando", true, false);
+            progressDialog = ProgressDialog.show(context, "Generando precios netos", "Cargando", true, false);
             new UpLoadVisitas().execute("");
 
         }
@@ -554,12 +569,42 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     }
 
 
+
+    public String[][] ObtenerCoordenadas(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        String[][] datos=new String[clientesH.length][3];
+        Cursor rs=null;
+        for(int i=0;i<clientesH.length;i++){
+
+            rs=db.rawQuery("select nombre,latitud,longitud from clientes where id_cliente='"+clientesH[i]+"' ",null);
+
+            if(rs.moveToFirst()){
+
+                datos[i][0]=rs.getString(0);
+                datos[i][1]=rs.getString(1);
+                datos[i][2]=rs.getString(2);
+
+            }
+
+        }
+
+        db.close();
+        lite.close();
+
+        return datos;
+    }
+
+
     @Override
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
         setUpGoogleApiClientIfNeeded();
         mGoogleApiClient.connect();
+
     }
 
     @Override
@@ -585,26 +630,43 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
 
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(19.56317359796029,  -99.04562934016724),12.0f));
-
-
-
                 addMarker();
+
+                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+
+
+                        return false;
+                    }
+                });
             }
         }
     }
 
     public void addMarker(){
 
-        mMap.addMarker(new MarkerOptions().position(new LatLng(19.555965369691677, -99.0496741113617)).title("Bodega Aurrera"));
-        mMap.addMarker(new MarkerOptions().position(new LatLng(19.555247562141705, -99.04640181636353)).title("El Fenix"));
-        mMap.addMarker(new MarkerOptions().position(new LatLng(19.56101015234801,  -99.05210955714722)).title("Farmacia Guadalajara"));
-        mMap.addMarker(new MarkerOptions().position(new LatLng(19.56317359796029,  -99.04562934016724)).title("Wal-Mart Ecatepec"));
+        String[][] datos=ObtenerCoordenadas();
+
+        for(int i=0;i<datos.length;i++){
+
+            String nombre=datos[i][0];
+            String lat=datos[i][1];
+            String lon=datos[i][2];
+
+            Double latitud=lat!=null?Double.parseDouble(lat):0;
+            Double longitud=lon!=null?Double.parseDouble(lon):0;
+
+            mMap.addMarker(new MarkerOptions().position(new LatLng(latitud, longitud)).title(nombre));
+        }
+
+
 
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
 
-                Toast.makeText(context,"Entro",Toast.LENGTH_SHORT).show();
+               // Toast.makeText(context,"Entro",Toast.LENGTH_SHORT).show();
 
                 return false;
             }

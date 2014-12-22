@@ -15,8 +15,91 @@
 <script src="js/amcharts.js"></script>
 <script src="js/gauge.js"></script>
 <script>
+function agente(nombre)
+{
+	$("#nombre").text(nombre);
+}
+function deci(valor){
+                
+                
+                var dec=valor.split(".");
+                
+                
+var leng = parseInt((dec).length);
+
+  var cantidad="";
+  
+  if(leng==2){
+                  
+                  cantidad=conComas(dec[0],dec[1]);
+                  
+                  }else{
+                                 
+      cantidad=conComas(dec[0],"00");
+                                 
+                                 }
+     return cantidad;
+                 
+                }
+
+function conComas(valor,Deci) {
+	
+    var nums = new Array();
+    var simb = ","; //Éste es el separador
+    valor = valor.toString();
+    valor = valor.replace(/\D/g, "");   //Ésta expresión regular solo permitira ingresar números
+    nums = valor.split(""); //Se vacia el valor en un arreglo
+    var long = nums.length - 1; // Se saca la longitud del arreglo
+    var patron = 3; //Indica cada cuanto se ponen las comas
+    var prox = 2; // Indica en que lugar se debe insertar la siguiente coma
+    var res = "";
+ 
+    while (long > prox) {
+        nums.splice((long - prox),0,simb); //Se agrega la coma
+        prox += patron; //Se incrementa la posición próxima para colocar la coma
+    }
+ 
+    for (var i = 0; i <= nums.length-1; i++) {
+        res += nums[i]; //Se crea la nueva cadena para devolver el valor formateado
+    }
+ 
+    return res+"."+Deci;
+}
+ function decimal(valor){
+			
+			var Val=valor.toString();
+			var Cant="";
+    		
+	
+	          if(Val%1==0){
+				  
+				  Cant=Val+".00";
+				  }
+				  
+				  
+	   
+	   var dec=Cant.split(".");	
+       var leng = parseInt((dec).length);
+
+       var cantidad="";
+  
+      if(leng==2){
+	  
+	  cantidad=conComas(dec[0],dec[1]);
+	  
+	  }else{
+		  
+      cantidad=conComas(dec[0],"00");
+		  
+		  }
+     return cantidad;
+	 
+	}
 function graficar(ritmo,pres,venta,numinter)
 {	
+	$("#presupuesto").text("$"+decimal(pres));
+	$("#vendido").text("$"+decimal(venta));	
+	$("#ritmo").text("$"+decimal(ritmo));
 	var mayor=ritmo<pres?pres:ritmo;
 	var endvalue = mayor;
 	var posiciones = endvalue.toString().length-1;
@@ -81,18 +164,76 @@ function graficar(ritmo,pres,venta,numinter)
 						}
 
 </script>
+<script>
+ function GetValores(){
+// capturamos la url
+        var loc = document.location.href;
+        //alert(loc);
+        // si existe el interrogante
+        if(loc.indexOf('?')>0)
+        {
+            // cogemos la parte de la url que hay despues del interrogante
+            var getString = loc.split('?')[1];
+            // obtenemos un array con cada clave=valor
+            var GET = getString.split('&');
+            var get = {};
+
+
+            // recorremos todo el array de valores
+            for(var i = 0, l = GET.length; i < l; i++){
+                var tmp = GET[i].split('=');
+                get[tmp[0]] = unescape(decodeURI(tmp[1]));
+            }
+
+            return get;
+        }
+
+     }
+function Load(){
+	  var valores=GetValores();
+	   var presupuesto;
+       var vendido;
+       var ritmo;
+       var nombre
+
+     for(var index in valores)
+            {
+			        if(index=="A")
+			        vendido=valores[index];
+					if(index=="B")
+					ritmo=valores[index];
+					if(index=="C")
+					nombre=valores[index];
+					if(index=="D")
+					presupuesto=valores[index];
+			}
+
+		var var1=parseFloat(vendido);
+		var var2=parseFloat(ritmo);
+		var var3=parseFloat(presupuesto);
+
+		var var11=var1.toFixed(2);
+		var var22=var2.toFixed(2);
+		var var33=var3.toFixed(2);
+	
+		
+		agente(nombre.toString());
+		graficar(var22,var33,var11,5);
+
+	}
+</script>
 </head>
-<body class="ui-mobile-viewport ui-overlay-a" onLoad="graficar(28666,33125,5500,5);">
+<body class="ui-mobile-viewport ui-overlay-a" onLoad="Load();">
 <div data-role="page" class="jqm-demos ui-page ui-page-theme-a ui-page-header-fixed ui-page-footer-fixed ui-page-active" id="Ventas" data-title="Ventas" data-url="panel-fixed-page1" tabindex="0" style="padding-top: 44px; padding-bottom: 44px;">
-  <!--<div data-role="header" data-position="fixed" role="banner" class="ui-header ui-bar-inherit ui-header-fixed slidedown ui-fixed-hidden">
-    <h1 class="ui-title" role="heading" aria-level="1">Ventas</h1>
+  <div data-role="header" data-position="fixed" role="banner" class="ui-header ui-bar-inherit ui-header-fixed slidedown ui-fixed-hidden">
+  <!--  <h1 class="ui-title" role="heading" aria-level="1">Ventas</h1>
     <a href="#nav-panel" data-icon="bars" data-iconpos="notext" class="ui-link ui-btn-left ui-btn ui-icon-bars ui-btn-icon-notext ui-shadow ui-corner-all" data-role="button" role="button">Menú</a> </div>
   <!-- /header -->
   <div class="ui-panel-wrapper">
     <div role="main" class="ui-content jqm-content jqm-fullwidth">
-      <div id="inf" style=" width:90%; margin:0px auto; background:rgba(204,204,204,0.3); border-radius:12px 12px 0px 0px; font-size:12px;">
-      <span id="nombre">Miguel Ángel Rodriguez Gonzalez</span> </div>
-      <div style="width:90%; background:rgba(204,204,204,0.3); border-radius:0px 0px 12px 12px; margin:1px auto;">
+      <div id="inf" style=" width:90%; margin:0px auto; border-radius:12px 12px 0px 0px; font-size:12px;">
+      <span id="nombre"></span> </div>
+      <div style="width:90%;  border-radius:0px 0px 12px 12px; margin:1px auto;">
         <div id="chartdiv" style="width:90%; height:200px;"></div>
         <div style="width:100%; margin:0px auto; font-size:12px;">
           <table>
@@ -105,9 +246,9 @@ function graficar(ritmo,pres,venta,numinter)
             </thead>
             <tbody>
               <tr>
-                <td><span id="precol" style="color:green;">█</span> <span id="presupuesto">$33,125.00&nbsp;</span></td>
-                <td><span id="vencol" style="color:silver;">█</span><span id="vendido">$2,222.00&nbsp;</span></td>
-                <td><span id="ritcol" style="color:blue;">█</span><span id="ritmo">$28,666.00&nbsp;</span></td>
+                <td><span id="precol" style="color:green;">█</span> <span id="presupuesto"></span></td>
+                <td><span id="vencol" style="color:silver;">█</span><span id="vendido"></span></td>
+                <td><span id="ritcol" style="color:blue;">█</span><span id="ritmo"></span></td>
               </tr>
             </tbody>
             <tfoot>
@@ -123,7 +264,7 @@ function graficar(ritmo,pres,venta,numinter)
   </div>
   <!-- /content -->
   
-  <!--<div data-role="footer" data-position="fixed" role="contentinfo" class="ui-footer ui-bar-inherit ui-footer-fixed slideup ui-fixed-hidden">
+ <!-- <div data-role="footer" data-position="fixed" role="contentinfo" class="ui-footer ui-bar-inherit ui-footer-fixed slideup ui-fixed-hidden">
     <h4 class="ui-title" role="heading" aria-level="1">Casa Marzam S.A de C.V. &copy;</h4>
   </div>
   <!-- /footer -->

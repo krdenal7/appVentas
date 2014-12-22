@@ -2,12 +2,14 @@ package com.marzam.com.appventas.KPI;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
@@ -18,13 +20,24 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
+import android.widget.ArrayAdapter;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.marzam.com.appventas.GPS.Actualizar_Coordenadas;
 import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Tab_pedidos.pedido;
+import com.marzam.com.appventas.WebService.WebServices;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +46,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-
+import java.util.LinkedList;
+import java.util.List;
 
 
 public class KPI_General extends Activity {
@@ -41,6 +55,8 @@ public class KPI_General extends Activity {
     Context context;
     CSQLite lite;
     TextView txtUsuario;
+    ProgressDialog progressDialog;
+    WebView webViews;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,35 +66,22 @@ public class KPI_General extends Activity {
 
         txtUsuario=(TextView)findViewById(R.id.textView55);
         txtUsuario.setText(Obtener_Nombre());
+        webViews=(WebView)findViewById(R.id.webView2);
 
-        WebView webView=(WebView)findViewById(R.id.webView2);
-        webView.loadUrl("file:///android_asset/www/cliente.html");
-        WebSettings settings=webView.getSettings();
-          settings.setJavaScriptEnabled(true);
-          settings.setDatabaseEnabled(true);
-          String path=this.getApplicationContext().getDir("databases",Context.MODE_PRIVATE).getPath();
-          settings.setDatabasePath("/data/data/com.marzam.com.appventas/databases");
-          settings.setDomStorageEnabled(true);
-          settings.setAllowContentAccess(true);
-          settings.setAllowFileAccess(true);
-
-
-        //   File directorio = new File("/data/data/com.marzam.com.appventas/databases/");
-        //  File[] files=directorio.listFiles();
-        //CopiarArchivos(files);
+        String id_cliente=ObtenerId_cliente();
+        String url=ObtenerValoresURL(id_cliente);
 
 
 
+        webViews.loadUrl("file:///android_asset/www/cliente.html?"+url);
+        WebSettings settings=webViews.getSettings();
+        settings.setJavaScriptEnabled(true);
 
 
-        webView.setWebChromeClient(new WebChromeClient(){
-           @Override
-        public void onExceededDatabaseQuota(String url,String databaseIdentifier, long currenteQuota, long estimatedSize,long totalusedQuota,WebStorage.QuotaUpdater quotaUpdater){
+    //    new TaskWebview().execute("");
+    //    progressDialog = ProgressDialog.show(context, "Obteniendo información del cliente", "Cargando", true, false);
 
-               quotaUpdater.updateQuota(estimatedSize*2);
-               String val="";
-           }
-        });
+
     }
 
     public void ShowMenu(){
@@ -101,6 +104,7 @@ public class KPI_General extends Activity {
                     Intent intent=new Intent(context, Actualizar_Coordenadas.class);
                     startActivity(intent);
                 }
+
                 if(i==2){
                     ShowCierreVisita();
                 }
@@ -227,6 +231,21 @@ public class KPI_General extends Activity {
 
         return clave;
     }
+    public String ObtenerId_cliente(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        Cursor rs=db.rawQuery("select id_cliente from sesion_cliente where Sesion=1",null);
+
+
+        String id="";
+
+        if(rs.moveToFirst()){
+            id=rs.getString(0);
+        }
+
+        return id;
+    }
+
 
 
     public void CopiarArchivos(File[] files){
@@ -264,6 +283,35 @@ public class KPI_General extends Activity {
         }
     }
 
+    public String ObtenerValoresURL(String id_cliente){
+        String datos=null;
+
+     lite=new CSQLite(context);
+     SQLiteDatabase db=lite.getWritableDatabase();
+
+    Cursor rs=null;
+
+    String query="select saldo,limite_credito,cartera_vencida,cartera_novencida,venta_mes_anterior,venta_mes_actual from presupuesto_clientes where id_cliente='"+id_cliente+"'";
+
+
+    rs=db.rawQuery(query,null);
+
+
+    if(rs.moveToFirst()){
+
+        List<NameValuePair> params = new LinkedList<NameValuePair>();
+        params.add(new BasicNameValuePair("A", rs.getString(0)));
+        params.add(new BasicNameValuePair("B", rs.getString(1)));
+        params.add(new BasicNameValuePair("C", rs.getString(2)));
+        params.add(new BasicNameValuePair("D", rs.getString(3)));
+        params.add(new BasicNameValuePair("E", rs.getString(4)));
+        params.add(new BasicNameValuePair("F", rs.getString(5)));
+        datos = URLEncodedUtils.format(params, "utf-8");
+    }
+
+     return datos;
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -295,5 +343,32 @@ public class KPI_General extends Activity {
             ShowMenu();
 
         return super.onKeyDown(keyEvent,event);
+    }
+
+    private class TaskWebview extends AsyncTask<String,Void,Object> {
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+
+
+          //  settings.setDatabaseEnabled(true);
+          //   String path=context.getApplicationContext().getDir("databases",Context.MODE_PRIVATE).getPath();
+          //  settings.setDatabasePath("/data/data/com.marzam.com.appventas/databases");
+          //   settings.setDomStorageEnabled(true);
+          //  settings.setAllowContentAccess(true);
+          //  settings.setAllowFileAccess(true);
+
+            return "";
+        }
+
+        @Override
+        protected void onPostExecute(Object result){
+
+             if(progressDialog.isShowing()){
+                 progressDialog.dismiss();
+             }
+
+        }
     }
 }

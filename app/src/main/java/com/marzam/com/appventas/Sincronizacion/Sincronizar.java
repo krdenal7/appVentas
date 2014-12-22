@@ -29,12 +29,16 @@ import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -328,7 +332,38 @@ public class Sincronizar extends Activity {
 
         return clave;
     }
+    public String ObtenerConsecutivo(String agente){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        Cursor rs=null;
+        String consecutivo="";
 
+        rs=db.rawQuery("select id from consecutivo where clave_agente='"+agente+"'",null);
+
+
+        if(rs.moveToFirst()){
+            consecutivo=rs.getString(0);
+        }
+
+
+        return consecutivo;
+    }
+    public String ObtenerConsecutivo_Visitas(String agente){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        Cursor rs=null;
+        String consecutivo="";
+
+        rs=db.rawQuery("select id from Consecutivo_visitas where clave_agente='"+agente+"'",null);
+
+
+        if(rs.moveToFirst()){
+            consecutivo=rs.getString(0);
+        }
+
+
+        return consecutivo;
+    }
 
     private String getDate(){
 
@@ -360,11 +395,13 @@ public class Sincronizar extends Activity {
             String archivoBack=nomAgente+getDate();
 
             File back=new File(directorio+"/"+archivoBack+".zip");
-            String bd64="";//web.Down_DB(nomAgente+".zip");
+            String bd64=web.Down_DB(nomAgente+".zip");
+            if(!back.exists())
+                   EscribirTXT();
 
             if(back.exists()){
 
-                Object archivo=web.cargarBack(directorio+"/"+archivoBack+".zip",archivoBack+".zip");
+                Object archivo=web.cargarBack(directorio + "/" + archivoBack + ".zip", archivoBack + ".zip");
 
                 if(archivo!=null)
                        back.delete();
@@ -397,7 +434,8 @@ public class Sincronizar extends Activity {
                   f.delete();
 
             AgregarColumnProductos();
-            Object archivo=web.cargarBack(directorio+"/"+archivoBack+".zip",archivoBack+".zip");
+            LeerTxt();
+            Object archivo=web.cargarBack(directorio + "/" + archivoBack + ".zip", archivoBack + ".zip");
 
                if(archivo!=null)
                    back.delete();
@@ -460,5 +498,106 @@ public class Sincronizar extends Activity {
             return true;
         }
         return false;
+    }
+
+    public void LeerTxt(){
+        try {
+            InputStreamReader archivo=new InputStreamReader(openFileInput("datos.txt"));
+            BufferedReader br=new BufferedReader(archivo);
+
+            String agente=br.readLine();
+            String consecutivo=br.readLine();
+            String con_visitas=br.readLine();
+
+           ActualizarBD(agente,consecutivo,con_visitas);
+
+
+        } catch (Exception e) {
+          String   Err=e.toString();
+            e.printStackTrace();
+        }
+
+    }
+
+    public void EscribirTXT(){
+
+        try{
+
+            OutputStreamWriter writer2=new OutputStreamWriter(openFileOutput("datos.txt",Context.MODE_PRIVATE));
+            String agente=ObtenerAgenteActivo();
+            String con=ObtenerConsecutivo(agente);
+            String cont2=ObtenerConsecutivo_Visitas(agente);
+            writer2.write(agente+"\n"+con+"\n"+cont2);
+            writer2.close();
+            ObtenerArchivos2();
+        }catch (Exception e){
+
+        }
+
+    }
+
+    public void ActualizarBD(String agente,String con1,String cont2){
+
+        lite=new CSQLite(context);
+
+        SQLiteDatabase db=lite.getWritableDatabase();
+        db.execSQL("update consecutivo set id='"+con1+"' where clave_agente='"+agente+"'");
+        db.close();
+
+        SQLiteDatabase db1=lite.getWritableDatabase();
+        db1.execSQL("update Consecutivo_visitas set id='"+cont2+"' where clave_agente='"+agente+"'");
+        db1.close();
+
+        SQLiteDatabase db2=lite.getWritableDatabase();
+        db2.execSQL("update agentes set Sesion=1 where clave_agente='"+agente+"'");
+        db2.close();
+
+
+
+    }
+
+
+    public void ObtenerArchivos2(){
+
+        File directorio = new File("/data/data/com.marzam.com.appventas/files");
+        File[] files=directorio.listFiles();
+
+
+        CopiarArchivos2(files);
+    }
+    public void CopiarArchivos2(File[] files){
+        byte[] buffer=new byte[1024];
+        int length;
+        FileOutputStream myOuput=null;
+        try {
+
+            FileInputStream myInput=null;
+
+            File folder = android.os.Environment.getExternalStorageDirectory();
+            File directorio2 = new File(folder.getAbsolutePath() + "/Marzam/preferencias");
+
+
+
+            for(int i=0;i<files.length;i++){
+                try {
+                    myInput = new FileInputStream(files[i]);
+                    String archivo = files[i].getName();
+                    myOuput = new FileOutputStream(directorio2 + "/" + archivo);
+                    while ((length = myInput.read(buffer)) > 0) {
+                        myOuput.write(buffer, 0, length);
+                    }
+
+
+                    myInput.close();
+                }catch (Exception e){continue;}
+
+            }
+            myOuput.close();
+            myOuput.flush();
+        }
+        catch (Exception e){
+            String err=e.toString();
+            Log.e("ErrorCopiar:",e.toString());
+        }
     }
 }

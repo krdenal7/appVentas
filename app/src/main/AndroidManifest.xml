@@ -29,8 +29,8 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/Theme.Theme_marzam"
-        android:largeHeap="true">
+        android:largeHeap="true"
+        android:theme="@style/Theme.Theme_marzam" >
         <activity
             android:name="com.marzam.com.appventas.MainActivity"
             android:label="@string/app_name"
@@ -54,8 +54,9 @@
             android:label="@string/Mapa"
             android:screenOrientation="portrait" >
         </activity>
-        <activity android:name="com.marzam.com.appventas.MapsLocation"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.marzam.com.appventas.MapsLocation"
+            android:screenOrientation="portrait" />
         <activity
             android:name="com.marzam.com.appventas.Graficas.Grafica_Vendedor"
             android:label="@string/title_activity_grafica__vendedor"
@@ -116,12 +117,16 @@
         <activity
             android:name="com.marzam.com.appventas.Gesture.Dib_firma"
             android:label="@string/title_activity_dib_firma"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name="com.marzam.com.appventas.Sincronizacion.Sincronizar"
             android:label="@string/title_activity_sincronizar"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.marzam.com.appventas.KPI.estatus_respuestas"
+            android:label="@string/title_activity_estatus_respuestas" >
         </activity>
     </application>
 

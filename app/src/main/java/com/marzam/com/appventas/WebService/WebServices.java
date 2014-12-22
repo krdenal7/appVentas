@@ -22,7 +22,8 @@ import org.kobjects.base64.Base64;
  */
 public class WebServices {
 
-static String ip="http://190.1.4.120/WebService/WebService.asmx";
+static String ip="http://201.134.159.126/WebService/WebService.asmx";
+
     public Object Upload_BD(String zip,String nombre){
 
            String cadena="";
@@ -186,6 +187,38 @@ static String ip="http://190.1.4.120/WebService/WebService.asmx";
         return respuesta;
     }
 
+    public String UploadCoordenadas(String json){
+
+        String SOAP_ACTION="http://tempuri.org/RegistraGP";
+        String OPERATION_NAME="RegistraGP";
+        String WSDL_TARGET_NAMESPACE="http://tempuri.org/";
+        String SOAP_ADDRESS=ip;
+
+        SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
+        request.addProperty("json",json);
+
+
+        SoapSerializationEnvelope envelope=new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.dotNet=true;
+
+        envelope.setOutputSoapObject(request);
+
+        HttpTransportSE httpTransportSE=new HttpTransportSE(SOAP_ADDRESS);
+        Object response=null;
+
+        try{
+
+            httpTransportSE.call(SOAP_ACTION,envelope);
+            response=envelope.getResponse();
+
+        }catch (Exception e){
+            String a=e.toString();
+            Log.d("WebServiceBakError",a);
+            return null;
+        }
+
+        return response.toString();
+    }
 
     public String Down_DB(String agente){
 
@@ -231,6 +264,39 @@ static String ip="http://190.1.4.120/WebService/WebService.asmx";
         return sb.toString();
     }
 
+    public String Sincronizarrespuestas(String json){
+
+        String SOAP_ACTION="http://tempuri.org/SincronizarRespuestas";
+        String OPERATION_NAME="SincronizarRespuestas";
+        String WSDL_TARGET_NAMESPACE="http://tempuri.org/";
+        String SOAP_ADDRESS=ip;
+
+        SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
+        request.addProperty("jsonPedidos",json);
+
+
+        SoapSerializationEnvelope envelope=new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.dotNet=true;
+
+        envelope.setOutputSoapObject(request);
+
+        HttpTransportSE httpTransportSE=new HttpTransportSE(SOAP_ADDRESS);
+        Object response=null;
+
+        try{
+
+            httpTransportSE.call(SOAP_ACTION,envelope);
+            response=envelope.getResponse();
+
+        }catch (Exception e){
+            String a=e.toString();
+            Log.d("WebServiceBakError",a);
+            return null;
+        }
+
+        return response.toString();
+
+    }
 
 
 

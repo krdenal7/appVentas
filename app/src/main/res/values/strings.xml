@@ -39,5 +39,6 @@
     <string name="title_activity_info_producto">Info_producto</string>
     <string name="title_activity_dib_firma">Dib_firma</string>
     <string name="title_activity_sincronizar">Sincronizar</string>
+    <string name="title_activity_estatus_respuestas">estatus_respuestas</string>
 
 </resources>

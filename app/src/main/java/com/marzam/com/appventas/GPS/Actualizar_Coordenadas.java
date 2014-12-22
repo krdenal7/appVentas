@@ -69,6 +69,7 @@ public class Actualizar_Coordenadas extends Activity {
                 txtLon.setText(lon);
 
 
+                new UpLoadVisitas().execute("");
 
 
             }
@@ -109,9 +110,57 @@ public class Actualizar_Coordenadas extends Activity {
 
         return array.toString();
     }
+    public String Obtener_idCliente(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        Cursor rs=db.rawQuery("select id_cliente from sesion_cliente where Sesion=1",null);
+
+        String cliente="";
+
+        if(rs.moveToFirst()){
+            cliente=rs.getString(0);
+        }
+
+        return cliente;
+    }
+
+
+    public void ActualizarCoordenadasBD(){
+
+        String id_cliente=Obtener_idCliente();
+        
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        db.execSQL("update clientes set latitud='"+lat+"' , longitud='"+lon+"' where id_cliente='"+id_cliente+"'");
+
+
+    }
 
 
 
+    private class UpLoadVisitas extends AsyncTask<String,Void,Object> {
+
+        @Override
+        protected Object doInBackground(String... strings) {
+            WebServices web=new WebServices();
+            ActualizarCoordenadasBD();
+            String resp=web.UploadCoordenadas(ObtenerjsonGP());
+
+
+
+            return resp!=null?"":null;
+        }
+
+        @Override
+        protected void onPostExecute(Object result){
+
+          if(result==null)
+              Toast.makeText(getApplicationContext(),"Error al registrar coordenadas",Toast.LENGTH_LONG).show();
+
+        }
+    }
 
 
     @Override
