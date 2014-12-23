@@ -167,7 +167,7 @@ try {
         producto_row.put("C","Codigo:"+codigo);
         producto_row.put("D","Piezas surtidas:"+piezas_surtidas);
         producto_row.put("E","Precio:"+precio);
-        producto_row.put("F","Factura:"+"");
+        producto_row.put("F","Factura:"+factura);
         data.add(producto_row);
         producto_row=new HashMap<String, String>();
 

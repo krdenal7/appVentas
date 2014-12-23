@@ -90,14 +90,14 @@
 			});
 
      $('#inf').append('<span>Saldo:</span> <span id="saldo">$'+saldo+'</span> <br/>'+
-        '<span>Limite:</span> <span id="limite">$'+limite+'</span><div id="progressbar" style="width:100%; height:15px; margin:0px auto;"></div>');
+        '<span>Límite:</span> <span id="limite">$'+limite+'</span><div id="progressbar" style="width:100%; height:15px; margin:0px auto;"></div>');
 
     $('#container').highcharts({
         chart: {
             type: 'bar',height:'300'
         },
         title: {
-            text: 'Grafica'
+            text: 'Gráfica'
         },
         xAxis: {
             categories: ['Total'],
@@ -195,7 +195,7 @@ function conComas(valor,Deci) {
   <div class="ui-panel-wrapper">
     <div role="main" class="ui-content jqm-content jqm-fullwidth">
       <div id="inf" style="width:90%; margin:0px auto; font-size:20px; color:#000;" ><span>Saldo:</span> <span id="saldo">$91,038.00</span> <br/>
-        <span>Limite:</span> <span id="limite">$288,630.00</span>
+        <span>Límite:</span> <span id="limite">$288,630.00</span>
         <div id="progressbar" style="width:100%; height:15px; margin:0px auto;"></div>
       </div>
       <div id="graficas">

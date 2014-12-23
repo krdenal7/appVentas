@@ -114,7 +114,7 @@ public class pliquidacion extends Activity {
     public void ShowisEnvio(){
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Aviso");
-        alert.setMessage("Desea envíar el pedido?");
+        alert.setMessage("Desea enviar el pedido?");
         alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -217,7 +217,7 @@ public class pliquidacion extends Activity {
                 if(res!="")
                     Toast.makeText(context,res,Toast.LENGTH_LONG).show();
                 else
-                    Toast.makeText(context,"Pedido envíado exitosamente",Toast.LENGTH_LONG).show();
+                    Toast.makeText(context,"Pedido enviado exitosamente",Toast.LENGTH_LONG).show();
                 progress.dismiss();
             }
         }

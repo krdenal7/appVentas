@@ -89,7 +89,7 @@ public class envio_pedido {
             if(res==null) {
                 LimpiarBD_Insertados();
                 updateConsecutivo(agente);
-                return "Fallo al envíar pedidos. Sincronize el dispositivo para envíarlos nuevamente";
+                return "Fallo al enviar pedidos. Sincronize el dispositivo para envíarlos nuevamente";
             }
 
             if(res!=null)
@@ -399,7 +399,7 @@ public class envio_pedido {
     }//Conpleto
   public String Obtener_tipoOrden(){
 
-      return "FD";
+      return "FG";
 
   }
   public String Obtener_descuentoComercial(){
@@ -512,23 +512,26 @@ public class envio_pedido {
 
      Cursor rs=null;
       try{
-
           rs=db.rawQuery("select codigo,Cantidad,precio,clasificacion_fiscal,iva,ieps,precio_final from productos where isCheck=1 ", null);
-
       }catch (Exception e) {
           String err=e.toString();
           Log.d("Error al obtener datos de producto:",err);
       }
-
      int cantidad=rs.getColumnCount();
      String id_pedido=Obtener_idPedido();
      String orden=Obtener_tipoOrden();
      String desc=Obtener_descuentoComercial();
-
      while (rs.moveToNext()){
+         String codigo=rs.getString(0);
+         String cant=rs.getString(1);
+         String precio=rs.getString(2);
+         String clasificacion=rs.getString(3);
+         String iva=rs.getString(4);
+         String ieps=rs.getString(5);
+         String final_p=rs.getString(6);
 
          String query="insert into detalle_pedido(id_pedido,codigo,piezas_pedidas,piezas_surtidas,precio_farmacia,clasfificacion_fiscal,oferta,desc_comercial,precio_neto,iva,ieps,factura_marzam,orden)values" +
-        "('"+id_pedido+"','"+rs.getString(0)+"',"+rs.getString(1)+",0,"+rs.getString(2)+",'"+rs.getString(3)+"',"+Obtener_oferta(rs.getString(0))+","+desc+","+rs.getString(6)+","+rs.getString(4)+","+rs.getString(5)+",'','"+orden+"')";
+        "('"+id_pedido+"','"+codigo+"',"+cant+",0,"+precio+",'"+clasificacion+"',"+Obtener_oferta(rs.getString(0))+","+desc+","+final_p+","+iva+","+ieps+",'','"+orden+"')";
 
          try {
 

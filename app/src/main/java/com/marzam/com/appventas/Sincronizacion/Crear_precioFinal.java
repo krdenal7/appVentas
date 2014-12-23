@@ -1,5 +1,6 @@
 package com.marzam.com.appventas.Sincronizacion;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -8,6 +9,7 @@ import android.widget.Toast;
 
 import com.marzam.com.appventas.SQLite.CSQLite;
 
+import java.sql.SQLDataException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,12 +43,15 @@ public class Crear_precioFinal {
 
         /*Pasos*/
 
+
         /*1-.*/Obtener_Prodcutos_Descliente();
         /*2-.*/Generar_PrecioFinal_Descliente();
         /*3-.*/data.clear();
         /*4-.*/Obtener_Productos_DescMenor();
         /*5-.*/Generar_PrecioFinal_DescMenor();
-        /*6-.*/Llenar_precioFinal_precio();
+        /*6-.*///Llenar_precioFinal_precio();
+        /*6-.*/Obtener_Productos_SoloOferta();
+        /*7-.*/Generar_PrecioFinal_SoloOferta();
 
 
     }
@@ -64,6 +69,8 @@ public class Crear_precioFinal {
     public void Extraer_Casificacion(){
 
        SQLiteDatabase db=lite.getWritableDatabase();
+
+       db.execSQL("update clasificacion_fiscal set aplicacion=1");
        Cursor rs=db.rawQuery("select * from clasificacion_fiscal where aplicacion=1",null);
 
        String desCliente="";
@@ -151,6 +158,29 @@ public class Crear_precioFinal {
        }
        db.close();
    }//Llena una lista con los productos a los cuales se les aplica el descuento menor
+   public void Obtener_Productos_SoloOferta(){
+
+       SQLiteDatabase db=lite.getWritableDatabase();
+
+       Cursor rs=null;
+
+       String query="select codigo,precio,descripcion  from productos where precio_final=''";
+
+       rs=db.rawQuery(query,null);
+       data=new ArrayList<HashMap<String, ?>>();
+       Hasproducto=new HashMap<String, String>();
+
+       while (rs.moveToNext()){
+
+           Hasproducto.put("A",rs.getString(0));
+           Hasproducto.put("B",rs.getString(1));
+           Hasproducto.put("C",rs.getString(2));
+           data.add(Hasproducto);
+           Hasproducto=new HashMap<String, String>();
+       }
+       db.close();
+
+   }
     public String Obtener_idCliente(){
 
         SQLiteDatabase db=lite.getWritableDatabase();
@@ -166,13 +196,9 @@ public class Crear_precioFinal {
 
         return cliente;
     }
-
    public void Generar_PrecioFinal_Descliente(){
 
        String codigo="";
-       String Fecha=getDate();
-       Double iva=0.00;
-       Double ieps=0.00;
        Double precioFarmacia=0.00;
        Double oferta=0.00;
        Double desc_comercial=Obtener_DescuentoDelCliente(Obtener_idCliente());
@@ -187,12 +213,10 @@ public class Crear_precioFinal {
 
                codigo = data.get(i).get("A").toString();
                precioFarmacia = Double.parseDouble(data.get(i).get("B").toString());
-               iva = Double.parseDouble(data.get(i).get("C").toString());
-               ieps = Double.parseDouble(data.get(i).get("D").toString());
 
 
            /*se obtiene la oferta*/
-            Cursor   rs = db.rawQuery("select descuento from ofertas where codigo='" + codigo + "'  and vigencia_incio >='" + Fecha + "'   and vigencia_fin <= '" + Fecha + "'", null);
+            Cursor   rs = db.rawQuery("select descuento from ofertas where codigo='" + codigo + "'", null);
 
                if (rs.moveToFirst())
                    oferta = Double.parseDouble(rs.getString(0));
@@ -201,7 +225,6 @@ public class Crear_precioFinal {
 
                Double precio1 = ((precioFarmacia - (precioFarmacia * oferta / 100)));
                Double precio2 = (precio1 - (precio1 * desc_comercial / 100));
-           //  Double precio3 = (precio2 + (precio2 * ieps / 100));
                Double total = precio2;
 
 
@@ -209,8 +232,6 @@ public class Crear_precioFinal {
                db.execSQL("update productos set precio_final='" + Stotal + "' where codigo='" + codigo + "'");
 
 
-               iva = 0.00;
-               ieps = 0.00;
                precioFarmacia = 0.00;
                oferta = 0.00;
                }catch (Exception e){
@@ -232,7 +253,7 @@ public class Crear_precioFinal {
        Double iva=0.00;
        Double ieps=0.00;
        Double precioFarmacia=0.00;
-       Double oferta=null;
+       Double oferta=0.00;
        Double desc_comercial=Obtener_DescuentoDelCliente(Obtener_idCliente());
 
        SQLiteDatabase db=lite.getWritableDatabase();
@@ -249,7 +270,7 @@ public class Crear_precioFinal {
 
 
            /*se obtiene la oferta*/
-            Cursor   rs = db.rawQuery("select descuento from ofertas where codigo='" + codigo + "'  and vigencia_incio >='" + Fecha + "'   and vigencia_fin <= '" + Fecha + "'", null);
+            Cursor   rs = db.rawQuery("select descuento from ofertas where codigo='" + codigo + "'", null);
 
                if (rs.moveToFirst())
                    oferta = Double.parseDouble(rs.getString(0));
@@ -295,6 +316,38 @@ public class Crear_precioFinal {
 
 
    }
+
+    public void Generar_PrecioFinal_SoloOferta(){
+
+        String codigo="";
+        Double precio=0.00;
+        Double total=0.00;
+        Double oferta=0.00;
+     SQLiteDatabase db=lite.getWritableDatabase();
+
+     for(int i=0;i<data.size();i++){
+
+         codigo=data.get(i).get("A").toString();
+         precio=Double.parseDouble(data.get(i).get("B").toString());
+
+         Cursor rs=db.rawQuery("select descuento from ofertas where codigo='"+codigo+"'",null);
+
+         if(rs.moveToFirst()){
+            oferta=Double.parseDouble(rs.getString(0));
+         }
+
+         Double Total1=(precio*oferta)/100;
+         total=precio-Total1;
+
+         String stotal=String.format(Locale.US, "%.2f", total);
+
+         db.execSQL("update productos set precio_final='"+stotal+"' where codigo='"+codigo+"'");
+
+
+     }
+
+
+    }
 
 
    public String where(String[] dat){

@@ -198,7 +198,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
-        String query="select id_cliente from agenda where numero_empleado='"+agente+"' and id_frecuencia in"+where()+"";
+        String query="select id_cliente from agenda where numero_empleado='"+agente+"' and id_frecuencia in"+where()+" order by orden_visita";
 
         Cursor cursor=db.rawQuery(query,null);
 
@@ -241,7 +241,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor cursor=db.rawQuery("select id_cliente from  agenda where numero_empleado='"+agente+"'",null);
+        Cursor cursor=db.rawQuery("select distinct(id_cliente) from  agenda where numero_empleado='"+agente+"' ",null);
 
         clientes=new CharSequence[cursor.getCount()];
         datos=new CharSequence[cursor.getCount()];

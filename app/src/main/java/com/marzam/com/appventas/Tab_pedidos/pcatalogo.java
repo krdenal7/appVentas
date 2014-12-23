@@ -12,8 +12,10 @@ import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,6 +42,7 @@ import com.marzam.com.appventas.WebService.WebServices;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.zip.Inflater;
 
 
@@ -94,23 +97,25 @@ public class pcatalogo extends Activity {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
 
-                  String charseq=charSequence.toString();
-                  int cant=charSequence.length();
 
-                 if(charSequence.length()>=2) {
+                try {
+                    if (charSequence.length() >= 2) {
 
 
-                     pcatalogo.this.simpleAdapter.getFilter().filter(charSequence);
-                     Filter cont =  simpleAdapter.getFilter();
+                        pcatalogo.this.simpleAdapter.getFilter().filter(charSequence);
+                        Filter cont = simpleAdapter.getFilter();
 
-                     if (cont != null) {
-                             lproductos.setAdapter(simpleAdapter);
-                                       }
-                 }else {
-                             lproductos.setAdapter(adapter1);
-                 }
+                        if (cont != null) {
+                            lproductos.setAdapter(simpleAdapter);
+                        }
+                    } else {
+                        lproductos.setAdapter(adapter1);
+                    }
+                }catch (Exception e){
 
-            }
+                }
+                }
+
 
             @Override
             public void afterTextChanged(Editable editable) {
@@ -169,11 +174,12 @@ public class pcatalogo extends Activity {
 
             public void onClick(DialogInterface dialog, int id) {
 
-                LlenarModelItems();
-                adapter1=new CustomAdapter(context,modelItems);
-                lproductos.setAdapter(adapter1);
-                EditBuscar.setText("");
-                new UpdateList().execute("");
+
+                  //LlenarModelItems();
+                 //adapter1=new CustomAdapter(context,modelItems);
+                 //lproductos.setAdapter(adapter1);
+                 //EditBuscar.setText("");
+                 //new UpdateList().execute("");
 
             }
 
@@ -189,20 +195,30 @@ public class pcatalogo extends Activity {
     public void ShowDialog_picker(final String codigo){
 
         llenar_picker();
+        final EditText txtCantidad=new EditText(context);
+        txtCantidad.setHint("cantidad");
+        txtCantidad.setInputType(InputType.TYPE_CLASS_NUMBER);
 
         AlertDialog.Builder alert1=new AlertDialog.Builder(context);
         alert1.setTitle("Seleccione una cantidad");
-        alert1.setView(picker);
+        alert1.setView(txtCantidad);
         alert1.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
+                int cantidad=Integer.parseInt(txtCantidad.getText().toString());
                 AgregarProducto(codigo,0,1);
-                AgregarProducto(codigo,(picker.getValue())-1,1);
-                adapter1=new CustomAdapter(context,modelItems);
-                lproductos.setAdapter(adapter1);
-                EditBuscar.setText("");
-                new UpdateList().execute("");
+
+                if(cantidad!=0)
+                AgregarProducto(codigo,cantidad,1);
+
+                else
+                AgregarProducto(codigo,0,0);
+
+               // adapter1=new CustomAdapter(context,modelItems);
+               // lproductos.setAdapter(adapter1);
+               // EditBuscar.setText("");
+               // new UpdateList().execute("");
 
             }
         });
@@ -244,18 +260,20 @@ public class pcatalogo extends Activity {
 
         Cursor rs=null;
 
-        String query="select descripcion,precio,Cantidad,codigo,precio_final  from productos";
+        String query="select descripcion,precio,Cantidad,codigo,precio_final,clasificacion_fiscal from productos";
 
         rs=db.rawQuery(query,null);
         data=new ArrayList<HashMap<String, ?>>();
         producto_row=new HashMap<String, String>();
 
         while (rs.moveToNext()){
+
             producto_row.put("A",rs.getString(0));
             producto_row.put("B","Precio Lista: $"+rs.getString(1));
             producto_row.put("C","Cantidad: "+rs.getString(2));
             producto_row.put("D",rs.getString(3));
             producto_row.put("E","Precio Final: $"+rs.getString(4));
+            producto_row.put("F","Clasificación: "+rs.getString(5));
             data.add(producto_row);
             producto_row=new HashMap<String, String>();
         }
@@ -273,7 +291,7 @@ public class pcatalogo extends Activity {
       Cursor rs=null;
 
         try {
-            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,codigo,precio_final  from productos limit 1000 ",null);
+            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,codigo,precio_final,clasificacion_fiscal  from productos limit 1000 ",null);
         }catch (Exception e){
             String err="Error:"+e.toString();
             Log.d("Error:",err);
@@ -286,7 +304,8 @@ public class pcatalogo extends Activity {
         int cont=0;
 
         while (rs.moveToNext()){
-            modelItems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5));
+
+            modelItems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6));
             cont++;
         }
 
@@ -347,6 +366,7 @@ public class pcatalogo extends Activity {
 
         final int[] cont = {0};
 
+
         boton1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -354,6 +374,7 @@ public class pcatalogo extends Activity {
                 AgregarProducto(codigo,0,0);
                 cont[0]=0;
                 txt3.setText("0");
+
 
             }
         });
@@ -363,7 +384,7 @@ public class pcatalogo extends Activity {
 
                 AgregarProducto(codigo,1,1);
                 int val=Integer.parseInt(info[2]);
-                txt3.setText(""+((val+ cont[0])+1));
+                txt3.setText("" + ((val + cont[0]) + 1));
                 cont[0]++;
 
             }
@@ -446,7 +467,7 @@ public class pcatalogo extends Activity {
 
 
         LlenarHasmap();//llena el arreglo para el simpleAdapter
-        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","E","C"},new int[]{R.id.textView30,R.id.textView31,R.id.textView60,R.id.textView32});
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","E","C","F"},new int[]{R.id.textView30,R.id.textView31,R.id.textView60,R.id.textView32,R.id.textView71});
 
     }
 

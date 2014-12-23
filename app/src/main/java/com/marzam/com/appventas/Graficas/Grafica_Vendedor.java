@@ -52,10 +52,11 @@ public class Grafica_Vendedor extends Activity {
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-       String query="select sum(impote_total) as vendido,a.nombre,p.presupuesto_ventas from encabezado_pedido as e\n" +
-               "inner join agentes as a on e.clave_agente=a.clave_agente\n" +
-               "inner join presupuesto_agente as p on a.clave_agente=p.clave_agente  where e.clave_agente='"+clave_agente+"'";
+       String query="select sum(impote_total) as vendido from encabezado_pedido where clave_agente='"+clave_agente+"'";
        Cursor rs=db.rawQuery(query,null);
+       Cursor rs2=null;
+       Cursor rs3=null;
+        String presupuesto="0";
 
 
         if(rs.moveToFirst()){
@@ -64,14 +65,26 @@ public class Grafica_Vendedor extends Activity {
             params.add(new BasicNameValuePair("A", String.valueOf(rs.getDouble(0))));
             Double ritmo=(rs.getDouble(0)/dias_transcurridos())*dias();
             params.add(new BasicNameValuePair("B", String.valueOf(ritmo)));
-            params.add(new BasicNameValuePair("C",rs.getString(1)));
-            String presupuesto=rs.getString(2)==null?"0":rs.getString(2);
+
+            rs2=db.rawQuery("select nombre from agentes where clave_agente='"+clave_agente+"' ",null);
+
+            if(rs2.moveToFirst()) {
+                params.add(new BasicNameValuePair("C", rs2.getString(0)));
+                                  }
+
+            rs3=db.rawQuery("select presupuesto_ventas from presupuesto_agente where clave_agente='"+clave_agente+"'",null);
+
+            if(rs3.moveToFirst()) {
+                presupuesto = String.valueOf(rs3.getString(0));
+                                  }
+
             params.add(new BasicNameValuePair("D",presupuesto));
+
             url = URLEncodedUtils.format(params, "utf-8");
 
         }
 
-        return  url;
+        return  url.replace("+","%20");
     }
     public String ObtenerClavedeAgente(){
 

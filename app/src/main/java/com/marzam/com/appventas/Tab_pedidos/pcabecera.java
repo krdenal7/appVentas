@@ -66,7 +66,7 @@ public class pcabecera extends Activity {
         txt_idPedido.setText(Obtener_idpedido());
 
         spinner=(Spinner)findViewById(R.id.spinner);
-        String[]tipoFac={"FD"};
+        String[]tipoFac={"FG"};
         ArrayAdapter arrayAdapter=new ArrayAdapter(context,android.R.layout.simple_spinner_dropdown_item,tipoFac);
         spinner.setAdapter(arrayAdapter);
 
@@ -158,7 +158,7 @@ public class pcabecera extends Activity {
     public void ShowisEnvio(){
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Aviso");
-        alert.setMessage("Desea envíar el pedido?");
+        alert.setMessage("Desea enviar el pedido?");
         alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -209,7 +209,7 @@ public class pcabecera extends Activity {
                 if(res!="")
                     Toast.makeText(context,res,Toast.LENGTH_LONG).show();
                 else
-                    Toast.makeText(context,"Pedido envíado exitosamente",Toast.LENGTH_LONG).show();
+                    Toast.makeText(context,"Pedido enviado exitosamente",Toast.LENGTH_LONG).show();
                 progress.dismiss();
             }
         }

@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.Filterable;
 import android.widget.NumberPicker;
 import android.widget.TextView;
@@ -34,7 +36,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     TextView Cantidad;
     TextView Precio;
     TextView Precio_neto;
-
+    TextView Clasificacion;
     CSQLite lite;
 
     Button boton1;
@@ -92,6 +94,9 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
     Precio_neto=(TextView)convertView.findViewById(R.id.textView58);
     Precio_neto.setText("Precio Final: $"+modelitems[position].getPrecio_neto());
+
+    Clasificacion=(TextView)convertView.findViewById(R.id.textView2);
+    Clasificacion.setText("Clasificación: "+modelitems[position].getClasificacion());
 
 
 
@@ -157,16 +162,23 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     }
     public void ShowDialog_picker(final int posicion, final View view){
         llenar_picker();
+
+        final EditText txtCantidad=new EditText(context);
+        txtCantidad.setHint("cantidad");
+        txtCantidad.setInputType(InputType.TYPE_CLASS_NUMBER);
+
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Seleccione una cantidad");
-        alert.setView(picker);
+        alert.setView(txtCantidad);
         alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
 
+                int cant=Integer.parseInt(txtCantidad.getText().toString());
+
                 Agregar_Producto(view,0,posicion);
-                Agregar_Producto(view,(picker.getValue())-1,posicion);
+                Agregar_Producto(view,cant,posicion);
 
             }
         });
@@ -257,7 +269,9 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
         Cursor rs=null;
 
         try {
-            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,codigo,precio_final  from productos limit 1000",null);
+
+            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,codigo,precio_final,clasificacion_fiscal  from productos limit 1000",null);
+
         }catch (Exception e){
             String err="Error:"+e.toString();
             Log.d("Error:", err);
@@ -270,7 +284,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
         int cont=0;
 
         while (rs.moveToNext()){
-            modelitems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5));
+            modelitems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6));
             cont++;
         }
 

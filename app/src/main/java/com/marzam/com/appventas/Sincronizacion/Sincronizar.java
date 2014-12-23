@@ -529,7 +529,7 @@ public class Sincronizar extends Activity {
             String cont2=ObtenerConsecutivo_Visitas(agente);
             writer2.write(agente+"\n"+con+"\n"+cont2);
             writer2.close();
-            ObtenerArchivos2();
+          //ObtenerArchivos2();
         }catch (Exception e){
 
         }
@@ -557,15 +557,15 @@ public class Sincronizar extends Activity {
     }
 
 
-    public void ObtenerArchivos2(){
+    public void ObtenerArchivos(){
 
         File directorio = new File("/data/data/com.marzam.com.appventas/files");
         File[] files=directorio.listFiles();
 
 
-        CopiarArchivos2(files);
+        CopiarArchivos(files);
     }
-    public void CopiarArchivos2(File[] files){
+    public void CopiarArchivos(File[] files){
         byte[] buffer=new byte[1024];
         int length;
         FileOutputStream myOuput=null;

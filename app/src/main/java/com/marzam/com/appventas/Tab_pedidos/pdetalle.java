@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -224,7 +225,7 @@ public class pdetalle extends Activity {
     public void ShowisEnvio(){
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Aviso");
-        alert.setMessage("Desea envíar el pedido?");
+        alert.setMessage("Desea enviar el pedido?");
         alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -245,15 +246,22 @@ public class pdetalle extends Activity {
 
         llenar_picker();
 
+
+        final EditText txtCantidad=new EditText(context);
+        txtCantidad.setHint("cantidad");
+        txtCantidad.setInputType(InputType.TYPE_CLASS_NUMBER);
+
         AlertDialog.Builder alert1=new AlertDialog.Builder(context);
         alert1.setTitle("Seleccione una cantidad");
-        alert1.setView(picker);
+        alert1.setView(txtCantidad);
         alert1.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
+                int cant=Integer.parseInt(txtCantidad.getText().toString());
+
                 AgregarProducto(codigo,0,1);
-                AgregarProducto(codigo,(picker.getValue())-1,1);
+                AgregarProducto(codigo,cant,1);
 
 
             }
@@ -517,7 +525,7 @@ public class pdetalle extends Activity {
                 if(res!="")
                 Toast.makeText(context,res,Toast.LENGTH_LONG).show();
                 else
-                Toast.makeText(context,"Pedido envíado exitosamente",Toast.LENGTH_LONG).show();
+                Toast.makeText(context,"Pedido enviado exitosamente",Toast.LENGTH_LONG).show();
             }
         }
     }
