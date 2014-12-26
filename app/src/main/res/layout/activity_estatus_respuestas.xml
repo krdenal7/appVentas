@@ -6,11 +6,10 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.marzam.com.appventas.KPI.estatus_respuestas">
 
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/listView3"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+   <ExpandableListView
+       android:layout_width="fill_parent"
+       android:layout_height="fill_parent"
+       android:id="@+id/lsexpandible">
+
+       </ExpandableListView>
 </RelativeLayout>

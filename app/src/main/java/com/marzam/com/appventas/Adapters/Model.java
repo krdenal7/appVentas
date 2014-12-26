@@ -1,4 +1,4 @@
-package com.marzam.com.appventas;
+package com.marzam.com.appventas.Adapters;
 
 /**
  * Created by SAMSUMG on 18/11/2014.

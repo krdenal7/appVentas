@@ -1,8 +1,10 @@
 package com.marzam.com.appventas.KPI;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -11,10 +13,15 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
+import com.marzam.com.appventas.Adapters.CustomAdapter_ListExpandible;
+import com.marzam.com.appventas.MainActivity;
+import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Sincronizacion.Crear_precioFinal;
@@ -32,10 +39,13 @@ public class estatus_respuestas extends Activity {
     Context context;
     CSQLite lite;
     ProgressDialog progressDialog;
-    ListView list;
-    SimpleAdapter simpleAdapter;
-    HashMap<String,String> producto_row;
-    static ArrayList<HashMap<String,?>> data=null;
+
+
+    /*Lista Expandible*/
+    ExpandableListAdapter expandableListAdapter;
+    ExpandableListView expandable;
+    String[] groups;
+    String[][] children;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +53,13 @@ public class estatus_respuestas extends Activity {
         setTitle("Estatus de pedidos");
         setContentView(R.layout.activity_estatus_respuestas);
         context=this;
-        list=(ListView)findViewById(R.id.listView3);
+      // list=(ListView)findViewById(R.id.listView3);
 
+        expandable=(ExpandableListView)findViewById(R.id.lsexpandible);
+      //  expandableListAdapter=new CustomAdapter_ListExpandible(context,groups,children);
+      //  expandable.setAdapter(expandableListAdapter);
+        progressDialog=ProgressDialog.show(context,"Obteniendo estatus de pedidos","Cargando",true,false);
         new DownEstatus().execute("");
-        progressDialog = ProgressDialog.show(context, "Descargando estatus", "Cargando", true, false);
 
     }
 
@@ -77,20 +90,23 @@ public class estatus_respuestas extends Activity {
         JSONArray array=new JSONArray();
         JSONObject object=new JSONObject();
 
-        rs=db.rawQuery("select id_pedido from encabezado_pedido where clave_agente='"+agente+"' and id_estatus='20'",null);
+        rs=db.rawQuery("select id_pedido from encabezado_pedido where clave_agente='"+agente+"' and id_estatus<>'10'",null);
 
        if(rs.getCount()<=0)
-           return null;
+                 return null;
 
         while (rs.moveToNext()){
             try {
+
                 object.put("id_Pedido",rs.getString(0));
+                array.put(object);
+                object=new JSONObject();
             } catch (JSONException e) {
                 object.put("id_Pedido","");
             }
         }
 
-        array.put(object);
+
 
         return array.toString();
     }
@@ -108,7 +124,7 @@ public class estatus_respuestas extends Activity {
                     if(jsonStatus==null)
                                return null;
 
-                   json=web.Sincronizarrespuestas(ObtenerjsonStatus());
+                   json=web.Sincronizarrespuestas(jsonStatus);
 
                 if(json!=null)
                      llenarHasMap(json);
@@ -125,17 +141,13 @@ public class estatus_respuestas extends Activity {
 
             if(progressDialog.isShowing()){
 
-                if(result==null) {
-                    Toast.makeText(context, "No se encontraron respuestas de pedidos", Toast.LENGTH_SHORT).show();
-                    String[] dat={"Sin respuesta de pedidos"};
-                    ArrayAdapter adapter=new ArrayAdapter(context,android.R.layout.simple_list_item_1,dat);
-                    list.setAdapter(adapter);
-                }
-                else {
-                    simpleAdapter = new SimpleAdapter(context, data, R.layout.row_estatus, new String[]{"A", "B", "C", "D", "E", "F"}, new int[]{R.id.textView65, R.id.textView66, R.id.textView67, R.id.textView68, R.id.textView69, R.id.textView70});
-                    list.setAdapter(simpleAdapter);
-                }
+                if(result==null){
+                    ShowSinDatos();
+                }else{
 
+                 expandableListAdapter=new CustomAdapter_ListExpandible(context,groups,children);
+                 expandable.setAdapter(expandableListAdapter);
+                }
                 progressDialog.dismiss();
 
             }
@@ -143,13 +155,31 @@ public class estatus_respuestas extends Activity {
         }
     }
 
+    public void ShowSinDatos(){
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Información");
+        alert.setIcon(android.R.drawable.ic_dialog_alert);
+        alert.setMessage("No se encontro información de pedidos");
+        alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                startActivity(new Intent(getBaseContext(), MapsLocation.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                finish();
+            }
+        });
+        AlertDialog alertDialog=alert.create();
+        alertDialog.show();
+
+    }
+
     public void llenarHasMap(String json){
 
-        data=new ArrayList<HashMap<String, ?>>();
-        producto_row=new HashMap<String, String>();
 try {
 
         JSONArray array = new JSONArray(json);
+        groups=new String[array.length()];
+        children=new String[array.length()][5];
 
     for (int i = 0; i < array.length(); i++) {
 
@@ -162,22 +192,32 @@ try {
         String precio=jsonData.getString("precio_neto");
         String factura=jsonData.getString("factura_marzam");
 
-        producto_row.put("A","Pedido:"+id);
-        producto_row.put("B","Estatus:"+ObtenerStatus(estatus));
-        producto_row.put("C","Codigo:"+codigo);
-        producto_row.put("D","Piezas surtidas:"+piezas_surtidas);
-        producto_row.put("E","Precio:"+precio);
-        producto_row.put("F","Factura:"+factura);
-        data.add(producto_row);
-        producto_row=new HashMap<String, String>();
+        groups[i]="Pedido: "+id;
 
+        for(int i2=0;i2<5;i2++) {
+            switch (i2) {
+                case 0:
+                    children[i][0] ="Estatus: "+ObtenerStatus(estatus);
+                    break;
+                case 1:
+                    children[i][1] ="Codigo: "+codigo;
+                    break;
+                case 2:
+                    children[i][2] ="Piezas surtidas: "+piezas_surtidas;
+                    break;
+                case 3:
+                    children[i][3] ="Precio: "+precio;
+                    break;
+                case 4:
+                    children[i][4] ="Factura:"+factura;
+            }
+        }
 
     }
 }catch (Exception e){
-
+    String err=e.toString();
+    e.printStackTrace();
 }
-
-
     }
 
     public String ObtenerStatus(String id){

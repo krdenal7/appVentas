@@ -126,7 +126,8 @@
         </activity>
         <activity
             android:name="com.marzam.com.appventas.KPI.estatus_respuestas"
-            android:label="@string/title_activity_estatus_respuestas" >
+            android:label="@string/title_activity_estatus_respuestas"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 

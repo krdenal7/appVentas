@@ -7,15 +7,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,19 +28,13 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.marzam.com.appventas.CustomAdapter;
-import com.marzam.com.appventas.KPI.KPI_General;
-import com.marzam.com.appventas.MainActivity;
-import com.marzam.com.appventas.Model;
+import com.marzam.com.appventas.Adapters.CustomAdapter;
+import com.marzam.com.appventas.Adapters.Model;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
-import com.marzam.com.appventas.Sincronizacion.Crear_precioFinal;
-import com.marzam.com.appventas.WebService.WebServices;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
-import java.util.zip.Inflater;
 
 
 public class pcatalogo extends Activity {

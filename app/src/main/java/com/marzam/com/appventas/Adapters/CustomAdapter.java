@@ -1,4 +1,4 @@
-package com.marzam.com.appventas;
+package com.marzam.com.appventas.Adapters;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -15,13 +15,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Filterable;
 import android.widget.NumberPicker;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 
 
