@@ -12,8 +12,8 @@ public class Model {
     String ean;
     String precio_neto;
     String clasificacion;
-
-    public Model(String name, int value,int cantidad,String precio,String ean,String precio_neto,String clasificacion){
+    String oferta;
+    public Model(String name, int value,int cantidad,String precio,String ean,String precio_neto,String clasificacion,String oferta){
         this.name=name;
         this.value=value;
         this.cantidad=cantidad;
@@ -21,6 +21,7 @@ public class Model {
         this.ean=ean;
         this.precio_neto=precio_neto;
         this.clasificacion=clasificacion;
+        this.oferta=oferta;
     }
     public String getName(){
         return this.name;
@@ -35,5 +36,6 @@ public class Model {
     public String getPrecio_neto(){return  this.precio_neto;}
     public String getEan(){return  this.ean;}
     public String getClasificacion(){return  this.clasificacion;}
+    public String getOferta(){return this.oferta;}
 
 }

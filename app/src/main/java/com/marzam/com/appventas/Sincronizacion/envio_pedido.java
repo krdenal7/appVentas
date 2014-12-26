@@ -291,11 +291,12 @@ public class envio_pedido {
 
 
 
+          Double iep=(precio*ieps1/100)*cantidad;
           Double cant1=(precio*ieps1/100);
           Double cant=((precio)+cant1);
-          Double cant2=(cant*iva1/100);
+          Double cant2=(cant*iva1/100)*cantidad;
 
-          ieps+=cant1;
+          ieps+=iep;
           iva+=cant2;
 
           total_piezas+=cantidad;

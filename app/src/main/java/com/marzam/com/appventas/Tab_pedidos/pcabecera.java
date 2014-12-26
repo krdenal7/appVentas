@@ -28,6 +28,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.marzam.com.appventas.Gesture.Dib_firma;
+import com.marzam.com.appventas.KPI.KPI_General;
+import com.marzam.com.appventas.MainActivity;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Sincronizacion.envio_pedido;
@@ -204,13 +206,32 @@ public class pcabecera extends Activity {
         @Override
         protected void onPostExecute(Object result){
 
+            AlertDialog.Builder alert=new AlertDialog.Builder(context);
+            alert.setTitle("Envio de pedido");
+            alert.setIcon(android.R.drawable.ic_dialog_info);
+
             if(progress.isShowing()) {
                 String res=String.valueOf(result);
                 if(res!="")
-                    Toast.makeText(context,res,Toast.LENGTH_LONG).show();
+              alert.setMessage(res);
                 else
-                    Toast.makeText(context,"Pedido enviado exitosamente",Toast.LENGTH_LONG).show();
+              alert.setMessage("Pedido enviado exitosamente");
+
                 progress.dismiss();
+
+              alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+                  @Override
+                  public void onClick(DialogInterface dialogInterface, int i) {
+
+                      startActivity(new Intent(getBaseContext(), KPI_General.class)
+                              .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                      finish();
+
+                  }
+              });
+
+                AlertDialog alertDialog=alert.create();
+                alertDialog.show();
             }
         }
     }

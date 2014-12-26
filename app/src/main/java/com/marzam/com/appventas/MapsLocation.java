@@ -69,6 +69,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     AlertDialog alertDialogT;
     AlertDialog alertDialogAct;
     String[] clientesH;
+    String[] clientesT;
     String CteAct="";
     ProgressDialog progressDialog;
 
@@ -111,12 +112,15 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                     ShowCteT();
                 if(i==2){
 
-                    Intent intent=new Intent(context, estatus_respuestas.class);
-                    startActivity(intent);
+                    startActivity(new Intent(getBaseContext(), estatus_respuestas.class)
+                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                    finish();
+
                 }
                 if(i==3){
-                    Intent intent=new Intent(context, Sincronizar.class);
-                    startActivity(intent);
+                    startActivity(new Intent(getBaseContext(), Sincronizar.class)
+                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                    finish();
                 }
 
             }
@@ -159,6 +163,9 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
+                if(!VerificarSesion_Cliente(clientesT[i])){
+                    ShowSesionActiva();
+                }
             }
         });
         alertDialogT=alert.create();
@@ -234,8 +241,6 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         return datos;
     }
     public CharSequence[] ObtenerCteTotales(String agente){
-
-        CharSequence[] clientes=null;
         CharSequence[] datos=null;
 
         lite=new CSQLite(context);
@@ -243,11 +248,11 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         Cursor cursor=db.rawQuery("select distinct(id_cliente) from  agenda where numero_empleado='"+agente+"' ",null);
 
-        clientes=new CharSequence[cursor.getCount()];
+        clientesT=new String[cursor.getCount()];
         datos=new CharSequence[cursor.getCount()];
         int cont=0;
         while (cursor.moveToNext()){
-            clientes[cont]=cursor.getString(0);
+            clientesT[cont]=cursor.getString(0);
             cont++;
         }
 
@@ -255,7 +260,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
          for(int i=0;i<datos.length;i++){
 
-             rs=db.rawQuery("select id_cliente,nombre from clientes where id_cliente='"+clientes[i]+"' ",null);
+             rs=db.rawQuery("select id_cliente,nombre from clientes where id_cliente='"+clientesT[i]+"' ",null);
 
              if(rs.moveToFirst()){
                  datos[i]=rs.getString(0)+"-"+rs.getString(1);

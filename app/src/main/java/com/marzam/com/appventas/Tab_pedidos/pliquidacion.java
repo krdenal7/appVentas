@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.marzam.com.appventas.Gesture.Dib_firma;
+import com.marzam.com.appventas.KPI.KPI_General;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Sincronizacion.envio_pedido;
@@ -69,10 +70,16 @@ public class pliquidacion extends Activity {
         txtIva=(TextView)findViewById(R.id.textView16);
         txtIeps=(TextView)findViewById(R.id.textView18);
 
-        txtSubtotal.setText("$"+String.format(Locale.US,"%.2f",subTotal));
-        txtTotal.setText("$"+String.format(Locale.US,"%.2f",total));
-        txtIeps.setText("$"+String.format(Locale.US,"%.2f",ieps));
-        txtIva.setText("$"+String.format(Locale.US,"%.2f",iva));
+        NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
+        DecimalFormat dec=(DecimalFormat)nf;
+
+
+
+
+        txtSubtotal.setText("$"+ dec.format(subTotal));
+        txtTotal.setText("$"+dec.format(total));
+        txtIeps.setText("$"+dec.format(ieps));
+        txtIva.setText("$"+dec.format(iva));
         txtCantp.setText(""+CantProductos);
 
     }
@@ -164,12 +171,12 @@ public class pliquidacion extends Activity {
 
 
 
-
+            Double iep=(precio*ieps1/100)*cantidad;
             Double cant1=(precio*ieps1/100);
             Double cant=((precio)+cant1);
-            Double cant2=(cant*iva1/100);
+            Double cant2=(cant*iva1/100)*cantidad;
 
-            ieps+=cant1;
+            ieps+=iep;
             iva+=cant2;
 
             CantProductos+=cantidad;
@@ -212,13 +219,30 @@ public class pliquidacion extends Activity {
         @Override
         protected void onPostExecute(Object result){
 
+            AlertDialog.Builder alert=new AlertDialog.Builder(context);
+            alert.setTitle("Envio de pedido");
+            alert.setIcon(android.R.drawable.ic_dialog_info);
+
             if(progress.isShowing()) {
                 String res=String.valueOf(result);
                 if(res!="")
-                    Toast.makeText(context,res,Toast.LENGTH_LONG).show();
+                    alert.setMessage(res);
                 else
-                    Toast.makeText(context,"Pedido enviado exitosamente",Toast.LENGTH_LONG).show();
+                    alert.setMessage("Pedido enviado exitosamente");
+
                 progress.dismiss();
+
+                alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        startActivity(new Intent(getBaseContext(), KPI_General.class)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                        finish();
+                    }
+                });
+
+                AlertDialog alertDialog=alert.create();
+                alertDialog.show();
             }
         }
     }
@@ -262,10 +286,13 @@ public class pliquidacion extends Activity {
         CantProductos=0;
         ObtenerValores();
 
-        txtSubtotal.setText("$"+String.format(Locale.US,"%.2f",subTotal));
-        txtTotal.setText("$"+String.format(Locale.US,"%.2f",total));
-        txtIeps.setText("$"+String.format(Locale.US,"%.2f",ieps));
-        txtIva.setText("$"+String.format(Locale.US,"%.2f",iva));
+        NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
+        DecimalFormat dec=(DecimalFormat)nf;
+
+        txtSubtotal.setText("$"+ dec.format(subTotal));
+        txtTotal.setText("$"+dec.format(total));
+        txtIeps.setText("$"+dec.format(ieps));
+        txtIva.setText("$"+dec.format(iva));
         txtCantp.setText(""+CantProductos);
 
         MostrarFirma();

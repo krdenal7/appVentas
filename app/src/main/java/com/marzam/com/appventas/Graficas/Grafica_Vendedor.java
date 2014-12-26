@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 public class Grafica_Vendedor extends Activity {
 
@@ -62,9 +63,11 @@ public class Grafica_Vendedor extends Activity {
         if(rs.moveToFirst()){
             List<NameValuePair> params = new LinkedList<NameValuePair>();
 
-            params.add(new BasicNameValuePair("A", String.valueOf(rs.getDouble(0))));
+            int vendido=(int)rs.getDouble(0);
+            params.add(new BasicNameValuePair("A", String.valueOf(String.valueOf(vendido))));
             Double ritmo=(rs.getDouble(0)/dias_transcurridos())*dias();
-            params.add(new BasicNameValuePair("B", String.valueOf(ritmo)));
+            int ritmo2=(int)ritmo.doubleValue();
+            params.add(new BasicNameValuePair("B",String.valueOf(ritmo2)));
 
             rs2=db.rawQuery("select nombre from agentes where clave_agente='"+clave_agente+"' ",null);
 
@@ -167,7 +170,7 @@ public class Grafica_Vendedor extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_grafica__vendedor, menu);
+        //getMenuInflater().inflate(R.menu.menu_grafica__vendedor, menu);
         return true;
     }
 

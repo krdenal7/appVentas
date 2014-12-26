@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.marzam.com.appventas.CustomAdapter;
 import com.marzam.com.appventas.Gesture.Dib_firma;
+import com.marzam.com.appventas.KPI.KPI_General;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Sincronizacion.envio_pedido;
@@ -440,17 +441,17 @@ public class pdetalle extends Activity {
             public void onClick(View view) {
 
                 AgregarProducto(codigo,0,0);
+                Actualizar();
                 cont[0]=0;
                 txt3.setText("0");
-                Actualizar();
-
+                alertDialog.dismiss();
 
             }
         });
         boton2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Actualizar();
                 AgregarProducto(codigo,1,1);
                 int val=Integer.parseInt(info[2]);
                 txt3.setText(""+((val+ cont[0])+1));
@@ -461,7 +462,7 @@ public class pdetalle extends Activity {
         boton3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Actualizar();
                 AgregarProducto(codigo, 2, 1);
                 int val=Integer.parseInt(info[2]);
                 txt3.setText(""+((val+ cont[0])+2));
@@ -471,7 +472,7 @@ public class pdetalle extends Activity {
         boton4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Actualizar();
                 AgregarProducto(codigo,5,1);
                 int val=Integer.parseInt(info[2]);
                 txt3.setText(""+((val+ cont[0])+5));
@@ -482,7 +483,7 @@ public class pdetalle extends Activity {
         boton5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Actualizar();
                 AgregarProducto(codigo,10,1);
                 int val=Integer.parseInt(info[2]);
                 txt3.setText(""+((val+ cont[0])+10));
@@ -492,7 +493,7 @@ public class pdetalle extends Activity {
         boton6.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Actualizar();
                 alertDialog.dismiss();
                 ShowDialog_picker(codigo);
             }
@@ -516,16 +517,30 @@ public class pdetalle extends Activity {
         @Override
         protected void onPostExecute(Object result){
 
+            AlertDialog.Builder alert=new AlertDialog.Builder(context);
+            alert.setTitle("Envio de pedido");
+            alert.setIcon(android.R.drawable.ic_dialog_info);
+
             if(progress.isShowing()) {
-
-                Actualizar();
-                progress.dismiss();
-
                 String res=String.valueOf(result);
                 if(res!="")
-                Toast.makeText(context,res,Toast.LENGTH_LONG).show();
+                    alert.setMessage(res);
                 else
-                Toast.makeText(context,"Pedido enviado exitosamente",Toast.LENGTH_LONG).show();
+                    alert.setMessage("Pedido enviado exitosamente");
+
+                progress.dismiss();
+
+                alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        startActivity(new Intent(getBaseContext(), KPI_General.class)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                        finish();
+                    }
+                });
+
+                AlertDialog alertDialog=alert.create();
+                alertDialog.show();
             }
         }
     }

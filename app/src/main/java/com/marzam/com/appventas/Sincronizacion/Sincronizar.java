@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
@@ -20,6 +21,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.marzam.com.appventas.MainActivity;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.WebService.WebServices;
@@ -115,6 +117,7 @@ public class Sincronizar extends Activity {
             public void onClick(DialogInterface dialogInterface, int i) {
                 if(VerificarPedidosPendientes()<=0) {
                     if(isOnline()) {
+                        progres=ProgressDialog.show(context,"Sincronizando","Cargando",true,false);
                         new UpLoadTask().execute("");
                         //progres = ProgressDialog.show(context, "Realizando cierre", "Cargando", true, false);
                     }else {
@@ -310,10 +313,24 @@ public class Sincronizar extends Activity {
         @Override
         protected void onPostExecute(Object result){
 
-            if(progres.isShowing())
-            txtPedidos.setText(""+VerificarPedidosPendientes());
-            progres.dismiss();
-            Toast.makeText(context,result.toString(),Toast.LENGTH_SHORT).show();
+            AlertDialog.Builder alert=new AlertDialog.Builder(context);
+            alert.setTitle("Envio de pedido");
+
+            if(progres.isShowing()) {
+                txtPedidos.setText("" + VerificarPedidosPendientes());
+                progres.dismiss();
+
+                alert.setMessage(result.toString());
+                alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+                AlertDialog alertDialog=alert.create();
+                alertDialog.show();
+            }
+
 
         }
     }
@@ -380,12 +397,6 @@ public class Sincronizar extends Activity {
         @Override
         protected void onPreExecute(){
             super.onPreExecute();
-            progres=new ProgressDialog(context);
-            progres.setTitle("Sincronizando");
-            progres.setMessage("Cargando");
-            progres.setIndeterminate(false);
-            progres.setCancelable(false);
-            progres.show();
         }
 
         @Override
@@ -443,15 +454,48 @@ public class Sincronizar extends Activity {
             return archivo;
         }
 
+
         @Override
         protected void onPostExecute(Object result){
 
+            AlertDialog.Builder alert=new AlertDialog.Builder(context);
+            alert.setTitle("Sincroinización");
+
+
             if(progres.isShowing()) {
                 progres.dismiss();
-                if(result==null)
-                      Toast.makeText(context,"Error al realizar cierre. Intente nuevamente",Toast.LENGTH_SHORT).show();
-                else
-                      Toast.makeText(context,"Se completo el cierre de día correctamente",Toast.LENGTH_SHORT).show();
+                if(result==null) {
+        alert.setMessage("Error al realizar cierre de día. Desea intentar nuevamente?");
+                    alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            progres=ProgressDialog.show(context,"Sincronizando","cargando",true,false);
+                            new UpLoadTask().execute("");
+
+                        }
+                    });
+        alert.setNegativeButton("No",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+                }
+                else {
+           alert.setMessage("Se completo el cierre de día correctamente");
+           alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+               @Override
+               public void onClick(DialogInterface dialogInterface, int i) {
+
+                   startActivity(new Intent(getBaseContext(), MainActivity.class)
+                           .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP ));
+                   finish();
+
+               }
+           });
+                }
+           AlertDialog alertDialog=alert.create();
+                alertDialog.show();
             }
         }
 

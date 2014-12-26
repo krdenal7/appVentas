@@ -109,7 +109,10 @@ public class pcatalogo extends Activity {
                             lproductos.setAdapter(simpleAdapter);
                         }
                     } else {
-                        lproductos.setAdapter(adapter1);
+
+                           LlenarModelItems();
+                           adapter1=new CustomAdapter(context,modelItems);
+                           lproductos.setAdapter(adapter1);
                     }
                 }catch (Exception e){
 
@@ -128,7 +131,9 @@ public class pcatalogo extends Activity {
             @Override
             public void onClick(View view) {
 
+                LlenarModelItems();
                 EditBuscar.setText("");
+                adapter1=new CustomAdapter(context,modelItems);
                 lproductos.setAdapter(adapter1);
 
             }
@@ -260,7 +265,8 @@ public class pcatalogo extends Activity {
 
         Cursor rs=null;
 
-        String query="select descripcion,precio,Cantidad,codigo,precio_final,clasificacion_fiscal from productos";
+        String query="select descripcion,precio,Cantidad,p.codigo,precio_final,clasificacion_fiscal,o.descuento from productos as p left join " +
+                " ofertas as o on p.codigo=o.codigo";
 
         rs=db.rawQuery(query,null);
         data=new ArrayList<HashMap<String, ?>>();
@@ -268,12 +274,15 @@ public class pcatalogo extends Activity {
 
         while (rs.moveToNext()){
 
+            String oferta=(rs.getString(6)==null)?"0":rs.getString(6);
+
             producto_row.put("A",rs.getString(0));
             producto_row.put("B","Precio Lista: $"+rs.getString(1));
             producto_row.put("C","Cantidad: "+rs.getString(2));
             producto_row.put("D",rs.getString(3));
             producto_row.put("E","Precio Final: $"+rs.getString(4));
             producto_row.put("F","Clasificación: "+rs.getString(5));
+            producto_row.put("G","Oferta: "+oferta+"%");
             data.add(producto_row);
             producto_row=new HashMap<String, String>();
         }
@@ -291,7 +300,8 @@ public class pcatalogo extends Activity {
       Cursor rs=null;
 
         try {
-            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,codigo,precio_final,clasificacion_fiscal  from productos limit 1000 ",null);
+            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento  " +
+                           "from productos as p left join ofertas as o on p.codigo=o.codigo limit 1000 ",null);
         }catch (Exception e){
             String err="Error:"+e.toString();
             Log.d("Error:",err);
@@ -305,7 +315,8 @@ public class pcatalogo extends Activity {
 
         while (rs.moveToNext()){
 
-            modelItems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6));
+            String oferta=(rs.getString(7)==null)?"0":rs.getString(7);
+            modelItems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),oferta);
             cont++;
         }
 
@@ -458,8 +469,6 @@ public class pcatalogo extends Activity {
             lite.close();
         }
 
-
-
         }
 
 
@@ -467,7 +476,7 @@ public class pcatalogo extends Activity {
 
 
         LlenarHasmap();//llena el arreglo para el simpleAdapter
-        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","E","C","F"},new int[]{R.id.textView30,R.id.textView31,R.id.textView60,R.id.textView32,R.id.textView71});
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","E","G","C","F"},new int[]{R.id.textView30,R.id.textView31,R.id.textView60,R.id.textView61,R.id.textView32,R.id.textView71});
 
     }
 

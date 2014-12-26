@@ -1,7 +1,10 @@
 package com.marzam.com.appventas.GPS;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -19,6 +22,7 @@ import android.widget.Toast;
 
 import com.marzam.com.appventas.KPI.KPI_General;
 import com.marzam.com.appventas.MainActivity;
+import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.WebService.WebServices;
@@ -42,6 +46,7 @@ public class Actualizar_Coordenadas extends Activity {
     String lat="0";
     String lon="0";
     GPSHelper gps;
+    ProgressDialog progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +75,7 @@ public class Actualizar_Coordenadas extends Activity {
 
 
                 new UpLoadVisitas().execute("");
+                progress=ProgressDialog.show(context,"Envio de coordenadas","Enviado",true,false);
 
 
             }
@@ -156,8 +162,29 @@ public class Actualizar_Coordenadas extends Activity {
         @Override
         protected void onPostExecute(Object result){
 
-          if(result==null)
-              Toast.makeText(getApplicationContext(),"Error al registrar coordenadas",Toast.LENGTH_LONG).show();
+            AlertDialog.Builder alert=new AlertDialog.Builder(context);
+            alert.setTitle("Aviso");
+
+
+            if(progress.isShowing()) {
+                if (result == null)
+                   alert.setMessage("Error al registrar coordenadas");
+                else
+                    alert.setMessage("Cordenadas enviadas exitosamente");
+
+                alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        startActivity(new Intent(getBaseContext(), MapsLocation.class)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                        finish();
+                    }
+                });
+                progress.dismiss();
+
+                AlertDialog alertDialog=alert.create();
+                alertDialog.show();
+            }
 
         }
     }
