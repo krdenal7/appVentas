@@ -175,7 +175,7 @@ public class Actualizar_Coordenadas extends Activity {
                 alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        startActivity(new Intent(getBaseContext(), MapsLocation.class)
+                        startActivity(new Intent(getBaseContext(), KPI_General.class)
                                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
                         finish();
                     }

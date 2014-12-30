@@ -1,5 +1,6 @@
 package com.marzam.com.appventas;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
@@ -8,15 +9,21 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.text.Layout;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -32,6 +39,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -72,6 +80,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     String[] clientesT;
     String CteAct="";
     ProgressDialog progressDialog;
+    Marker customMarker;
 
     CSQLite lite;
     TextView txtCte;
@@ -651,10 +660,14 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     public void addMarker(){
 
+
+        View marker=((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker_layout,null);
+        TextView numTXT=(TextView)marker.findViewById(R.id.num_txt);
+
         String[][] datos=ObtenerCoordenadas();
 
         for(int i=0;i<datos.length;i++){
-
+            numTXT.setText(String.valueOf(i));
             String nombre=datos[i][0];
             String lat=datos[i][1];
             String lon=datos[i][2];
@@ -662,20 +675,17 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
             Double latitud=lat!=null?Double.parseDouble(lat):0;
             Double longitud=lon!=null?Double.parseDouble(lon):0;
 
-            mMap.addMarker(new MarkerOptions().position(new LatLng(latitud, longitud)).title(nombre));
+          //  mMap.addMarker(new MarkerOptions().position(new LatLng(latitud, longitud)).title(nombre));
+             LatLng latLng=new LatLng(latitud,longitud);
+
+            customMarker=mMap.addMarker(new MarkerOptions()
+            .position(latLng)
+            .title(nombre)
+            .snippet("Farmacia")
+            .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(context,marker))));
+
         }
 
-
-
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-
-               // Toast.makeText(context,"Entro",Toast.LENGTH_SHORT).show();
-
-                return false;
-            }
-        });
 
 
     }
@@ -840,7 +850,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                 dia="Viernes";
                 break;
             case 7:
-                dia="sabado";
+                dia="Sabado";
 
         }
 
@@ -849,6 +859,21 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         return where;
     }
 
+
+    public static Bitmap createDrawableFromView(Context context,View view){
+
+        DisplayMetrics displayMetrics=new DisplayMetrics();
+        ((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        view.measure(displayMetrics.widthPixels,displayMetrics.heightPixels);
+        view.layout(0,0,displayMetrics.widthPixels,displayMetrics.heightPixels);
+        view.buildDrawingCache();
+        Bitmap bitmap=Bitmap.createBitmap(view.getMeasuredWidth(),view.getMeasuredHeight(),Bitmap.Config.ARGB_8888);
+        Canvas canvas=new Canvas(bitmap);
+        view.draw(canvas);
+
+        return  bitmap;
+    }
 
 
 }

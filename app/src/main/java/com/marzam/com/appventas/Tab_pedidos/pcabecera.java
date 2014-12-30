@@ -3,46 +3,34 @@ package com.marzam.com.appventas.Tab_pedidos;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.gesture.Gesture;
-import android.gesture.GestureOverlayView;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.marzam.com.appventas.Gesture.Dib_firma;
 import com.marzam.com.appventas.KPI.KPI_General;
-import com.marzam.com.appventas.MainActivity;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Sincronizacion.envio_pedido;
 import com.marzam.com.appventas.WebService.WebServices;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 
 public class pcabecera extends Activity {
 
@@ -52,6 +40,7 @@ public class pcabecera extends Activity {
     ProgressDialog progress;
     CSQLite lite;
     Spinner spinner;
+
 
 
     @Override
@@ -68,10 +57,51 @@ public class pcabecera extends Activity {
         txt_idPedido.setText(Obtener_idpedido());
 
         spinner=(Spinner)findViewById(R.id.spinner);
-        String[]tipoFac={"FG"};
+        LlenarList();
+
+
+        lite=new CSQLite(context);
+        final SQLiteDatabase db=lite.getWritableDatabase();
+        try {
+            db.execSQL("ALTER TABLE tipo_fuerza ADD COLUMN isCheck int DEFAULT 0");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        String tipo_fuerza=spinner.getSelectedItem().toString();
+        db.execSQL("update tipo_fuerza set isCheck=1 where tipo_orden='"+tipo_fuerza+"'");
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String tipo_fuerza=spinner.getSelectedItem().toString();
+
+                  db.execSQL("update tipo_fuerza set isCheck=1 where tipo_orden='"+tipo_fuerza+"'");
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+    }
+    public void LlenarList(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select tipo_orden from tipo_fuerza",null);
+        String[]tipoFac=new String[rs.getCount()];
+        int contador=0;
+        while (rs.moveToNext()){
+
+            tipoFac[contador]=rs.getString(0);
+            contador++;
+        }
+
         ArrayAdapter arrayAdapter=new ArrayAdapter(context,android.R.layout.simple_spinner_dropdown_item,tipoFac);
         spinner.setAdapter(arrayAdapter);
-
 
 
     }
@@ -124,6 +154,7 @@ public class pcabecera extends Activity {
 
         return numero;
     }
+
 
 
     public void ShowMenu(){

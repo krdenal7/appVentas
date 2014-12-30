@@ -43,13 +43,12 @@ public class Crear_precioFinal {
 
         /*Pasos*/
 
-
+         /*6-.*/Llenar_precioFinal_precio();
         /*1-.*/Obtener_Prodcutos_Descliente();
         /*2-.*/Generar_PrecioFinal_Descliente();
         /*3-.*/data.clear();
         /*4-.*/Obtener_Productos_DescMenor();
         /*5-.*/Generar_PrecioFinal_DescMenor();
-        /*6-.*///Llenar_precioFinal_precio();
         /*6-.*/Obtener_Productos_SoloOferta();
         /*7-.*/Generar_PrecioFinal_SoloOferta();
 
@@ -58,11 +57,12 @@ public class Crear_precioFinal {
 
    public void Llenar_precioFinal_precio(){
 
-        SQLiteDatabase db=lite.getWritableDatabase();
-
-        db.execSQL("update productos set precio_final=precio where precio_final=''");
-
-        db.close();
+     SQLiteDatabase db=lite.getWritableDatabase();
+       ContentValues values=new ContentValues();
+       values.put("isCheck", 0);
+       values.put("Cantidad",0);
+       values.put("precio_final","");
+       db.update("productos", values, null, null);
 
     }//Se hace una copia de la columna precio a la columna precio_final de los productos a los cuales no se aplica ningun descuento
 
@@ -323,30 +323,56 @@ public class Crear_precioFinal {
         Double precio=0.00;
         Double total=0.00;
         Double oferta=0.00;
-     SQLiteDatabase db=lite.getWritableDatabase();
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        String[][] valores=new String[data.size()][2];
 
      for(int i=0;i<data.size();i++){
 
          codigo=data.get(i).get("A").toString();
          precio=Double.parseDouble(data.get(i).get("B").toString());
 
-         Cursor rs=db.rawQuery("select descuento from ofertas where codigo='"+codigo+"'",null);
 
-         if(rs.moveToFirst()){
-            oferta=Double.parseDouble(rs.getString(0));
-         }
+          Cursor rs = db.rawQuery("select descuento from ofertas where codigo='" + codigo + "'", null);
+
+try {
+    if (rs.moveToFirst()) {
+
+        oferta = Double.parseDouble(rs.getString(0));
+
+    }
+}finally {
+    if(rs!=null){
+        rs.close();
+    }else {
+        Toast.makeText(context,"Cursor vacio",Toast.LENGTH_LONG).show();
+    }
+}
 
          Double Total1=(precio*oferta)/100;
          total=precio-Total1;
 
          String stotal=String.format(Locale.US, "%.2f", total);
 
-         db.execSQL("update productos set precio_final='"+stotal+"' where codigo='"+codigo+"'");
 
+         ContentValues values=new ContentValues();
+         values.put("precio_final",stotal);
+
+         try {
+             db.update("productos",values,"codigo='"+codigo+"'",null);
+         }catch (Exception e){
+             lite=new CSQLite(context);
+             db=lite.getWritableDatabase();
+             db.update("productos",values,"codigo='"+codigo+"'",null);
+             Toast.makeText(context,e.toString(),Toast.LENGTH_LONG).show();
+         }
+
+
+       //  String stotal=String.format(Locale.US, "%.2f", total);
+       //   db.execSQL("update productos set precio_final='"+stotal+"' where codigo='"+codigo+"'");
 
      }
-
-
     }
 
 

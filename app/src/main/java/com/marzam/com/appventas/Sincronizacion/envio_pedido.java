@@ -3,7 +3,6 @@ package com.marzam.com.appventas.Sincronizacion;
 
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -11,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Base64;
 import android.util.Log;
+import android.view.LayoutInflater;
 
 
 import com.marzam.com.appventas.SQLite.CSQLite;
@@ -30,7 +30,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import org.apache.commons.codec.binary.Hex;
 
 
 public class envio_pedido {
@@ -49,6 +48,7 @@ public class envio_pedido {
     String[] cabecero=new String[13];
     String P_noinsertados=null;
     WebServices webServices;
+
 
 
 
@@ -400,7 +400,18 @@ public class envio_pedido {
     }//Conpleto
   public String Obtener_tipoOrden(){
 
-      return "FG";
+      lite=new CSQLite(context);
+      SQLiteDatabase db=lite.getWritableDatabase();
+      String tipo="";
+      Cursor rs=db.rawQuery("select tipo_orden from tipo_fuerza where isCheck=1 ",null);
+
+      if(rs.moveToFirst()){
+          tipo=rs.getString(0);
+      }else {
+          tipo="FG";
+      }
+
+      return tipo;
 
   }
   public String Obtener_descuentoComercial(){

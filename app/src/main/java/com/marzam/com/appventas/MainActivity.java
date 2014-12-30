@@ -112,7 +112,7 @@ public class MainActivity extends Activity {
        txtUsuario=(TextView)findViewById(R.id.textView);
        locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
        CrearDirectorioDownloads();
-      // ObtenerArchivos2();
+       //ObtenerArchivos2();
 
       // EliminarBD();
 

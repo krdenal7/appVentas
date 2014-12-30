@@ -2,6 +2,7 @@ package com.marzam.com.appventas.Tab_pedidos;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -60,6 +61,7 @@ public class pcatalogo extends Activity {
     Button boton4;
     Button boton5;
     Button boton6;
+    ProgressDialog dialogList;
 
 
     @Override
@@ -73,6 +75,7 @@ public class pcatalogo extends Activity {
 
 
         new UpdateList().execute("");
+        dialogList=ProgressDialog.show(context,"Catalogo","Generando..",true,false);
         LlenarModelItems();
         adapter1=new CustomAdapter(this,modelItems);
         lproductos.setAdapter(adapter1);
@@ -485,7 +488,9 @@ public class pcatalogo extends Activity {
         protected void onPostExecute(Object result){
 
 
-
+                if(dialogList.isShowing()){
+                    dialogList.dismiss();
+                }
 
         }
     }
