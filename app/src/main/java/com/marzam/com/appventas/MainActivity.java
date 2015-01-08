@@ -2,6 +2,7 @@ package com.marzam.com.appventas;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -16,8 +17,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -33,6 +36,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.WebService.WebServices;
@@ -77,6 +82,7 @@ public class MainActivity extends Activity {
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private static final String PROPERTY_EXPIRATION_TIME = "onServerExpirationTimeMs";
     private static final String PROPERTY_USER = "user";
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST=9000;
 
     public static final long EXPIRATION_TIME_MS = 1000 * 3600 * 24 * 7;
     String SENDER_ID = "1006732471487";
@@ -84,8 +90,6 @@ public class MainActivity extends Activity {
 
     ProgressDialog pd;
 
-    String telefono;
-    String correo;
 
     File directorio;
     LocationManager locationManager;
@@ -108,7 +112,6 @@ public class MainActivity extends Activity {
 
 
 
-
        txtUsuario=(TextView)findViewById(R.id.textView);
        locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
        CrearDirectorioDownloads();
@@ -128,9 +131,6 @@ public class MainActivity extends Activity {
 
             }
         }
-
-
-
 
 
 
@@ -166,6 +166,20 @@ public class MainActivity extends Activity {
 
             }
         });
+
+        /*Registro SERVICIO GOOGLE CLOUD
+        if(checkPlayServices()){
+
+            gcm=GoogleCloudMessaging.getInstance(context);
+            regid=getRegistrationId(context);
+
+            if(regid.isEmpty()){
+               new TareaRegistroGCM().execute(ObtenerAgenteActivo());
+               pd=ProgressDialog.show(context,"Registro de dispositivo","Cargando",true,false);
+            }
+        }else{
+            Log.i(TAG,"Dispositivo no soportado");
+        }*/
     }
 
     public void CrearDirectorioDownloads(){
@@ -345,21 +359,28 @@ try {
                 //Nos registramos en los servidores de GCM
                 regid = gcm.register(SENDER_ID);
 
-
-
+                msg="Dispositivo registrado: "+regid;
                 Log.d(TAG, "Registrado en GCM: registration_id=" + regid);
 
 
-                setRegistrationId(context, params[0], regid);
-
+               setRegistrationId(context, params[0], regid);
+              // storeRegistrationId(context,regid);
             }
             catch (IOException ex)
             {
-                Toast t=Toast.makeText(context,"Error al conectar Intente mas tarde",Toast.LENGTH_LONG);
-                t.show();
+               Log.i(TAG,ex.toString());
             }
-            pd.dismiss();
+
+
             return msg;
+        }
+        @Override
+        protected  void onPostExecute(String result){
+
+            if( pd.isShowing()){
+                pd.dismiss();
+            }
+
         }
 
     }
@@ -464,16 +485,6 @@ try {
             Log.d("Error al crear zip",e.toString());
         }
 
-    }
-    public String ObtenerjsonConsecutivos(String agente){
-
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
-
-        Cursor rs=null;
-
-
-        return "";
     }
 
 
@@ -620,55 +631,6 @@ try {
 
 
     /*Registro-PUSH*/
-    private String getRegistrationId(Context context,String usuario)  {
-        SharedPreferences prefs = getSharedPreferences(
-                MainActivity.class.getSimpleName(),
-                Context.MODE_PRIVATE);
-
-        String registrationId = prefs.getString(PROPERTY_REG_ID, "");
-
-        if (registrationId.length() == 0)
-        {
-            Log.d(TAG, "Registro GCM no encontrado.");
-            return "";
-        }
-
-        String registeredUser =
-                prefs.getString(PROPERTY_USER, "user");
-
-        int registeredVersion =
-                prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
-
-        long expirationTime =
-                prefs.getLong(PROPERTY_EXPIRATION_TIME, -1);
-
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-        String expirationDate = sdf.format(new Date(expirationTime));
-
-        Log.d(TAG, "Registro GCM encontrado (usuario=" + registeredUser +
-                ", version=" + registeredVersion +
-                ", expira=" + expirationDate + ")");
-
-        int currentVersion = getAppVersion(context);
-
-        if (registeredVersion != currentVersion)
-        {
-            Log.d(TAG, "Nueva versión de la aplicación.");
-            return "";
-        }
-        else if (System.currentTimeMillis() > expirationTime)
-        {
-            Log.d(TAG, "Registro GCM expirado.");
-            return "";
-        }
-        else if (!usuario.equals(registeredUser))
-        {
-            Log.d(TAG, "Nuevo nombre de usuario.");
-            return "";
-        }
-
-        return registrationId;
-    }
     private int getAppVersion(Context context) {
 
         try{
@@ -697,6 +659,21 @@ try {
 
         editor.commit();
     }
+    private boolean checkPlayServices(){
+        int resultCode= GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
+
+        if(resultCode!= ConnectionResult.SUCCESS){
+            if(GooglePlayServicesUtil.isUserRecoverableError(resultCode)){
+               GooglePlayServicesUtil.getErrorDialog(resultCode,this,PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            }else {
+                Log.i(TAG,"Dispositivo no soportado");
+            }
+            return false;
+        }
+        return true;
+    }
+
+
 
 
     /*Obtener datod del Telefono*/
@@ -833,6 +810,8 @@ try {
 
         return false;
     }
+
+
 
 
 }

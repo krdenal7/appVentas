@@ -12,6 +12,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.kobjects.base64.Base64;
 import android.util.Log;
 import android.view.Menu;
@@ -22,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.marzam.com.appventas.MainActivity;
+import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.WebService.WebServices;
@@ -106,6 +111,19 @@ public class Sincronizar extends Activity {
         lite.close();
         return Cantidad;
     }
+    public boolean VerificarSesionActiva(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs= db.rawQuery("select id_cliente from sesion_cliente where Sesion=1",null);
+
+        if(rs.moveToFirst()){
+            return  true;//ya se encunetra una sesion activa
+        }
+
+            return false;
+    }
 
     public void ShowCierreDia(){
 
@@ -115,16 +133,20 @@ public class Sincronizar extends Activity {
         alert.setPositiveButton("Si", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                if(VerificarPedidosPendientes()<=0) {
-                    if(isOnline()) {
-                        progres=ProgressDialog.show(context,"Sincronizando","Cargando",true,false);
-                        new UpLoadTask().execute("");
-                        //progres = ProgressDialog.show(context, "Realizando cierre", "Cargando", true, false);
-                    }else {
-                        Toast.makeText(context,"Verifique su conexión a internet e intente nuevamente",Toast.LENGTH_LONG).show();
-                          }
-                }else{
-                    Toast.makeText(context,"No se puede completar el cierre. Envíe sus pedidos pendientes",Toast.LENGTH_LONG).show();
+                if(!VerificarSesionActiva()) {
+                    if (VerificarPedidosPendientes() <= 0) {
+                        if (isOnline()) {
+                            progres = ProgressDialog.show(context, "Sincronizando", "Cargando", true, false);
+                            new UpLoadTask().execute("");
+                            //progres = ProgressDialog.show(context, "Realizando cierre", "Cargando", true, false);
+                        } else {
+                        Toast.makeText(context, "Verifique su conexión a internet e intente nuevamente", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Toast.makeText(context, "No se puede completar el cierre. Envíe sus pedidos pendientes", Toast.LENGTH_LONG).show();
+                    }
+                }else {
+                        Toast.makeText(context,"Tiene una visita activa.Cierre la visita para poder completar la sincronización",Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -405,6 +427,13 @@ public class Sincronizar extends Activity {
             String nomAgente=ObtenerAgenteActivo();
             String archivoBack=nomAgente+getDate();
 
+
+            String json=jsonVisitas();
+            String visita;
+            visita = json==null ? null:web.SincronizarVisitas(json);
+            String json_cierre=jsonCierreVisitas();
+            visita = json_cierre==null?"":web.CierreVisitas(json_cierre);
+
             File back=new File(directorio+"/"+archivoBack+".zip");
             String bd64=web.Down_DB(nomAgente+".zip");
             if(!back.exists())
@@ -501,7 +530,75 @@ public class Sincronizar extends Activity {
 
     }
 
+    public String jsonVisitas(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
 
+        Cursor rs=db.rawQuery("select * from visitas where status_visita='10'",null);
+        JSONArray array=new JSONArray();
+        JSONObject object=new JSONObject();
+
+        while (rs.moveToNext()){
+
+            try {
+
+
+
+                object.put("numero_empleado",rs.getString(0));
+                object.put("id_cliente",rs.getString(1));
+                object.put("latitud",rs.getString(2));
+                object.put("longitud",rs.getString(3));
+                object.put("fecha_visita",rs.getString(4).replace(":","|"));
+                object.put("fecha_registro",rs.getString(5).replace(":","|"));
+                String id_visita=rs.getString(6);
+                object.put("id_visita",id_visita);
+
+                array.put(object);
+                object=new JSONObject();
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+
+        return array.length()==0 ? null: array.toString();
+
+    }
+    public String jsonCierreVisitas(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+
+        Cursor rs=db.rawQuery("select id_visita,status_visita,fecha_cierre from visitas where status_visita in ('10','20')",null);
+
+        JSONArray array=new JSONArray();
+        JSONObject object=new JSONObject();
+
+        while (rs.moveToNext()){
+
+            try {
+
+                object.put("id_visita",rs.getString(0));
+                object.put("estatus_visita",rs.getString(1));
+                object.put("fecha_cierre",rs.getString(2).replace(":","|"));
+                array.put(object);
+                object=new JSONObject();
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+                array=null;
+            }
+
+        }
+
+
+
+
+        return  array.toString();
+    }
 
     @Override
     public void onDestroy(){
@@ -644,4 +741,13 @@ public class Sincronizar extends Activity {
             Log.e("ErrorCopiar:",e.toString());
         }
     }
+
+    @Override
+    public void onBackPressed(){
+        startActivity(new Intent(getBaseContext(), MapsLocation.class)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+        finish();
+
+    }
+
 }

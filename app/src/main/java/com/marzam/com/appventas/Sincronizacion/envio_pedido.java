@@ -20,12 +20,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -48,6 +50,7 @@ public class envio_pedido {
     String[] cabecero=new String[13];
     String P_noinsertados=null;
     WebServices webServices;
+    String id_pedido;
 
 
 
@@ -59,6 +62,7 @@ public class envio_pedido {
         String resp="";
         webServices=new WebServices();
         String agente=ObtenerAgenteActivo();
+        id_pedido=LeerTXT();
 
 
         if(Verificar_productos()) {
@@ -166,16 +170,15 @@ public class envio_pedido {
 
 
   public void InsertarIdPedido(){
-      this.context=context;
 
       lite=new CSQLite(context);
       SQLiteDatabase db=lite.getWritableDatabase();
 
-                              Cursor rs=db.rawQuery("select * from encabezado_pedido where id_pedido='"+Obtener_idPedido()+"'",null);
+                              Cursor rs=db.rawQuery("select * from encabezado_pedido where id_pedido='"+id_pedido+"'",null);
 
       if(rs.getCount()==0){
 
-                              db.execSQL("insert into encabezado_pedido (id_pedido) values ('"+Obtener_idPedido()+"')");
+                              db.execSQL("insert into encabezado_pedido (id_pedido) values ('"+id_pedido+"')");
       }
 
       rs.close();
@@ -183,18 +186,7 @@ public class envio_pedido {
       lite.close();
 
   }
-  public void actualizarTipoOrden(Context context,String Tipo){
-      this.context=context;
 
-      lite=new CSQLite(context);
-      SQLiteDatabase db=lite.getWritableDatabase();
-
-      db.execSQL("update encabezado_pedido set tipo_orden='"+Tipo+"' where id_pedido=134057A0000001'");
-
-      db.close();
-      lite.close();
-
-  }
 
     public String ObtenerAgenteActivo(){
 
@@ -226,25 +218,22 @@ public class envio_pedido {
     }
 
    /*Obtener datos del encabezado*/
-  public String Obtener_idPedido(){
-      StringBuilder builder=new StringBuilder();
+   public String LeerTXT(){
+       String id_pedido="";
 
-      String agente=ObtenerAgenteActivo();
-      builder.append("P"+agente);
-      String consecutivo=Consecutivo(agente);
+       try{
 
-      int val=(builder.length()+consecutivo.length());
-      int falt=(12-val);
+           InputStreamReader archivo=new InputStreamReader(((Activity)context).openFileInput("Pedidos.txt"));
+           BufferedReader br=new BufferedReader(archivo);
 
-      for(int i=0;i<falt;i++){
-          builder.append("0");
-      }
-      builder.append(consecutivo);
+           id_pedido=br.readLine();
 
+       }catch (Exception e){
 
+       }
 
-      return builder.toString();
-  }
+       return  id_pedido;
+   }
   public String Obtener_idCliente(){
 
       lite=new CSQLite(context);
@@ -308,27 +297,6 @@ public class envio_pedido {
       importe_total=subTotal+ieps+iva;
 
   }//Completo
-  public String[] Obtener_ValoresEncabezado(){
-      String[] val=new String[2];
-
-   SQLiteDatabase db=lite.getWritableDatabase();
-
-      Cursor rs=db.rawQuery("select total_piezas,impote_total from encabezado_pedido where id_pedido='"+Obtener_idPedido()+"'",null);
-
-      int Cantidad=0;
-      Double importe=0.00;
-
-      while (rs.moveToNext()){
-
-          Cantidad=Integer.parseInt(rs.getString(0));
-          importe=Double.parseDouble(rs.getString(1));
-      }
-
-      val[0]=String.valueOf(Cantidad);
-      val[1]=String.valueOf(importe);
-
-      return val;
-  }//completo
   public String Obtener_firma(String id_cliente){
 
       File folder = android.os.Environment.getExternalStorageDirectory();
@@ -450,28 +418,14 @@ public class envio_pedido {
         String id="";
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select id from consecutivo_visitas ",null);
+        Cursor rs=db.rawQuery("select max(id_visita) from visitas ",null);
 
 
         if(rs.moveToFirst()){
             id=rs.getString(0);
         }
 
-        StringBuilder builder=new StringBuilder();
-        builder.append("V");
-        String clave=ObtenerAgenteActivo();
-        builder.append(clave);
-
-        int tam=(12-(clave.length()+1+id.length()));
-
-        for (int i=0;i<tam;i++){
-            builder.append("0");
-        }
-
-        builder.append(id);
-
-
-        return builder.toString();
+        return id;
     }//GENERA EL ID CORRESPONDIENTE DE LA VISITA
 
 /*Obtener datos del detalle*/
@@ -486,7 +440,7 @@ public class envio_pedido {
       String fec=getDate();
 
 
-      cabecero[0] = Obtener_idPedido();
+      cabecero[0] = id_pedido;
       cabecero[1] = Obtener_idCliente();
       cabecero[2] = Obtener_NoEmpleado();
       cabecero[3] =ObtenerAgenteActivo();
@@ -530,7 +484,7 @@ public class envio_pedido {
           Log.d("Error al obtener datos de producto:",err);
       }
      int cantidad=rs.getColumnCount();
-     String id_pedido=Obtener_idPedido();
+     String id_pedido=this.id_pedido;
      String orden=Obtener_tipoOrden();
      String desc=Obtener_descuentoComercial();
      while (rs.moveToNext()){
@@ -625,7 +579,7 @@ public class envio_pedido {
 
        lite=new CSQLite(context);
        SQLiteDatabase db=lite.getWritableDatabase();
-       String id=Obtener_idPedido();
+       String id=id_pedido;
 
        Cursor rs= db.rawQuery("select * from encabezado_pedido where id_pedido='"+id+"'",null);
        JSONObject json=new JSONObject();
@@ -666,7 +620,7 @@ while (rs.moveToNext()) {
 
      lite=new CSQLite(context);
      SQLiteDatabase db=lite.getWritableDatabase();
-     String id=Obtener_idPedido();
+     String id=id_pedido;
      Cursor rs=db.rawQuery("select * from detalle_pedido where id_pedido='"+id+"'",null);
      JSONObject json=new JSONObject();
      JSONArray array=new JSONArray();

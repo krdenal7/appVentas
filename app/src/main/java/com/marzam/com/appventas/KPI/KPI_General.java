@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.marzam.com.appventas.GPS.Actualizar_Coordenadas;
+import com.marzam.com.appventas.MainActivity;
 import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
@@ -57,6 +58,7 @@ public class KPI_General extends Activity {
     TextView txtUsuario;
     ProgressDialog progressDialog;
     WebView webViews;
+    String Date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,10 +126,9 @@ public class KPI_General extends Activity {
         alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                String agente=ObtenerClavedeAgente();
-                CerrarVisita(agente);
                 Intent intent=new Intent(context, MapsLocation.class);
                 startActivity(intent);
+                new TaskCierreVisita().execute("");
             }
         });
         alert.setNegativeButton("No",new DialogInterface.OnClickListener() {
@@ -145,7 +146,8 @@ public class KPI_General extends Activity {
         SQLiteDatabase db=lite.getWritableDatabase();
 
         db.execSQL("update sesion_cliente set Sesion=2,Fecha_cierre='"+getDate()+"' where id=(select Max(id) from sesion_cliente)");
-        UpdateConsecutivo_visitas(agente);
+        db.execSQL("update visitas set fecha_cierre='"+Date+"' where id_visita=(select max(id_visita) from visitas)");
+       // UpdateConsecutivo_visitas(agente);
         UpdateProductos();
 
         db.close();
@@ -189,12 +191,26 @@ public class KPI_General extends Activity {
 
         Calendar cal = new GregorianCalendar();
         Date dt = cal.getTime();
-        SimpleDateFormat df=new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat df=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         String formatteDate=df.format(dt.getTime());
 
         return formatteDate;
     }
 
+    public String Obtener_Idvisita(){
+
+        String id="";
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select max(id_visita) from visitas ",null);
+
+
+        if(rs.moveToFirst()){
+            id=rs.getString(0);
+        }
+
+        return id;
+    }
     public String Obtener_Nombre(){
 
         lite=new CSQLite(context);
@@ -245,6 +261,58 @@ public class KPI_General extends Activity {
 
         return id;
     }
+
+    public String Obtenerjson_Cierre(){
+        String json="";
+
+        JSONObject object=new JSONObject();
+        JSONArray array=new JSONArray();
+        try {
+
+            Date=getDate();
+            object.put("id_visita",Obtener_Idvisita());
+            object.put("fecha_cierre",Date.replace(":","|"));
+            object.put("estatus_visita","20");
+            array.put(object);
+            json=array.toString();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        return json;
+    }
+    public void Extraer_json(String json){
+
+        String estatus="20";
+        String id_visita="";
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+
+        try {
+
+            JSONArray array=new JSONArray(json);
+
+            for(int i=0;i<array.length();i++){
+
+            JSONObject object=new JSONObject(array.getJSONObject(i).toString());
+            estatus=object.get("estatus_visita").toString();
+            id_visita=object.get("id_visita").toString();
+            db.execSQL("update visitas set status_visita='"+estatus+"',fecha_cierre='"+Date+"' where id_visita='"+id_visita+"'");
+
+            }
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
 
 
 
@@ -345,6 +413,29 @@ public class KPI_General extends Activity {
         return super.onKeyDown(keyEvent,event);
     }
 
+    private class TaskCierreVisita extends AsyncTask<String,Void,Object>{
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+            WebServices services=new WebServices();
+            String json=Obtenerjson_Cierre();
+            String respuesta= services.CierreVisitas(json);
+
+            if(respuesta!=null)
+               Extraer_json(respuesta);
+
+            String agente=ObtenerClavedeAgente();
+            CerrarVisita(agente);
+
+            return respuesta;
+        }
+        @Override
+        protected void onPostExecute(Object res){
+
+        }
+    }
+
     private class TaskWebview extends AsyncTask<String,Void,Object> {
 
         @Override
@@ -370,5 +461,14 @@ public class KPI_General extends Activity {
              }
 
         }
+    }
+
+
+    @Override
+    public void onBackPressed(){
+        startActivity(new Intent(getBaseContext(), MapsLocation.class)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+        finish();
+
     }
 }

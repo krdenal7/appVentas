@@ -52,7 +52,7 @@ public class envio_pedidoFaltante {
 
             String json=jsonVisitas();
             String visita;
-            visita = json==null ? null:services.SincronizarVisitas(jsonVisitas());
+                   visita = json==null ? null:services.SincronizarVisitas(jsonVisitas());
 
 
 
@@ -355,26 +355,5 @@ public class envio_pedidoFaltante {
         return false;
     }
 
-    public String[] Dividirfecha(String fecha){
-        String[] fechreturn=new String[4];
-
-        try {
-            String[] Fecha = fecha.split(" ");
-            fechreturn[0] = Fecha[0];
-            String[] Hora = Fecha[1].split(":");
-            fechreturn[1] = Hora[0];
-            fechreturn[2] = Hora[1];
-            fechreturn[3] = Hora[2];
-        }catch (Exception e){
-            fechreturn[0]="01-01-2014";
-            fechreturn[1]="00";
-            fechreturn[2]="00";
-            fechreturn[3]="00";
-            return fechreturn;
-        }
-
-
-        return fechreturn;
-    }
 
 }

@@ -11,10 +11,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.text.InputType;
 import android.text.Layout;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -25,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,6 +61,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -81,6 +85,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     String CteAct="";
     ProgressDialog progressDialog;
     Marker customMarker;
+    String id_visita;
 
     CSQLite lite;
     TextView txtCte;
@@ -101,13 +106,13 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         ObtenerCtesHoy(ObtenerAgenteActivo());
         ObtenerClientesVisitados();
 
-
+        id_visita=Obtener_Idvisita();
 
     }
 
     public void ShowMenu(){
 
-        final CharSequence[] items={"Clientes de hoy","Clientes totales","Estatus de pedidos","Sincronización"};
+        final CharSequence[] items={"Clientes de hoy","Clientes totales","Buscar cliente","Estatus de pedidos","Sincronización"};
 
         AlertDialog.Builder alert = new AlertDialog.Builder(context);
         alert.setTitle( "Menú");
@@ -119,14 +124,17 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                     ShowCteH();
                 if(i==1)
                     ShowCteT();
-                if(i==2){
+                if(i==2)
+                    ShowBuscarCte();
+
+                if(i==3){
 
                     startActivity(new Intent(getBaseContext(), estatus_respuestas.class)
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
                     finish();
 
                 }
-                if(i==3){
+                if(i==4){
                     startActivity(new Intent(getBaseContext(), Sincronizar.class)
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
                     finish();
@@ -179,6 +187,49 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         });
         alertDialogT=alert.create();
         alertDialogT.show();
+
+    }
+    public void ShowBuscarCte(){
+
+        final EditText textView=new EditText(context);
+        textView.setHint("Numero de cuenta:");
+        textView.setInputType(InputType.TYPE_CLASS_TEXT);
+        textView.setFocusable(true);
+
+     AlertDialog.Builder alert=new AlertDialog.Builder(context);
+     alert.setTitle("Clientes");
+     alert.setView(textView);
+     alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+         @Override
+         public void onClick(DialogInterface dialogInterface, int i) {
+
+             String cuenta=textView.getText().toString().toUpperCase().replace("'","");
+
+             if(cuenta.equals("")) {
+                 dialogInterface.dismiss();
+                 Toast.makeText(context,"Campo vacio.Ingrese una clave de agente",Toast.LENGTH_LONG).show();
+             }else{
+
+                 String num_emp=ObtenerAgenteActivo();
+
+                 if(Verificar_ClienteExiste(cuenta,num_emp)){
+                     if(!VerificarSesion_Cliente(cuenta))
+                             ShowSesionActiva();
+                 }else {
+                     Toast.makeText(context,"No se encontro el cliente.Intente nuevamente",Toast.LENGTH_LONG).show();
+                 }
+
+             }
+         }
+     });
+     alert.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
+         @Override
+         public void onClick(DialogInterface dialogInterface, int i) {
+
+         }
+     });
+        AlertDialog alertDialog=alert.create();
+        alertDialog.show();
 
     }
 
@@ -344,6 +395,20 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
            return resp;
     } //Verifica si ya se encuentra iniciada una visita con algún cliente //Principal
+    public boolean Verificar_ClienteExiste(String cliente,String numero_emp){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+       String[] arg={cliente,numero_emp};
+
+       Cursor rs=db.rawQuery("select id_cliente from agenda where id_cliente=? and numero_empleado=?",arg);
+
+        if(rs.moveToFirst()){
+            return true;
+        }
+
+        return false;
+    }
 
     public String ObtenerClavedeAgente(){
 
@@ -397,7 +462,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         values.put("longitud", gpsHelper.getLongitude());
         values.put("fecha_visita",getDate());
         values.put("fecha_registro",getDate());
-        values.put("id_visita",Obtener_Idvisita(agente));
+        values.put("id_visita",id_visita);
         values.put("status_visita","10");
         Long res= db.insert("visitas",null,values);
 
@@ -405,33 +470,22 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         lite.close();
     }//SE REGISTRA LA VISITA Y SE ENVIA HACIA EL WEB SERVICE
 
-    public String Obtener_Idvisita(String agente){
-        String id="";
-        int num_id=0;
-        SQLiteDatabase db=lite.getWritableDatabase();
-
-        Cursor rs=db.rawQuery("select id from consecutivo_visitas where clave_agente='"+agente+"'",null);
-
-
-        if(rs.moveToFirst()){
-
-
-                id=rs.getString(0);
-
-        }
+    public String Obtener_Idvisita(){
 
         StringBuilder builder=new StringBuilder();
         builder.append("V");
-        String clave=ObtenerClavedeAgente();
-        builder.append(clave);
 
-        int tam=(12-(clave.length()+1+id.length()));
-
-        for (int i=0;i<tam;i++){
+           /*Id agente*/
+        String id_agente=ObtenerId_Agente();
+        int tam=id_agente.length();
+        int ceros=4-tam;
+        for(int i=0;i<ceros;i++){
             builder.append("0");
         }
+        builder.append(id_agente);
 
-       builder.append(id);
+       /*Año día*/
+        builder.append(Fecha());
 
 
 
@@ -462,13 +516,28 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     }//HACE EL CALCULO PARA MOSTRAR EN LA PANTALLA LOS CLIENTES QUE HAN SIDO VISITADOS Y LOS FALTANTES
 
+    private String ObtenerId_Agente(){
+        String id="";
+        String agente=ObtenerClavedeAgente();
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select id_agente from agentes where clave_agente='"+agente+"'",null);
+
+        if(rs.moveToFirst()){
+            id=rs.getString(0);
+        }
+
+
+        return id;
+    }
 
     private String jsonVisitas(){
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
         String agente=ObtenerAgenteActivo();
-        Cursor rs=db.rawQuery("select * from visitas where id_visita='"+Obtener_Idvisita(agente)+"'",null);
+        Cursor rs=db.rawQuery("select * from visitas where id_visita='"+id_visita+"'",null);
         JSONArray array=new JSONArray();
         JSONObject object=new JSONObject();
 
@@ -800,6 +869,23 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         String formatteDate=df.format(dt.getTime());
 
         return formatteDate;
+    }
+    private String Fecha(){
+        Calendar cal = new GregorianCalendar();
+        Date dt = cal.getTime();
+
+        SimpleDateFormat df=new SimpleDateFormat("yy");
+        String formatteDate=df.format(dt.getTime());
+
+        SimpleDateFormat df1=new SimpleDateFormat("ddd");
+        String formatteDate1=df1.format(dt.getTime());
+
+        SimpleDateFormat df2=new SimpleDateFormat("HHmmss");
+        String formatteDate2=df2.format(dt.getTime());
+
+        return formatteDate+formatteDate1+formatteDate2;
+
+
     }
 
     private String where(){

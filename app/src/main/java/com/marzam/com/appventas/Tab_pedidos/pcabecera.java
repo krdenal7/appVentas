@@ -27,6 +27,10 @@ import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Sincronizacion.envio_pedido;
 import com.marzam.com.appventas.WebService.WebServices;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -50,11 +54,18 @@ public class pcabecera extends Activity {
 
         context=this;
 
+        if(!existTxt("Pedidos.txt"))
+                          CrearTXT();
+
+        String id_pedido=Obtener_idpedido2();
+
+        EscribirTXT(id_pedido);
+
         txtFpedido=(TextView)findViewById(R.id.textView25);
         txtFpedido.setText(getDate());
 
         txt_idPedido=(TextView)findViewById(R.id.textView9);
-        txt_idPedido.setText(Obtener_idpedido());
+        txt_idPedido.setText(LeerTXT());
 
         spinner=(Spinner)findViewById(R.id.spinner);
         LlenarList();
@@ -105,26 +116,6 @@ public class pcabecera extends Activity {
 
 
     }
-    public String Obtener_idpedido(){
-
-        StringBuilder builder=new StringBuilder();
-
-        String agente=ObtenerAgenteActivo();
-        builder.append("P"+agente);
-        String consecutivo=Consecutivo(agente);
-
-        int val=(builder.length()+consecutivo.length());
-        int falt=(12-val);
-
-        for(int i=0;i<falt;i++){
-            builder.append("0");
-        }
-        builder.append(consecutivo);
-
-
-
-        return builder.toString();
-    }
     public String ObtenerAgenteActivo(){
 
         lite=new CSQLite(context);
@@ -139,20 +130,97 @@ public class pcabecera extends Activity {
 
         return clave;
     }
-    public String Consecutivo(String agente){
+    public String ObtenerIdAgente(){
 
-        String numero="";
-
+        String id="";
+        String clave_agente=ObtenerAgenteActivo();
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select " +
-                "id from consecutivo where clave_agente='"+agente+"'",null);
+        Cursor rs=db.rawQuery("select id_agente from agentes where clave_agente='"+clave_agente+"'",null);
+
         if(rs.moveToFirst()){
-            numero=rs.getString(0);
+            id=rs.getString(0);
         }
 
-        return numero;
+
+        return id;
+    }
+    public String Obtener_idpedido2(){
+
+        StringBuilder builder=new StringBuilder();
+
+
+        /*Iniciales*/
+        builder.append("FG");
+
+        /*Id agente*/
+       String id_agente=ObtenerIdAgente();
+       int tam=id_agente.length();
+       int ceros=4-tam;
+       for(int i=0;i<ceros;i++){
+           builder.append("0");
+       }
+           builder.append(id_agente);
+
+       /*Año día*/
+           builder.append(Fecha());
+
+
+        return builder.toString();
+    }
+
+    public void CrearTXT(){
+
+        try{
+
+            OutputStreamWriter out=new OutputStreamWriter(openFileOutput("Pedidos.txt",Context.MODE_PRIVATE));
+            out.write("");
+            out.close();
+
+        }catch (Exception e){
+            String error=e.toString();
+            e.printStackTrace();
+        }
+
+    }
+    public Boolean existTxt(String fileName){
+
+        for(String tmp:fileList()){
+            if(tmp.equals(fileName))
+                return true;
+        }
+
+        return false;
+    }
+    public void EscribirTXT(String id_pedido){
+
+        try{
+
+            OutputStreamWriter writer2=new OutputStreamWriter(openFileOutput("Pedidos.txt",Context.MODE_PRIVATE));
+            writer2.write(id_pedido);
+            writer2.close();
+            //ObtenerArchivos2();
+        }catch (Exception e){
+
+        }
+
+    }
+    public String LeerTXT(){
+        String id_pedido="";
+
+        try{
+
+            InputStreamReader archivo=new InputStreamReader(openFileInput("Pedidos.txt"));
+            BufferedReader br=new BufferedReader(archivo);
+
+            id_pedido=br.readLine();
+
+        }catch (Exception e){
+
+        }
+
+        return  id_pedido;
     }
 
 
@@ -218,6 +286,23 @@ public class pcabecera extends Activity {
         String formatteDate=df.format(dt.getTime());
 
         return formatteDate;
+    }
+    private String Fecha(){
+        Calendar cal = new GregorianCalendar();
+        Date dt = cal.getTime();
+
+        SimpleDateFormat df=new SimpleDateFormat("yy");
+        String formatteDate=df.format(dt.getTime());
+
+        SimpleDateFormat df1=new SimpleDateFormat("ddd");
+        String formatteDate1=df1.format(dt.getTime());
+
+        SimpleDateFormat df2=new SimpleDateFormat("HHmmss");
+        String formatteDate2=df2.format(dt.getTime());
+
+        return formatteDate+formatteDate1+formatteDate2;
+
+
     }
 
 
@@ -305,7 +390,7 @@ public class pcabecera extends Activity {
     @Override
     protected void onResume(){
     super.onResume();
-    txt_idPedido.setText(Obtener_idpedido());
+    txt_idPedido.setText(LeerTXT());
 
     }
 

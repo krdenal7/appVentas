@@ -196,6 +196,7 @@ public class Crear_precioFinal {
 
         return cliente;
     }
+
    public void Generar_PrecioFinal_Descliente(){
 
        String codigo="";
@@ -316,17 +317,15 @@ public class Crear_precioFinal {
 
 
    }
-
     public void Generar_PrecioFinal_SoloOferta(){
 
         String codigo="";
-        Double precio=0.00;
-        Double total=0.00;
+        Double precio;
+        Double total;
         Double oferta=0.00;
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        String[][] valores=new String[data.size()][2];
 
      for(int i=0;i<data.size();i++){
 
@@ -369,8 +368,9 @@ try {
          }
 
 
-       //  String stotal=String.format(Locale.US, "%.2f", total);
-       //   db.execSQL("update productos set precio_final='"+stotal+"' where codigo='"+codigo+"'");
+         precio=0.00;
+         total=0.00;
+         oferta=0.00;
 
      }
     }

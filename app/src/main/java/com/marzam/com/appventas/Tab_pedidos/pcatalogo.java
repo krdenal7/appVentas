@@ -259,8 +259,8 @@ public class pcatalogo extends Activity {
 
         Cursor rs=null;
 
-        String query="select descripcion,precio,Cantidad,p.codigo,precio_final,clasificacion_fiscal,o.descuento from productos as p left join " +
-                " ofertas as o on p.codigo=o.codigo";
+        String query="select descripcion,precio,p.Cantidad,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad from productos as p left join " +
+                " ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo ";
 
         rs=db.rawQuery(query,null);
         data=new ArrayList<HashMap<String, ?>>();
@@ -277,6 +277,8 @@ public class pcatalogo extends Activity {
             producto_row.put("E","Precio Final: $"+rs.getString(4));
             producto_row.put("F","Clasificación: "+rs.getString(5));
             producto_row.put("G","Oferta: "+oferta+"%");
+            producto_row.put("H",rs.getString(7));
+            producto_row.put("I","Existencia: "+rs.getString(8));
             data.add(producto_row);
             producto_row=new HashMap<String, String>();
         }
@@ -294,8 +296,8 @@ public class pcatalogo extends Activity {
       Cursor rs=null;
 
         try {
-            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento  " +
-                           "from productos as p left join ofertas as o on p.codigo=o.codigo limit 1000 ",null);
+            rs=db.rawQuery("select descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad " +
+                           "from productos as p left join ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo limit 1000 ",null);
         }catch (Exception e){
             String err="Error:"+e.toString();
             Log.d("Error:",err);
@@ -310,7 +312,7 @@ public class pcatalogo extends Activity {
         while (rs.moveToNext()){
 
             String oferta=(rs.getString(7)==null)?"0":rs.getString(7);
-            modelItems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),oferta);
+            modelItems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),oferta,rs.getString(8),rs.getString(9));
             cont++;
         }
 
@@ -468,9 +470,8 @@ public class pcatalogo extends Activity {
 
     public void LLenarList(){
 
-
         LlenarHasmap();//llena el arreglo para el simpleAdapter
-        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","E","G","C","F"},new int[]{R.id.textView30,R.id.textView31,R.id.textView60,R.id.textView61,R.id.textView32,R.id.textView71});
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","E","G","C","F","H","I","D"},new int[]{R.id.textView30,R.id.textView31,R.id.textView60,R.id.textView61,R.id.textView32,R.id.textView71,R.id.textView74,R.id.textView73,R.id.textView75});
 
     }
 
@@ -494,8 +495,6 @@ public class pcatalogo extends Activity {
 
         }
     }
-
-
 
 
 

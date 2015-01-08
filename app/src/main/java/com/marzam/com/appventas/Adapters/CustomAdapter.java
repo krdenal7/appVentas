@@ -37,6 +37,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     TextView Precio_neto;
     TextView Clasificacion;
     TextView Oferta;
+    TextView existencias;
     CSQLite lite;
 
     Button boton1;
@@ -100,6 +101,9 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
     Oferta=(TextView)convertView.findViewById(R.id.textView59);
     Oferta.setText("Oferta: "+modelitems[position].getOferta()+"%");
+
+   existencias=(TextView)convertView.findViewById(R.id.textView72);
+   existencias.setText("Existencia: "+modelitems[position].getExistencia());
 
 
     name.setText(modelitems[position].getName());//Asigna el nombre a los Texview
@@ -272,8 +276,8 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
         try {
 
-            rs=db.rawQuery("select descripcion,isCheck,Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento  " +
-                           "from productos as p left join ofertas as o on p.codigo=o.codigo limit 1000",null);
+            rs=db.rawQuery("select descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad " +
+                           " from productos as p leftf join ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo limit 1000 ",null);
 
         }catch (Exception e){
             String err="Error:"+e.toString();
@@ -288,7 +292,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
         while (rs.moveToNext()){
             String oferta=(rs.getString(7)==null)?"0":rs.getString(7);
-            modelitems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),oferta);
+            modelitems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),oferta,rs.getString(8),rs.getString(9));
             cont++;
         }
 
