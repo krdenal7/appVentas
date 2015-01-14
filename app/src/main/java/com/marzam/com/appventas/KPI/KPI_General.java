@@ -9,6 +9,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -127,8 +129,10 @@ public class KPI_General extends Activity {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 Intent intent=new Intent(context, MapsLocation.class);
-                startActivity(intent);
-                new TaskCierreVisita().execute("");
+
+                    startActivity(intent);
+                    new TaskCierreVisita().execute("");
+
             }
         });
         alert.setNegativeButton("No",new DialogInterface.OnClickListener() {
@@ -271,7 +275,7 @@ public class KPI_General extends Activity {
 
             Date=getDate();
             object.put("id_visita",Obtener_Idvisita());
-            object.put("fecha_cierre",Date.replace(":","|"));
+            object.put("fecha_cierre",Date.replace(":", "|"));
             object.put("estatus_visita","20");
             array.put(object);
             json=array.toString();
@@ -420,10 +424,14 @@ public class KPI_General extends Activity {
 
             WebServices services=new WebServices();
             String json=Obtenerjson_Cierre();
-            String respuesta= services.CierreVisitas(json);
+            String respuesta="";
 
-            if(respuesta!=null)
-               Extraer_json(respuesta);
+            if(isOnline()) {
+                 respuesta = services.CierreVisitas(json);
+
+                if (respuesta != null)
+                    Extraer_json(respuesta);
+            }
 
             String agente=ObtenerClavedeAgente();
             CerrarVisita(agente);
@@ -463,7 +471,15 @@ public class KPI_General extends Activity {
         }
     }
 
+    public  boolean isOnline(){
 
+        ConnectivityManager cm=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo=cm.getActiveNetworkInfo();
+        if(networkInfo !=null && networkInfo.isConnected()){
+            return true;
+        }
+        return false;
+    }
     @Override
     public void onBackPressed(){
         startActivity(new Intent(getBaseContext(), MapsLocation.class)

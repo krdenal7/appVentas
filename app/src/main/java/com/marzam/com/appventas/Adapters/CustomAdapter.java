@@ -277,7 +277,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
         try {
 
             rs=db.rawQuery("select descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad " +
-                           " from productos as p leftf join ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo limit 1000 ",null);
+                           " from productos as p left join ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo limit 1000 ",null);
 
         }catch (Exception e){
             String err="Error:"+e.toString();

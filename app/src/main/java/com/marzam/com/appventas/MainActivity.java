@@ -47,6 +47,9 @@ import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.kobjects.base64.Base64;
 import org.xmlpull.v1.XmlSerializer;
 
@@ -115,7 +118,7 @@ public class MainActivity extends Activity {
        txtUsuario=(TextView)findViewById(R.id.textView);
        locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
        CrearDirectorioDownloads();
-       //ObtenerArchivos2();
+      //ObtenerArchivos2();
 
       // EliminarBD();
 
@@ -143,14 +146,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View view) {
 
-            //    gcm = GoogleCloudMessaging.getInstance(MainActivity.this);
-            //    regid = getRegistrationId(context, "Isaac");
 
-            //     if (regid.equals("")) {
-            //         TareaRegistroGCM tarea = new TareaRegistroGCM();
-            //         tarea.execute("");
-            //        pd = ProgressDialog.show(context, "Por favor espere", "Registrando en servidor", true, false);
-            //    }
 
                 password=((EditText)findViewById(R.id.editText)).getText().toString();
 
@@ -167,22 +163,13 @@ public class MainActivity extends Activity {
             }
         });
 
-        /*Registro SERVICIO GOOGLE CLOUD
-        if(checkPlayServices()){
+     if(ExistsBD())
+     PushNotification();
 
-            gcm=GoogleCloudMessaging.getInstance(context);
-            regid=getRegistrationId(context);
-
-            if(regid.isEmpty()){
-               new TareaRegistroGCM().execute(ObtenerAgenteActivo());
-               pd=ProgressDialog.show(context,"Registro de dispositivo","Cargando",true,false);
-            }
-        }else{
-            Log.i(TAG,"Dispositivo no soportado");
-        }*/
     }
 
     public void CrearDirectorioDownloads(){
+
 
         try {
             File folder = android.os.Environment.getExternalStorageDirectory();
@@ -246,6 +233,7 @@ public class MainActivity extends Activity {
                 }else{
                     ActualizarSesionAgente(agente);
                     MostrarDatos_Agente();
+                    EliminarRegistrationId(context,"","");
                 }
 
             }
@@ -346,6 +334,7 @@ try {
         protected String doInBackground(String... params)
         {
             String msg = "";
+            WebServices services=new WebServices();
 
             try
             {
@@ -358,6 +347,12 @@ try {
 
                 //Nos registramos en los servidores de GCM
                 regid = gcm.register(SENDER_ID);
+
+                String json=jsonPush(ObtenerAgenteActivo(),regid,getPhoneNumber());
+
+
+                if(json!=null)
+                services.RegistrarTelefono(json);
 
                 msg="Dispositivo registrado: "+regid;
                 Log.d(TAG, "Registrado en GCM: registration_id=" + regid);
@@ -383,6 +378,27 @@ try {
 
         }
 
+    }
+
+    public String jsonPush(String num_emp,String key,String telefono){
+
+        JSONObject object=new JSONObject();
+        JSONArray array=new JSONArray();
+
+        try{
+
+            object.put("numero_empleado",num_emp);
+            object.put("api_key",key);
+            object.put("numero_telefono",telefono!=null?telefono.replace("+",""):"0000000000");
+            array.put(object);
+
+
+        }catch (JSONException e){
+            array=null;
+        }
+
+
+        return array.toString();
     }
 
     @Override
@@ -631,6 +647,22 @@ try {
 
 
     /*Registro-PUSH*/
+    private void PushNotification(){
+        //Registro SERVICIO GOOGLE CLOUD
+        if(checkPlayServices()){
+
+
+            gcm=GoogleCloudMessaging.getInstance(context);
+            regid=getRegistrationId(context);
+
+            if(regid.isEmpty()){
+                new TareaRegistroGCM().execute(ObtenerAgenteActivo());
+                pd=ProgressDialog.show(context,"Registro de dispositivo","Cargando",true,false);
+            }
+        }else{
+            Log.i(TAG,"Dispositivo no soportado");
+        }
+    }
     private int getAppVersion(Context context) {
 
         try{
@@ -659,6 +691,22 @@ try {
 
         editor.commit();
     }
+    private void EliminarRegistrationId(Context context, String user, String regId){
+        SharedPreferences prefs = getSharedPreferences(
+                MainActivity.class.getSimpleName(),
+                Context.MODE_PRIVATE);
+
+        int appVersion = getAppVersion(context);
+
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PROPERTY_USER, user);
+        editor.putString(PROPERTY_REG_ID, regId);
+        editor.putInt(PROPERTY_APP_VERSION, appVersion);
+        editor.putLong(PROPERTY_EXPIRATION_TIME,
+                System.currentTimeMillis() + EXPIRATION_TIME_MS);
+
+        editor.commit();
+    }
     private boolean checkPlayServices(){
         int resultCode= GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
 
@@ -671,6 +719,21 @@ try {
             return false;
         }
         return true;
+    }
+    private String getRegistrationId(Context context){
+        final SharedPreferences prefd=getSharedPreferences(
+                MainActivity.class.getSimpleName(),
+                Context.MODE_PRIVATE);
+        String registrationId= prefd.getString(PROPERTY_REG_ID,"");
+        if(registrationId.isEmpty()){
+            return "";
+        }
+        int registeredVersion=prefd.getInt(PROPERTY_APP_VERSION,Integer.MIN_VALUE);
+        int currentVersion=getAppVersion(context);
+        if(registeredVersion!=currentVersion){
+            return "";
+        }
+        return registrationId;
     }
 
 

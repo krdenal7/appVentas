@@ -255,4 +255,11 @@ try {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onBackPressed(){
+        startActivity(new Intent(getBaseContext(), MapsLocation.class)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+        finish();
+    }
 }
