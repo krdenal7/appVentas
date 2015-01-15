@@ -102,12 +102,13 @@ public class pcatalogo extends Activity {
                         if (cont != null) {
                             lproductos.setAdapter(simpleAdapter);
                         }
-                    } else {
 
-                           LlenarModelItems();
-                           adapter1=new CustomAdapter(context,modelItems);
-                           lproductos.setAdapter(adapter1);
-                    }
+                    }// else {
+
+                     //         LlenarModelItems();
+                     //         adapter1=new CustomAdapter(context,modelItems);
+                     //         lproductos.setAdapter(adapter1);
+                     //   }
                 }catch (Exception e){
 
                 }

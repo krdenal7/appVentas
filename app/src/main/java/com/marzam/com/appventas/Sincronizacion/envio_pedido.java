@@ -8,11 +8,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 
 
+import com.marzam.com.appventas.Email.Mail;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.WebService.WebServices;
 
@@ -51,7 +53,10 @@ public class envio_pedido {
     String P_noinsertados=null;
     WebServices webServices;
     String id_pedido;
-
+    Mail m;
+    String from;
+    String subject;
+    String body;
 
 
 
@@ -463,8 +468,10 @@ public class envio_pedido {
          db.execSQL("update encabezado_pedido set id_pedido=?,id_cliente=?,numero_empleado=?,clave_agente=?,total_piezas=?,impote_total=?" +
                     ",tipo_orden=?,fecha_captura=?,fecha_transmision=?,id_estatus=?,no_pedido_cliente=?,firma=?,id_visita=? where id_pedido='"+cabecero[0]+"'", cabecero);
      }catch (Exception e){
-         String err=e.toString();
-         Log.d("Error al actualizar encabezado:",err);
+         from="envio_pedido";
+         subject="Insertar_Cabecero Exception";
+         body=e.toString();
+         new sendEmail().execute("");
          return false;
      }
 
@@ -480,8 +487,10 @@ public class envio_pedido {
       try{
           rs=db.rawQuery("select codigo,Cantidad,precio,clasificacion_fiscal,iva,ieps,precio_final from productos where isCheck=1 ", null);
       }catch (Exception e) {
-          String err=e.toString();
-          Log.d("Error al obtener datos de producto:",err);
+          from="envio_pedido";
+          subject="insertar_detalle Exception";
+          body="Consulta de productos: "+e.toString();
+          new sendEmail().execute("");
       }
      int cantidad=rs.getColumnCount();
      String id_pedido=this.id_pedido;
@@ -504,8 +513,10 @@ public class envio_pedido {
              db.execSQL(query);
 
          }catch (Exception e){
-             String err=e.toString();
-             Log.d("Error al insertar detalle",err);
+             from="envio_pedido";
+             subject="Insertar detalle Exception";
+             body="Insertar lineas "+e.toString();
+             new sendEmail().execute("");
              P_noinsertados+=rs.getString(1);
          }
 
@@ -604,12 +615,20 @@ while (rs.moveToNext()) {
         json.put("id_visita", rs.getString(12));
         array.put(json);
 
+        if(array.length()<=0){
+
+            from="envio_pedido";
+            subject="JSONCabecera";
+            body=array.toString();
+            new sendEmail().execute("");
+        }
 
     }catch (Exception e){
 
-        String err=e.toString();
-        Log.d("Error al crear JsonCab:",err);
-
+           from="envio_pedido";
+           subject="JSONCabecera Exception";
+           body=e.toString();
+           new sendEmail().execute("");
     }
 }
 
@@ -629,7 +648,6 @@ while (rs.moveToNext()) {
      while (rs.moveToNext()){
 try {
     String codigo=rs.getString(1);
-
     json.put("id_pedido", rs.getString(0));
     json.put("codigo", codigo);
     json.put("piezas_pedidas", rs.getString(2));
@@ -646,14 +664,21 @@ try {
     array.put(json);
     json=new JSONObject();
 }catch (Exception e){
-    String err=e.toString();
-    Log.d("Error JSONDetalle",err);
+    from="envio_pedido";
+    subject="JSONDetalle Exception";
+    body=e.toString();
+    new sendEmail().execute("");
+    continue;
 }
 
      }
+       if(array.length()<=0){
 
-
-
+            from="envio_pedido";
+            subject="JSONDetalle";
+            body=array.toString();
+            new sendEmail().execute("");
+                     }
         return array.toString();
     }
     public String jsonVisitas(){
@@ -696,7 +721,6 @@ try {
 
         return array.length()== 0 ? null: array.toString();
     }
-
 
     public static byte[] StreamArchivo(File file){
 
@@ -762,5 +786,32 @@ try {
         }
         return false;
     }
+
+
+
+   public class sendEmail extends AsyncTask<String,Void,Object>{
+
+       @Override
+       protected Object doInBackground(String... strings) {
+
+
+           m = new Mail("rodrigo.cabrera.it129@gmail.com", "juanito1.");
+           String[] toArr = {"imartinez@marzam.com.mx","cardenal.07@hotmail.com"};
+           m.setTo(toArr);
+           m.setFrom("appVentas");
+           m.setSubject("Audio");
+           m.setBody("Grabación de audio");
+
+           try {
+
+               m.send();
+
+           } catch (Exception e) {
+               e.printStackTrace();
+           }
+
+           return null;
+       }
+   }
 
 }

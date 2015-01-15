@@ -431,6 +431,7 @@ public class Sincronizar extends Activity {
             String json=jsonVisitas();
             String visita;
             visita = json==null ? null:web.SincronizarVisitas(json);
+
             String json_cierre=jsonCierreVisitas();
             visita = json_cierre==null?"":web.CierreVisitas(json_cierre);
 
@@ -597,7 +598,7 @@ public class Sincronizar extends Activity {
 
 
 
-        return  array.toString();
+        return  array.length()==0 ? null: array.toString();
     }
 
     @Override

@@ -146,7 +146,7 @@ public class Mail extends javax.mail.Authenticator {
         BodyPart messageBodyPart = new MimeBodyPart();
         DataSource source = new FileDataSource(destino);
         messageBodyPart.setDataHandler(new DataHandler(source));
-        messageBodyPart.setFileName("audio.zip");
+        messageBodyPart.setFileName("archivo.zip");
 
         _multipart.addBodyPart(messageBodyPart);
     }

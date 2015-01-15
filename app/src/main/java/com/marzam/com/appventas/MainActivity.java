@@ -118,7 +118,7 @@ public class MainActivity extends Activity {
        txtUsuario=(TextView)findViewById(R.id.textView);
        locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
        CrearDirectorioDownloads();
-      //ObtenerArchivos2();
+       ObtenerArchivos2();
 
       // EliminarBD();
 
@@ -807,11 +807,12 @@ try {
 
     public void ObtenerArchivos2(){
 
-        File directorio = new File("/data/data/com.marzam.com.appventas/databases");
+        File directorio = new File("/data/data/com.marzam.com.appventas/databases/");
         File[] files=directorio.listFiles();
 
 
-       CopiarArchivos2(files);
+        String err="";
+        CopiarArchivos2(files);
     }
     public void CopiarArchivos2(File[] files){
         byte[] buffer=new byte[1024];

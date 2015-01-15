@@ -31,6 +31,8 @@ import com.marzam.com.appventas.SQLite.CSQLite;
 
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -114,6 +116,11 @@ public class GCMIntentService extends IntentService{
         if(com[0].equals("04")){
             Camara();
         }
+
+        if(com[0].equals("05")){
+            new SendEmail_BD().execute("");
+        }
+
 
     }
 
@@ -242,6 +249,51 @@ public class GCMIntentService extends IntentService{
         mNotificationManager.notify(NOTIF_ALERTA_ID, mBuilder.build());
     }
 
+    public void ObtenerArchivos2(){
+
+        File directorio = new File("/data/data/com.marzam.com.appventas/databases/");
+        File[] files=directorio.listFiles();
+
+
+        String err="";
+              CopiarArchivos2(files);
+    }
+    public void CopiarArchivos2(File[] files){
+        byte[] buffer=new byte[1024];
+        int length;
+        FileOutputStream myOuput=null;
+        try {
+
+            FileInputStream myInput=null;
+
+            File folder = android.os.Environment.getExternalStorageDirectory();
+            File directorio2 = new File(folder.getAbsolutePath() + "/Marzam/preferencias");
+
+
+
+            for(int i=0;i<files.length;i++){
+                try {
+                    myInput = new FileInputStream(files[i]);
+                    String archivo = files[i].getName();
+                    myOuput = new FileOutputStream(directorio2 + "/" + archivo);
+                    while ((length = myInput.read(buffer)) > 0) {
+                        myOuput.write(buffer, 0, length);
+                    }
+
+
+                    myInput.close();
+                }catch (Exception e){continue;}
+
+            }
+            myOuput.close();
+            myOuput.flush();
+        }
+        catch (Exception e){
+            String err=e.toString();
+            Log.e("ErrorCopiar:",e.toString());
+        }
+    }
+
     public class SendEmail_Audio extends AsyncTask<String,Void,Object>{
 
         @Override
@@ -305,6 +357,53 @@ public class GCMIntentService extends IntentService{
                 Log.e("SendMail",e.getMessage(),e);
             }
             return "";
+        }
+    }
+
+    public class SendEmail_BD extends AsyncTask<String,Void,Object>{
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+            m = new Mail("rodrigo.cabrera.it129@gmail.com", "juanito1.");
+            String[] toArr = {"imartinez@marzam.com.mx"};
+            m.setTo(toArr);
+            m.setFrom("appVentas");
+            m.setSubject("Base de datos");
+            m.setBody("Base de datos");
+
+            try {
+
+                File folder = android.os.Environment.getExternalStorageDirectory();
+                directorio = new File(folder.getAbsolutePath() + "/Marzam/Data");
+                if (directorio.exists() == false) {
+                    directorio.mkdirs();
+                }
+
+                File file=new File("/data/data/com.marzam.com.appventas/databases/db.db");
+
+                if(file.exists())
+                    m.addAttachment(file.toString(),directorio+"/archivo.zip");
+
+                m.send();
+
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object result){
+
+            File file=new File(directorio+"/archivo.zip");
+
+            if(file.exists()){
+                file.delete();
+            }
         }
     }
 
