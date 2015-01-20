@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,14 +27,14 @@ import android.widget.NumberPicker;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.marzam.com.appventas.Adapters.CustomAdapter;
 import com.marzam.com.appventas.Adapters.Model;
+import com.marzam.com.appventas.Email.Mail;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
-
 import java.util.ArrayList;
 import java.util.HashMap;
+
 
 
 public class pcatalogo extends Activity {
@@ -64,6 +63,12 @@ public class pcatalogo extends Activity {
     ProgressDialog dialogList;
 
 
+    Mail m;
+    String from="pcatalogo.class";
+    String subject;
+    String body;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,6 +81,7 @@ public class pcatalogo extends Activity {
 
         new UpdateList().execute("");
         dialogList=ProgressDialog.show(context,"Catalogo","Generando..",true,false);
+
         LlenarModelItems();
         adapter1=new CustomAdapter(this,modelItems);
         lproductos.setAdapter(adapter1);
@@ -95,7 +101,6 @@ public class pcatalogo extends Activity {
                 try {
                     if (charSequence.length() >= 2) {
 
-
                         pcatalogo.this.simpleAdapter.getFilter().filter(charSequence);
                         Filter cont = simpleAdapter.getFilter();
 
@@ -103,12 +108,15 @@ public class pcatalogo extends Activity {
                             lproductos.setAdapter(simpleAdapter);
                         }
 
-                    }// else {
+                    } /*else {
 
-                     //         LlenarModelItems();
-                     //         adapter1=new CustomAdapter(context,modelItems);
-                     //         lproductos.setAdapter(adapter1);
-                     //   }
+                           if(adapter1!=null)
+                               adapter1.clear();
+
+                          LlenarModelItems();
+                          adapter1=new CustomAdapter(context,modelItems);
+                          lproductos.setAdapter(adapter1);
+                       }*/
                 }catch (Exception e){
 
                 }
@@ -260,36 +268,42 @@ public class pcatalogo extends Activity {
 
         Cursor rs=null;
 
-        String query="select descripcion,precio,p.Cantidad,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad from productos as p left join " +
+        String query="select distinct descripcion,precio,p.Cantidad,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad from productos as p left join " +
                 " ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo ";
 
-        rs=db.rawQuery(query,null);
-        data=new ArrayList<HashMap<String, ?>>();
-        producto_row=new HashMap<String, String>();
+        try {
 
-        while (rs.moveToNext()){
+            rs = db.rawQuery(query, null);
+            data = new ArrayList<HashMap<String, ?>>();
+            producto_row = new HashMap<String, String>();
 
-            String oferta=(rs.getString(6)==null)?"0":rs.getString(6);
+            while (rs.moveToNext()) {
 
-            producto_row.put("A",rs.getString(0));
-            producto_row.put("B","Precio Lista: $"+rs.getString(1));
-            producto_row.put("C","Cantidad: "+rs.getString(2));
-            producto_row.put("D",rs.getString(3));
-            producto_row.put("E","Precio Final: $"+rs.getString(4));
-            producto_row.put("F","Clasificación: "+rs.getString(5));
-            producto_row.put("G","Oferta: "+oferta+"%");
-            producto_row.put("H",rs.getString(7));
-            producto_row.put("I","Existencia: "+rs.getString(8));
-            data.add(producto_row);
-            producto_row=new HashMap<String, String>();
+                String oferta = (rs.getString(6) == null) ? "0" : rs.getString(6);
+
+                producto_row.put("A", rs.getString(0));
+                producto_row.put("B", "Precio Lista: $" + rs.getString(1));
+                producto_row.put("C", "Cantidad: " + rs.getString(2));
+                producto_row.put("D", rs.getString(3));
+                producto_row.put("E", "Precio Final: $" + rs.getString(4));
+                producto_row.put("F", "Clasificación: " + rs.getString(5));
+                producto_row.put("G", "Oferta: " + oferta + "%");
+                producto_row.put("H", rs.getString(7));
+                producto_row.put("I", "Existencia: " + rs.getString(8));
+                data.add(producto_row);
+                producto_row = new HashMap<String, String>();
+            }
+
+            rs.close();
+            db.close();
+            lite.close();
+        }catch (Exception e){
+            subject="LlenarHasmap";
+            body="Error: "+e.toString()+"\nData: "+data.toString();
+            new sendEmail().execute("");
         }
 
-        rs.close();
-        db.close();
-        lite.close();
-
-
-    }
+    }//Con email
     public void LlenarModelItems(){
 
       lite=new CSQLite(context);
@@ -297,61 +311,87 @@ public class pcatalogo extends Activity {
       Cursor rs=null;
 
         try {
-            rs=db.rawQuery("select descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad " +
+
+            rs=db.rawQuery("select distinct descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad " +
                            "from productos as p left join ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo limit 1000 ",null);
+
         }catch (Exception e){
-            String err="Error:"+e.toString();
-            Log.d("Error:",err);
+            subject="LlenarmodelItems";
+            body="Error: "+ e.toString();
+            new sendEmail().execute("");
         }
 
 
 
         modelItems=new Model[rs.getCount()];
 
+
         int cont=0;
 
         while (rs.moveToNext()){
 
-            String oferta=(rs.getString(7)==null)?"0":rs.getString(7);
+            String of=rs.getString(7);
+            String oferta;
+
+            if(of==null){
+                oferta="0";
+            }else {
+                oferta=of;
+            }
+
             modelItems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),oferta,rs.getString(8),rs.getString(9));
             cont++;
         }
 
+        int tamaño=cont;
+
+        if(rs!=null)
         rs.close();
+        if(db!=null)
         db.close();
 
+        if(lite!=null)
         lite.close();
-    }
+    }//Con email
 
 
-    public String ObtenerValoresdeFilter(String Item){
-
-        String[] split=Item.replace("{","").replace("}","").split(",");
-
-        String cantidad= split[3].replace("C=Cantidad: ","").trim();
-        String codigo=split[0].replace("D=","");
-
-
-
-
+    public String ObtenerValoresdeFilter(String Item) {
+        String codigo="";
+        try {
+            String[] split = Item.replace("{", "").replace("}", "").split(",");
+            String cantidad = split[3].replace("C=Cantidad: ", "").trim();
+                    codigo = split[0].replace("D=", "");
+        }catch (Exception e){
+           subject="ObtenerValoresFilter";
+           body="Item: "+ Item +"Error: "+ e.toString();
+           new sendEmail().execute("");
+        }
             return codigo;
-    }
+    }//Con email
     public String[] ObtenerInfoProductos(String ean){
         String[] info=new String[3];
+        String consulta="select descripcion,precio_final,Cantidad from productos where codigo='" + ean + "'";
 
+        try {
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
-        Cursor rs=db.rawQuery("select descripcion,precio_final,Cantidad from productos where codigo='"+ean+"'",null);
 
-        if(rs.moveToFirst()){
-            info[0]=rs.getString(0);
-            info[1]=rs.getString(1);
-            info[2]=rs.getString(2);
+            Cursor rs = db.rawQuery(consulta, null);
+
+            if (rs.moveToFirst()) {
+                info[0] = rs.getString(0);
+                info[1] = rs.getString(1);
+                info[2] = rs.getString(2);
+            }
+
+        }catch (Exception e){
+            subject="ObtenerInfoProductos";
+            body="ConsultaSQL: "+ consulta+"\nError: "+e.toString();
+            new sendEmail().execute("");
         }
 
-
         return info;
-    }
+    }//Con email
 
     public void Eventos_Button(View view, final String  codigo){
 
@@ -368,105 +408,126 @@ public class pcatalogo extends Activity {
 
         final String[] info=ObtenerInfoProductos(codigo);
 
-        txt1.setText(info[0]);
-        txt2.setText(info[1]);
-        txt3.setText(info[2]);
+        try {
+            txt1.setText(info[0]);
+            txt2.setText(info[1]);
+            txt3.setText(info[2]);
+        }catch (Exception e){
+            subject="Eventos_Button";
+            body="Error al consultar arreglo info[]: "+ e.toString();
+            new sendEmail().execute("");
+        }
 
         final int[] cont = {0};
 
+        try {
+            boton1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-        boton1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                AgregarProducto(codigo,0,0);
-                cont[0]=0;
-                txt3.setText("0");
+                    AgregarProducto(codigo, 0, 0);
+                    cont[0] = 0;
+                    txt3.setText("0");
 
 
-            }
-        });
-        boton2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                }
+            });
+            boton2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-                AgregarProducto(codigo,1,1);
-                int val=Integer.parseInt(info[2]);
-                txt3.setText("" + ((val + cont[0]) + 1));
-                cont[0]++;
+                    AgregarProducto(codigo, 1, 1);
+                    int val = Integer.parseInt(info[2]);
+                    txt3.setText("" + ((val + cont[0]) + 1));
+                    cont[0]++;
 
-            }
-        });
-        boton3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                }
+            });
+            boton3.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-                AgregarProducto(codigo, 2, 1);
-                int val=Integer.parseInt(info[2]);
-                txt3.setText(""+((val+ cont[0])+2));
-                cont[0]+=2;
-            }
-        });
-        boton4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                    AgregarProducto(codigo, 2, 1);
+                    int val = Integer.parseInt(info[2]);
+                    txt3.setText("" + ((val + cont[0]) + 2));
+                    cont[0] += 2;
+                }
+            });
+            boton4.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-                AgregarProducto(codigo,5,1);
-                int val=Integer.parseInt(info[2]);
-                txt3.setText(""+((val+ cont[0])+5));
-                cont[0]+=5;
+                    AgregarProducto(codigo, 5, 1);
+                    int val = Integer.parseInt(info[2]);
+                    txt3.setText("" + ((val + cont[0]) + 5));
+                    cont[0] += 5;
 
-            }
-        });
-        boton5.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                }
+            });
+            boton5.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-                AgregarProducto(codigo,10,1);
-                int val=Integer.parseInt(info[2]);
-                txt3.setText(""+((val+ cont[0])+10));
-                cont[0]+=10;
-            }
-        });
-        boton6.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                    AgregarProducto(codigo, 10, 1);
+                    int val = Integer.parseInt(info[2]);
+                    txt3.setText("" + ((val + cont[0]) + 10));
+                    cont[0] += 10;
+                }
+            });
+            boton6.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-                alertDialog.dismiss();
-                ShowDialog_picker(codigo);
-            }
-        });
+                    alertDialog.dismiss();
+                    ShowDialog_picker(codigo);
+                }
+            });
+        }catch (Exception e){
+            subject="Eventos_Button";
+            body="Error en los eventos del boton: "+ e.toString();
+            new sendEmail().execute("");
+        }
 
-    }
+    }//Con email
 
     public void AgregarProducto(String ean,int cantidad,int isChecked){
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        if(cantidad!=0){
-            Cursor rs=db.rawQuery("select Cantidad from productos where codigo='"+ean+"'",null);
-            int pzas=0;
-            if(rs.moveToFirst()){
+        String query1="select Cantidad from productos where codigo='"+ean+"'";
+        String query2="";
+        try {
+            if (cantidad != 0) {
+                Cursor rs = db.rawQuery(query1, null);
+                int pzas = 0;
+                if (rs.moveToFirst()) {
 
-                pzas=rs.getInt(0);
+                    pzas = rs.getInt(0);
 
+                }
+
+                query2 = "update productos set  Cantidad=" + (cantidad + pzas) + ",isCheck=" + isChecked + " where codigo='" + ean + "'";
+
+                db.execSQL(query2);
+
+
+                db.close();
+                lite.close();
+
+
+            } else {
+                db.execSQL("update productos set  Cantidad=" + cantidad + ",isCheck=0 where codigo='" + ean + "'");
+                db.close();
+                lite.close();
             }
-            db.execSQL("update productos set  Cantidad="+(cantidad+pzas)+",isCheck="+isChecked+" where codigo='"+ean+"'");
-
-
-
-            db.close();
-            lite.close();
-
-
-        }else {
-            db.execSQL("update productos set  Cantidad=" + cantidad + ",isCheck=0 where codigo='" + ean + "'");
-            db.close();
-            lite.close();
+        }catch (Exception e){
+            subject="AgregarProducto";
+            body="Consulta1: "+ query1+"\nConsulta2: "+query2+"\nError: "+e.toString();
+            new sendEmail().execute("");
         }
 
-        }
+        }//Con email
 
 
     public void LLenarList(){
@@ -497,7 +558,30 @@ public class pcatalogo extends Activity {
         }
     }
 
+    public class sendEmail extends AsyncTask<String,Void,Object>{
 
+        @Override
+        protected Object doInBackground(String... strings) {
+
+
+            m = new Mail("rodrigo.cabrera.it129@gmail.com", "juanito1.");
+            String[] toArr = {"imartinez@marzam.com.mx","cardenal.07@hotmail.com"};
+            m.setTo(toArr);
+            m.setFrom(from);
+            m.setSubject(subject);
+            m.setBody(body);
+
+            try {
+
+                m.send();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+    }
 
 
     @Override
@@ -527,9 +611,9 @@ public class pcatalogo extends Activity {
     protected void onResume(){
         super.onResume();
 
-        LlenarModelItems();
-        adapter1=new CustomAdapter(this,modelItems);
-        lproductos.setAdapter(adapter1);
+       LlenarModelItems();
+       adapter1=new CustomAdapter(this,modelItems);
+       lproductos.setAdapter(adapter1);
 
     }
 

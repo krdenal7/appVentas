@@ -320,40 +320,7 @@ public class KPI_General extends Activity {
 
 
 
-    public void CopiarArchivos(File[] files){
-        byte[] buffer=new byte[1024];
-        int length;
-        FileOutputStream myOuput=null;
-        try {
 
-            FileInputStream myInput=null;
-
-            File folder = android.os.Environment.getExternalStorageDirectory();
-            File directorio = new File(folder.getAbsolutePath() + "/Marzam/preferencias");
-
-
-
-            for(int i=0;i<files.length;i++){
-
-                myInput=new FileInputStream(files[i]);
-                String archivo=files[i].getName();
-                myOuput=new FileOutputStream(directorio+"/"+archivo);
-                while ((length=myInput.read(buffer))>0){
-                    myOuput.write(buffer,0,length);
-                }
-
-
-                myInput.close();
-
-            }
-            myOuput.close();
-            myOuput.flush();
-        }
-        catch (Exception e){
-            String err=e.toString();
-            Log.e("ErrorCopiar:",e.toString());
-        }
-    }
 
     public String ObtenerValoresURL(String id_cliente){
         String datos=null;

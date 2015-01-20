@@ -114,12 +114,10 @@ public class MainActivity extends Activity {
         context=this;
 
 
-
        txtUsuario=(TextView)findViewById(R.id.textView);
        locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
        CrearDirectorioDownloads();
-       ObtenerArchivos2();
-
+       //ObtenerArchivos2();
       // EliminarBD();
 
           if(!existTxt(txt))
@@ -294,7 +292,6 @@ try {
 
              return true;
          }
-
         if(keyCode==KeyEvent.KEYCODE_MENU){
 
 

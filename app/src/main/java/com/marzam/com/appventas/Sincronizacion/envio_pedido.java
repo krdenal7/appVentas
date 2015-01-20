@@ -11,7 +11,6 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
-import android.view.LayoutInflater;
 
 
 import com.marzam.com.appventas.Email.Mail;
@@ -89,7 +88,6 @@ public class envio_pedido {
 
             if(isOnline()==false) {
                 LimpiarBD_Insertados();
-                updateConsecutivo(agente);
                 return "Pedido guardado localmente. Verifique su conexión y sincronize los pedidos";
             }
 
@@ -97,7 +95,6 @@ public class envio_pedido {
 
             if(res==null) {
                 LimpiarBD_Insertados();
-                updateConsecutivo(agente);
                 return "Fallo al enviar pedidos. Sincronize el dispositivo para envíarlos nuevamente";
             }
 
@@ -105,7 +102,6 @@ public class envio_pedido {
                 ActualizarStatusPedido(res);
 
             resp = LimpiarBD_Insertados();
-            updateConsecutivo(agente);
             return resp;
         }else {
             return "No hay productos para agregar";
@@ -115,11 +111,11 @@ public class envio_pedido {
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
-
+        String sql="";
         try {
 
 
-            JSONArray array=new JSONArray(json);
+             JSONArray  array=new JSONArray(json);
 
             for(int i=0;i<array.length();i++){
 
@@ -127,15 +123,18 @@ public class envio_pedido {
 
                 String id = jsonData.getString("id_pedido");
                 String estatus = jsonData.getString("id_estatus");
+                sql="update encabezado_pedido set id_estatus='" + estatus + "' where id_pedido='" + id + "'";
 
-                db.execSQL("update encabezado_pedido set id_estatus='" + estatus + "' where id_pedido='" + id + "'");
+                db.execSQL(sql);
             }
 
 
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            String err=e.toString();
+            from="envio_pedido";
+            subject="ActualizarStatusPedido";
+            body="Query: "+sql+"\nJson: "+ json+"\nEror: "+e.toString();
+            new sendEmail().execute("");
         }
 
 
@@ -175,52 +174,57 @@ public class envio_pedido {
 
 
   public void InsertarIdPedido(){
+      String query="";
+      try {
+          lite = new CSQLite(context);
+          SQLiteDatabase db = lite.getWritableDatabase();
+            query="select * from encabezado_pedido where id_pedido='" + id_pedido + "'";
 
-      lite=new CSQLite(context);
-      SQLiteDatabase db=lite.getWritableDatabase();
+          Cursor rs = db.rawQuery(query, null);
 
-                              Cursor rs=db.rawQuery("select * from encabezado_pedido where id_pedido='"+id_pedido+"'",null);
+          if (rs.getCount() == 0) {
+                 query="insert into encabezado_pedido (id_pedido) values ('" + id_pedido + "')";
+              db.execSQL(query);
+          }
 
-      if(rs.getCount()==0){
-
-                              db.execSQL("insert into encabezado_pedido (id_pedido) values ('"+id_pedido+"')");
+          rs.close();
+          db.close();
+          lite.close();
+      }catch (Exception e){
+          from="envio_pedido";
+          subject="InsertarIdPedido()";
+          body="Query: "+query+"\n Error: "+e.toString();
+          new sendEmail().execute("");
       }
-
-      rs.close();
-      db.close();
-      lite.close();
 
   }
 
 
     public String ObtenerAgenteActivo(){
 
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
-        String clave="";
+        String clave = "";
+        String query="";
+        try {
 
-        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
-        if(rs.moveToFirst()){
+            lite = new CSQLite(context);
+            SQLiteDatabase db = lite.getWritableDatabase();
 
-            clave=rs.getString(0);
+            query="select clave_agente from agentes where Sesion=1";
+            Cursor rs = db.rawQuery(query, null);
+            if (rs.moveToFirst()) {
+
+                clave = rs.getString(0);
+            }
+        }catch (Exception e){
+            from="envio_pedido";
+            subject="ObtenerAgenteActivo";
+            body="Query: "+query+"\nError: "+e.toString();
+            new sendEmail().execute("");
         }
 
         return clave;
     }
-    public String Consecutivo(String agente){
 
-        String numero="";
-
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
-
-        Cursor rs=db.rawQuery("select id from consecutivo where clave_agente='"+agente+"'",null);
-        if(rs.moveToFirst()){
-            numero=rs.getString(0);
-        }
-
-        return numero;
-    }
 
    /*Obtener datos del encabezado*/
    public String LeerTXT(){
@@ -234,7 +238,10 @@ public class envio_pedido {
            id_pedido=br.readLine();
 
        }catch (Exception e){
-
+           from="envio_pedido";
+           subject="LeerTXT";
+           body="Error: "+e.toString();
+           new sendEmail().execute("");
        }
 
        return  id_pedido;
@@ -243,25 +250,47 @@ public class envio_pedido {
 
       lite=new CSQLite(context);
       SQLiteDatabase db=lite.getWritableDatabase();
-      Cursor rs=db.rawQuery("select id_cliente from sesion_cliente where Sesion=1",null);
-
       String cliente="";
+      String query="";
 
-      if(rs.moveToFirst()){
-          cliente=rs.getString(0);
+      try {
+
+          query="select id_cliente from sesion_cliente where Sesion=1";
+          Cursor rs = db.rawQuery(query, null);
+
+
+          if (rs.moveToFirst()) {
+              cliente = rs.getString(0);
+          }
+      }catch (Exception e){
+          from="envio_pedido";
+          subject="Obtener_idCliente";
+          body="Query: "+query+"\n Error: "+e.toString();
+          new sendEmail().execute("");
       }
 
       return cliente;
   }
   public String Obtener_NoEmpleado(){
+
       lite=new CSQLite(context);
       SQLiteDatabase db=lite.getWritableDatabase();
       String clave="";
+      String query="";
 
-      Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
-      if(rs.moveToFirst()){
+      try {
+          query="select numero_empleado from agentes where Sesion=1";
+          Cursor rs = db.rawQuery(query, null);
+          if (rs.moveToFirst()) {
 
-          clave=rs.getString(0);
+              clave = rs.getString(0);
+          }
+      }catch (Exception e){
+          from="envio_pedido";
+          subject="Obtener_NoEmpleado";
+          body="Query: "+query+"\nError: "+e.toString();
+          new sendEmail().execute("");
+
       }
 
       return clave;
@@ -272,30 +301,37 @@ public class envio_pedido {
       SQLiteDatabase db=lite.getWritableDatabase();
       iva=0.00;
       ieps=0.00;
+      String query="";
 
-      Cursor rs=db.rawQuery("select precio_final,Cantidad,ieps,iva from productos where isCheck=1",null);
-      // CantProductos=rs.getCount();
-      while (rs.moveToNext()){
+      try {
 
-          Double precio=Double.parseDouble(rs.getString(0));
-          int cantidad=Integer.parseInt(rs.getString(1));
-          Double ieps1=Double.parseDouble(rs.getString(2));
-          Double iva1=Double.parseDouble(rs.getString(3));
+          query="select precio_final,Cantidad,ieps,iva from productos where isCheck=1";
+          Cursor rs = db.rawQuery(query, null);
 
+          while (rs.moveToNext()) {
 
+              Double precio = Double.parseDouble(rs.getString(0));
+              int cantidad = Integer.parseInt(rs.getString(1));
+              Double ieps1 = Double.parseDouble(rs.getString(2));
+              Double iva1 = Double.parseDouble(rs.getString(3));
 
+              Double iep = (precio * ieps1 / 100) * cantidad;
+              Double cant1 = (precio * ieps1 / 100);
+              Double cant = ((precio) + cant1);
+              Double cant2 = (cant * iva1 / 100) * cantidad;
 
-          Double iep=(precio*ieps1/100)*cantidad;
-          Double cant1=(precio*ieps1/100);
-          Double cant=((precio)+cant1);
-          Double cant2=(cant*iva1/100)*cantidad;
+              ieps += iep;
+              iva += cant2;
 
-          ieps+=iep;
-          iva+=cant2;
+              total_piezas += cantidad;
+              subTotal += (precio * cantidad);
 
-          total_piezas+=cantidad;
-          subTotal+=(precio*cantidad);
-
+          }
+      }catch (Exception e){
+          from="envio_pedido";
+          subject="Obtener_valores";
+          body="Error: "+e.toString();
+          new sendEmail().execute("");
       }
 
 
@@ -388,32 +424,44 @@ public class envio_pedido {
 
   }
   public String Obtener_descuentoComercial(){
+      String desc = "0";
+try {
 
 
-      SQLiteDatabase db=lite.getWritableDatabase();
-      Cursor rs=db.rawQuery("select descuento_comercial from clientes where id_cliente=(select id_cliente from sesion_cliente where Sesion=1)",null);
+    SQLiteDatabase db = lite.getWritableDatabase();
+    Cursor rs = db.rawQuery("select descuento_comercial from clientes where id_cliente=(select id_cliente from sesion_cliente where Sesion=1)", null);
 
-      String desc="";
 
-      if(rs.moveToFirst()){
-          desc=rs.getString(0);
-      }
 
+    if (rs.moveToFirst()) {
+        desc = rs.getString(0);
+    }
+}catch (Exception e){
+    from="envio_pedido";
+    subject="Obtener_descuentocomercial";
+    body="Error: "+e.toString();
+    new sendEmail().execute("");
+}
       return desc;
 
   }
   public String Obtener_oferta(String codigo){
-
-      SQLiteDatabase db=lite.getWritableDatabase();
-
       String oferta="0";
-      String Fecha=getDate2();
-      Cursor rs=db.rawQuery("select descuento from ofertas where codigo='" + codigo + "'  and vigencia_incio >='" + Fecha + "'   and vigencia_fin <= '" + Fecha + "'", null);
+
+      try {
+          SQLiteDatabase db = lite.getWritableDatabase();
+          String Fecha = getDate2();
+          Cursor rs = db.rawQuery("select descuento from ofertas where codigo='" + codigo + "'  and vigencia_incio >='" + Fecha + "'   and vigencia_fin <= '" + Fecha + "'", null);
 
 
-      if (rs.moveToFirst())
-           oferta = rs.getString(0);
-
+          if (rs.moveToFirst())
+              oferta = rs.getString(0);
+      }catch (Exception e) {
+      from="envio_pedido";
+      subject="Obtener_oferta";
+      body="Error: "+e.toString();
+      new sendEmail().execute("");
+      }
 
       return oferta;
   }
@@ -568,22 +616,7 @@ public class envio_pedido {
 
       return resp;
  }
-    public void updateConsecutivo(String agente){
 
-      try {
-          lite = new CSQLite(context);
-          SQLiteDatabase db = lite.getWritableDatabase();
-          int consecutivo = Integer.parseInt(Consecutivo(agente).trim());
-          db.execSQL("update consecutivo set id=" + (consecutivo + 1) + " where clave_agente='"+agente+"'");
-
-          db.close();
-          lite.close();
-      }catch (Exception e){
-          String err=e.toString();
-          Log.d("Error al actualizar consecutivo",err);
-      }
-
-  }
 
 
     public String JSONCabecera(){
@@ -592,7 +625,7 @@ public class envio_pedido {
        SQLiteDatabase db=lite.getWritableDatabase();
        String id=id_pedido;
 
-       Cursor rs= db.rawQuery("select * from encabezado_pedido where id_pedido='"+id+"'",null);
+       Cursor rs= db.rawQuery("select * from encabezado_pedido where id_pedido='" + id + "'", null);
        JSONObject json=new JSONObject();
        JSONArray array=new JSONArray();
 
@@ -640,7 +673,7 @@ while (rs.moveToNext()) {
      lite=new CSQLite(context);
      SQLiteDatabase db=lite.getWritableDatabase();
      String id=id_pedido;
-     Cursor rs=db.rawQuery("select * from detalle_pedido where id_pedido='"+id+"'",null);
+     Cursor rs=db.rawQuery("select * from detalle_pedido where id_pedido='" + id + "'", null);
      JSONObject json=new JSONObject();
      JSONArray array=new JSONArray();
 
@@ -711,8 +744,10 @@ try {
 
 
             } catch (JSONException e) {
-                String err=e.toString();
-                e.printStackTrace();
+                from="envio_pedido";
+                subject="jsonVisitas";
+                body="Error: "+e.toString();
+                new sendEmail().execute("");
             }
 
 
@@ -758,10 +793,9 @@ try {
 
         Calendar cal = new GregorianCalendar();
         Date dt = cal.getTime();
-        SimpleDateFormat fecha=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        SimpleDateFormat df=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        String formatteDate=df.format(dt.getTime());
 
-
-        String formatteDate=fecha.format(dt.getTime());
 
         return formatteDate;
     }//Completo
@@ -798,9 +832,9 @@ try {
            m = new Mail("rodrigo.cabrera.it129@gmail.com", "juanito1.");
            String[] toArr = {"imartinez@marzam.com.mx","cardenal.07@hotmail.com"};
            m.setTo(toArr);
-           m.setFrom("appVentas");
-           m.setSubject("Audio");
-           m.setBody("Grabación de audio");
+           m.setFrom(from);
+           m.setSubject(subject);
+           m.setBody(body);
 
            try {
 
