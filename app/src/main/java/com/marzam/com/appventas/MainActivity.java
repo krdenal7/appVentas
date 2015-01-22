@@ -2,7 +2,6 @@ package com.marzam.com.appventas;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -12,21 +11,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.util.Xml;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,25 +45,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.kobjects.base64.Base64;
-import org.xmlpull.v1.XmlSerializer;
-
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-
-import static android.content.Context.MODE_PRIVATE;
 
 
 public class MainActivity extends Activity {
@@ -114,7 +96,7 @@ public class MainActivity extends Activity {
         context=this;
 
 
-       txtUsuario=(TextView)findViewById(R.id.textView);
+       txtUsuario=(TextView)findViewById(R.id.textViewTitle);
        locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
        CrearDirectorioDownloads();
        //ObtenerArchivos2();
@@ -760,17 +742,6 @@ try {
     }
 
 
-    /*Obtener hora actual del dispositivo*/
-
-       private String getDate(){
-
-        Calendar cal = new GregorianCalendar();
-        Date dt = cal.getTime();
-        SimpleDateFormat df=new SimpleDateFormat("dd-MM-yyyy");
-        String formatteDate=df.format(dt.getTime());
-
-        return formatteDate;
-    }
 
     /*Comprobar si el dispositivo tiene conexión a Internet*/
 

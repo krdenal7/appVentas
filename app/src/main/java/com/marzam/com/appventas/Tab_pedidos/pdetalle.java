@@ -78,7 +78,7 @@ public class pdetalle extends Activity {
         btnClear=(ImageButton)findViewById(R.id.imageButton);
 
         Productos();
-        lista=(ListView)findViewById(R.id.listView);
+        lista=(ListView)findViewById(R.id.listEncabezado);
         simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64});
         lista.setAdapter(simpleAdapter);
         NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
@@ -582,7 +582,7 @@ public class pdetalle extends Activity {
     public void Actualizar(){
         monto=0.00;
         Productos();
-        lista=(ListView)findViewById(R.id.listView);
+        lista=(ListView)findViewById(R.id.listEncabezado);
         simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64});
         lista.setAdapter(simpleAdapter);
         NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);

@@ -158,25 +158,6 @@ public class KPI_General extends Activity {
         lite.close();
     }
 
-
-    public void UpdateConsecutivo_visitas(String agente){
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
-
-        Cursor rs=db.rawQuery("select MAX(id) from consecutivo_visitas where clave_agente='"+agente+"'",null);
-
-        if(rs.moveToFirst()){
-
-            int val=rs.getInt(0);
-            int total=val+1;
-            ContentValues values=new ContentValues();
-            values.put("id",total);
-            int res= db.update("consecutivo_visitas",values,null,null);
-            String a="";
-
-        }
-
-    }
     public void UpdateProductos(){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
@@ -317,11 +298,6 @@ public class KPI_General extends Activity {
 
     }
 
-
-
-
-
-
     public String ObtenerValoresURL(String id_cliente){
         String datos=null;
 
@@ -350,7 +326,6 @@ public class KPI_General extends Activity {
 
      return datos;
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -400,14 +375,15 @@ public class KPI_General extends Activity {
                     Extraer_json(respuesta);
             }
 
-            String agente=ObtenerClavedeAgente();
-            CerrarVisita(agente);
+
+
 
             return respuesta;
         }
         @Override
         protected void onPostExecute(Object res){
-
+            String agente=ObtenerClavedeAgente();
+            CerrarVisita(agente);
         }
     }
 

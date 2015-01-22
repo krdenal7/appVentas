@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.marzam.com.appventas" >
-    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION"/>
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -12,15 +12,16 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.BIND_DEVICE_ADMIN"
-        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
-    <!-->
+    <!--
+    >
     Permisos para el hardware
     -->
-    <uses-feature android:name="android.hardware.Camera" android:required="true"/>
+    <uses-feature
+        android:name="android.hardware.Camera"
+        android:required="true" />
 
     <!--
  The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -43,11 +44,12 @@
         android:largeHeap="true"
         android:theme="@style/Theme.Theme_marzam" >
         <activity
-            android:name="com.marzam.com.appventas.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -60,52 +62,51 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name="com.marzam.com.appventas.MapsActivity"
+            android:name=".MapsActivity"
             android:label="@string/Mapa"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.marzam.com.appventas.MapsLocation"
+            android:name=".MapsLocation"
             android:screenOrientation="portrait" />
         <activity
-            android:name="com.marzam.com.appventas.Graficas.Grafica_Vendedor"
+            android:name=".Graficas.Grafica_Vendedor"
             android:label="@string/title_activity_grafica__vendedor"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.marzam.com.appventas.KPI.KPI_General"
+            android:name=".KPI.KPI_General"
             android:label="@string/KPIgral"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.marzam.com.appventas.Tab_pedidos.pcabecera"
+            android:name=".Tab_pedidos.pcabecera"
             android:label="@string/title_activity_pcabecera"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.marzam.com.appventas.Tab_pedidos.pdetalle"
+            android:name=".Tab_pedidos.pdetalle"
             android:label="@string/title_activity_pdetalle"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.marzam.com.appventas.Tab_pedidos.pliquidacion"
+            android:name=".Tab_pedidos.pliquidacion"
             android:label="@string/title_activity_pliquidacion"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.marzam.com.appventas.Tab_pedidos.pedido"
+            android:name=".Tab_pedidos.pedido"
             android:label="@string/title_activity_pedido"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.marzam.com.appventas.Tab_pedidos.pcatalogo"
+            android:name=".Tab_pedidos.pcatalogo"
             android:label="@string/title_activity_catalogo"
             android:screenOrientation="portrait" >
         </activity>
 
-
         <receiver
-            android:name="com.marzam.com.appventas.PushNotifications.GCMBroadcastReceiver"
+            android:name=".PushNotifications.GCMBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
@@ -114,31 +115,43 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="com.marzam.com.appventas.PushNotifications.GCMIntentService" />
+        <service android:name=".PushNotifications.GCMIntentService" />
 
         <activity
-            android:name="com.marzam.com.appventas.GPS.Actualizar_Coordenadas"
+            android:name=".GPS.Actualizar_Coordenadas"
             android:label="@string/title_activity_actualizar__coordenadas"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.marzam.com.appventas.Productos.Info_producto"
+            android:name=".Productos.Info_producto"
             android:label="@string/title_activity_info_producto" >
         </activity>
         <activity
-            android:name="com.marzam.com.appventas.Gesture.Dib_firma"
+            android:name=".Gesture.Dib_firma"
             android:label="@string/title_activity_dib_firma"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.marzam.com.appventas.Sincronizacion.Sincronizar"
+            android:name=".Sincronizacion.Sincronizar"
             android:label="@string/title_activity_sincronizar"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.marzam.com.appventas.KPI.estatus_respuestas"
+            android:name=".KPI.estatus_respuestas"
             android:label="@string/title_activity_estatus_respuestas"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name=".EstatusPedidos.RespuestaPedidos"
+            android:label="@string/title_activity_respuesta_pedidos" >
+        </activity>
+        <activity
+            android:name=".EstatusPedidos.Encabezados_pedidos"
+            android:label="@string/title_activity_encabezados_pedidos" >
+        </activity>
+        <activity
+            android:name=".EstatusPedidos.DetallePedidos"
+            android:label="@string/title_activity_detalle_pedidos" >
         </activity>
     </application>
 

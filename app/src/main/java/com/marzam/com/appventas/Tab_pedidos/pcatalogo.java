@@ -104,19 +104,11 @@ public class pcatalogo extends Activity {
                         pcatalogo.this.simpleAdapter.getFilter().filter(charSequence);
                         Filter cont = simpleAdapter.getFilter();
 
-                        if (cont != null) {
-                            lproductos.setAdapter(simpleAdapter);
-                        }
+                        //if (cont != null) {
+                        lproductos.setAdapter(simpleAdapter);
+                      //  }
 
-                    } /*else {
-
-                           if(adapter1!=null)
-                               adapter1.clear();
-
-                          LlenarModelItems();
-                          adapter1=new CustomAdapter(context,modelItems);
-                          lproductos.setAdapter(adapter1);
-                       }*/
+                    }
                 }catch (Exception e){
 
                 }

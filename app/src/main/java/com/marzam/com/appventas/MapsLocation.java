@@ -47,6 +47,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.marzam.com.appventas.EstatusPedidos.RespuestaPedidos;
 import com.marzam.com.appventas.GPS.GPSHelper;
 import com.marzam.com.appventas.Graficas.Grafica_Vendedor;
 import com.marzam.com.appventas.KPI.KPI_General;
@@ -130,7 +131,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
                 if(i==3){
 
-                    startActivity(new Intent(getBaseContext(), estatus_respuestas.class)
+                    startActivity(new Intent(getBaseContext(), RespuestaPedidos.class)
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
                     finish();
 

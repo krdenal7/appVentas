@@ -40,6 +40,8 @@
     <string name="title_activity_dib_firma">Dib_firma</string>
     <string name="title_activity_sincronizar">Sincronizar</string>
     <string name="title_activity_estatus_respuestas">estatus_respuestas</string>
-
+    <string name="title_activity_respuesta_pedidos">RespuestaPedidos</string>
+    <string name="title_activity_encabezados_pedidos">Encabezados_pedidos</string>
+    <string name="title_activity_detalle_pedidos">DetallePedidos</string>
 
 </resources>

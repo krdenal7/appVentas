@@ -20,12 +20,9 @@ import android.widget.Filterable;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
-import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import com.marzam.com.appventas.Email.Mail;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
-
-import java.util.ArrayList;
 
 
 /**
@@ -101,7 +98,7 @@ try {
     Precio_neto = (TextView) convertView.findViewById(R.id.textView58);
     Precio_neto.setText("Precio Final: $" + modelitems[position].getPrecio_neto());
 
-    Clasificacion = (TextView) convertView.findViewById(R.id.textView2);
+    Clasificacion = (TextView) convertView.findViewById(R.id.textViewSubtitle);
     Clasificacion.setText("Clasificación: " + modelitems[position].getClasificacion());
 
     Oferta = (TextView) convertView.findViewById(R.id.textView59);
