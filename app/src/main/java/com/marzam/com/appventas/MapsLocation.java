@@ -112,44 +112,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     }
 
-    public void ShowMenu(){
 
-        final CharSequence[] items={"Clientes de hoy","Clientes totales","Buscar cliente","Estatus de pedidos","Sincronización"};
-
-        AlertDialog.Builder alert = new AlertDialog.Builder(context);
-        alert.setTitle( "Menú");
-        alert.setItems(items,new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-                if(i==0)
-                    ShowCteH();
-                if(i==1)
-                    ShowCteT();
-                if(i==2)
-                    ShowBuscarCte();
-
-                if(i==3){
-
-                    startActivity(new Intent(getBaseContext(), RespuestaPedidos.class)
-                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
-                    finish();
-
-                }
-                if(i==4){
-                    startActivity(new Intent(getBaseContext(), Sincronizar.class)
-                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
-                    finish();
-                }
-
-            }
-        });
-
-        AlertDialog alertDialog = alert.create();
-        alertDialog.show();
-
-
-    }
     public void ShowCteH(){
 
         final CharSequence[] list=ObtenerCtesHoy(ObtenerAgenteActivo());
@@ -686,6 +649,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     @Override
     protected void onResume() {
         super.onResume();
+        ObtenerClientesVisitados();
         setUpMapIfNeeded();
         setUpGoogleApiClientIfNeeded();
         mGoogleApiClient.connect();
@@ -695,9 +659,11 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     @Override
     public void onPause() {
         super.onPause();
+        ObtenerClientesVisitados();
         if (mGoogleApiClient != null) {
             mGoogleApiClient.disconnect();
         }
+
     }
 
     private void setUpMapIfNeeded() {
@@ -814,13 +780,29 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         int id = item.getItemId();
 
-
-        if(id==R.id.Reportes){
-
-            Intent intent=new Intent(context, Grafica_Vendedor.class);
-            startActivity(intent);
-
-            return true;
+        switch (id){
+            case R.id.Reportes:
+                Intent intent=new Intent(context, Grafica_Vendedor.class);
+                startActivity(intent);
+            break;
+            case R.id.ClientesdeHoy:
+                ShowCteH();
+            break;
+            case R.id.ClientesTotales:
+                ShowCteT();
+            break;
+            case R.id.Buscarcliente:
+                ShowBuscarCte();
+            break;
+            case R.id.Estatuspedidos:
+                startActivity(new Intent(getBaseContext(), RespuestaPedidos.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                finish();
+            break;
+            case R.id.Sincronizacion:
+                startActivity(new Intent(getBaseContext(), Sincronizar.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -838,7 +820,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
 
         if(keyCode==KeyEvent.KEYCODE_MENU){
-            ShowMenu();
+           // ShowMenu();
         }
 
         return super.onKeyDown(keyCode,event);
@@ -872,6 +854,8 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
 
     }
+
+
 
     private String getDate(){
 

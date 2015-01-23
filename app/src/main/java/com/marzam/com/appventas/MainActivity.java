@@ -304,7 +304,9 @@ try {
 
     @Override
     public void onBackPressed(){
+
         finish();
+
     }
 
 
@@ -436,25 +438,6 @@ try {
     }
 
     } //Si existe la base de datos y esta seleccionado el usuario lo mostrara en la pantalla
-    public String[] Obtener_Agentes(){
-        String[] agentes=null;
-
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
-
-        Cursor rs=db.rawQuery("select nombre,numero_empleado from agentes",null);
-
-        agentes=new String[rs.getCount()];
-        clave_agente=new String[rs.getCount()];
-        int cont=0;
-        while (rs.moveToNext()){
-            agentes[cont]=rs.getString(0);
-            clave_agente[cont]=rs.getString(1);
-            cont++;
-        }
-
-        return  agentes;
-    }  //Obtiene los nombres de los agentes para que sea seleccionado el que se requiera
     public void ActualizarSesionAgente(String clave){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();

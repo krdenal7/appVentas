@@ -166,60 +166,6 @@ public class pdetalle extends Activity {
 
     }
 
-    public void ShowEliminar(final int posicion){
-        AlertDialog.Builder alert=new AlertDialog.Builder(context);
-        alert.setTitle("Aviso");
-        alert.setMessage("Desea quitar el producto de la lista?");
-        alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-                String ean=data.get(posicion).get("D").toString().replace("codigo:","").trim();
-                EliminarProducto(ean);
-                Actualizar();
-
-            }
-        });
-        alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-            }
-        });
-        AlertDialog alertDialog=alert.create();
-        alertDialog.show();
-    }
-    public void ShowMenu(){
-
-        CharSequence[] items={"Enviar pedido","Agregar Firma","Agregar productos"};
-        AlertDialog.Builder alert=new AlertDialog.Builder(context);
-        alert.setTitle("Menú");
-        alert.setItems(items,new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-                if(i==0){
-
-                    ShowisEnvio();
-
-                }
-
-
-                if(i==1){
-                    Intent intent=new Intent(context, Dib_firma.class);
-                    startActivity(intent);
-                }
-
-                if(i==2){
-                    Intent intent=new Intent(context,pcatalogo.class);
-                    startActivity(intent);
-                }
-
-            }
-        });
-        AlertDialog alertDialog=alert.create();
-        alertDialog.show();
-    }
     public void ShowisEnvio(){
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Aviso");
@@ -334,18 +280,6 @@ public class pdetalle extends Activity {
         lite.close();
 
 
-
-    }
-
-    public void EliminarProducto(String ean){
-
-        lite=new CSQLite(context);
-
-        SQLiteDatabase db=lite.getWritableDatabase();
-        db.execSQL("update productos set  Cantidad=0,isCheck=0 where codigo='"+ean+"'");
-
-        db.close();
-        lite.close();
 
     }
 
@@ -563,7 +497,18 @@ public class pdetalle extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        switch (id){
+            case R.id.Enviar:
+                ShowisEnvio();
+                break;
+            case R.id.Firma:
+                Intent intent=new Intent(context, Dib_firma.class);
+                startActivity(intent);
+                break;
+            case  R.id.Productos:
+                Intent intent2=new Intent(context,pcatalogo.class);
+                startActivity(intent2);
+        }
 
 
         return super.onOptionsItemSelected(item);
@@ -571,10 +516,6 @@ public class pdetalle extends Activity {
 
     @Override
     public boolean onKeyDown(int keyEvent,KeyEvent event){
-
-        if(keyEvent==KeyEvent.KEYCODE_MENU)
-            ShowMenu();
-
 
         return  super.onKeyDown(keyEvent,event);
     }

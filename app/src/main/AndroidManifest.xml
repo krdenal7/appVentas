@@ -143,15 +143,18 @@
         </activity>
         <activity
             android:name=".EstatusPedidos.RespuestaPedidos"
-            android:label="@string/title_activity_respuesta_pedidos" >
+            android:label="@string/title_activity_respuesta_pedidos"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".EstatusPedidos.Encabezados_pedidos"
-            android:label="@string/title_activity_encabezados_pedidos" >
+            android:label="@string/title_activity_encabezados_pedidos"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".EstatusPedidos.DetallePedidos"
-            android:label="@string/title_activity_detalle_pedidos" >
+            android:label="@string/title_activity_detalle_pedidos"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 

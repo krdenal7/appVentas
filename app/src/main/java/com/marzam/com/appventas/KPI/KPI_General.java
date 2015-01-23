@@ -61,6 +61,8 @@ public class KPI_General extends Activity {
     ProgressDialog progressDialog;
     WebView webViews;
     String Date;
+    String estatus_cliente;
+    ProgressDialog progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +72,10 @@ public class KPI_General extends Activity {
 
         txtUsuario=(TextView)findViewById(R.id.textView55);
         txtUsuario.setText(Obtener_Nombre());
+
+        TextView estatus=(TextView)findViewById(R.id.textEstatus);
+        estatus.setText(estatus_cliente);
+
         webViews=(WebView)findViewById(R.id.webView2);
 
         String id_cliente=ObtenerId_cliente();
@@ -88,38 +94,6 @@ public class KPI_General extends Activity {
 
     }
 
-    public void ShowMenu(){
-
-        CharSequence[] items={"Pedidos","Actualizar coordenadas","Cerrar visita"};
-
-        AlertDialog.Builder alert=new AlertDialog.Builder(context);
-        alert.setTitle("Menú");
-        alert.setItems(items,new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-                if(i==0){
-
-                    Intent intent=new Intent(context, pedido.class);
-                    startActivity(intent);
-                }
-                if(i==1){
-
-                    Intent intent=new Intent(context, Actualizar_Coordenadas.class);
-                    startActivity(intent);
-                }
-
-                if(i==2){
-                    ShowCierreVisita();
-                }
-
-            }
-        });
-        AlertDialog alertDialog=alert.create();
-        alertDialog.show();
-
-
-    }
     public void ShowCierreVisita(){
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Aviso");
@@ -128,9 +102,8 @@ public class KPI_General extends Activity {
         alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Intent intent=new Intent(context, MapsLocation.class);
 
-                    startActivity(intent);
+                    progress=ProgressDialog.show(context,"Cerrando visita","Cargando...",true,false);
                     new TaskCierreVisita().execute("");
 
             }
@@ -209,10 +182,11 @@ public class KPI_General extends Activity {
             id=rs.getString(0);
         }
 
-        rs=db.rawQuery("select nombre from clientes where id_cliente='"+id+"'",null);
+        rs=db.rawQuery("select c.nombre,e.nombre from clientes as c inner join estatus_credito as e on c.id_estatus_credito=e.id_estatus_credito where id_cliente='"+id+"'",null);
 
         if(rs.moveToFirst()){
             cliente=rs.getString(0);
+            estatus_cliente=rs.getString(1);
         }
 
         return cliente;
@@ -342,20 +316,25 @@ public class KPI_General extends Activity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+       switch (id){
 
-            return true;
-        }
+           case R.id.Pedidos:
+               Intent intent=new Intent(context, pedido.class);
+               startActivity(intent);
+           break;
+           case R.id.Actualizar:
+               Intent intent2=new Intent(context, Actualizar_Coordenadas.class);
+               startActivity(intent2);
+           break;
+           case R.id.Cerra:
+               ShowCierreVisita();
+       }
 
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public boolean onKeyDown(int keyEvent,KeyEvent event){
-
-        if(keyEvent==KeyEvent.KEYCODE_MENU)
-            ShowMenu();
-
         return super.onKeyDown(keyEvent,event);
     }
 
@@ -374,16 +353,19 @@ public class KPI_General extends Activity {
                 if (respuesta != null)
                     Extraer_json(respuesta);
             }
-
-
-
-
             return respuesta;
         }
         @Override
         protected void onPostExecute(Object res){
-            String agente=ObtenerClavedeAgente();
-            CerrarVisita(agente);
+
+            if(progress.isShowing()) {
+                String agente = ObtenerClavedeAgente();
+                CerrarVisita(agente);
+                progress.dismiss();
+                startActivity(new Intent(context,MapsLocation.class)
+               .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                finish();
+            }
         }
     }
 
@@ -424,10 +406,10 @@ public class KPI_General extends Activity {
         return false;
     }
     @Override
-    public void onBackPressed(){
+    public void onBackPressed() {
         startActivity(new Intent(getBaseContext(), MapsLocation.class)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
-        finish();
+                 finish();
 
     }
 }

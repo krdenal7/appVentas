@@ -114,7 +114,7 @@ public class RespuestaPedidos extends Activity {
 
 
             query="select c.nombre,e.id_cliente from encabezado_pedido as e inner join clientes as c on " +
-                  "e.id_cliente=c.id_cliente where numero_empleado='"+id_cliente+"' group by e.id_cliente,c.nombre";
+                  "e.id_cliente=c.id_cliente where numero_empleado='"+id_cliente+"' group by e.id_cliente,c.nombre order by e.fecha_captura desc";
 
             rs=db.rawQuery(query,null);
 
