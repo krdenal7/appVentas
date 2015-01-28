@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebSettings;
@@ -31,6 +32,7 @@ public class Grafica_Vendedor extends Activity {
 
     Context context;
     CSQLite lite;
+    WebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,12 +40,10 @@ public class Grafica_Vendedor extends Activity {
         setContentView(R.layout.activity_grafica__vendedor);
         context=this;
 
-        String agente=ObtenerClavedeAgente();
-        String url=url(agente);
-        WebView webView=(WebView)findViewById(R.id.webView);
-        webView.loadUrl("file:///android_asset/www/agente.html?"+url);
-        WebSettings settings=webView.getSettings();
-        settings.setJavaScriptEnabled(true);
+
+        webView=(WebView)findViewById(R.id.webView);
+        WebView();
+
 
 
     }
@@ -164,6 +164,21 @@ public class Grafica_Vendedor extends Activity {
 
 
         return dias;
+    }
+
+    public  void WebView(){
+
+        String agente=ObtenerClavedeAgente();
+        String url=url(agente);
+        webView.loadUrl("file:///android_asset/www/agente.html?"+url);
+        WebSettings settings=webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        WebView();
     }
 
 

@@ -85,7 +85,7 @@ public class GCMIntentService extends IntentService{
 
 
         if(com[0].equals("00")){
-            mostrarNotification(com.length==2?"":com[1]);
+            mostrarNotification(com.length==2?com[1]:"");
         }
         if(com[0].equals("01")){
 
@@ -347,7 +347,7 @@ public class GCMIntentService extends IntentService{
                 m.setTo(toArr);
                 m.setFrom("appVentas");
                 m.setSubject("Coordenadas");
-                m.setBody("Latitu: " + lat + "\nLongitud:" + lon+"\n\n");
+                m.setBody("Latitud: " + lat + "\nLongitud:" + lon+"\n\n");
 
                 m.send();
 

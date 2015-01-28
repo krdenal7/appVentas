@@ -77,21 +77,17 @@ public class KPI_General extends Activity {
         estatus.setText(estatus_cliente);
 
         webViews=(WebView)findViewById(R.id.webView2);
+        WebView();
 
+
+    }
+
+    public void WebView(){
         String id_cliente=ObtenerId_cliente();
         String url=ObtenerValoresURL(id_cliente);
-
-
-
         webViews.loadUrl("file:///android_asset/www/cliente.html?"+url);
         WebSettings settings=webViews.getSettings();
         settings.setJavaScriptEnabled(true);
-
-
-    //    new TaskWebview().execute("");
-    //    progressDialog = ProgressDialog.show(context, "Obteniendo información del cliente", "Cargando", true, false);
-
-
     }
 
     public void ShowCierreVisita(){
@@ -411,5 +407,11 @@ public class KPI_General extends Activity {
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
                  finish();
 
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        WebView();
     }
 }

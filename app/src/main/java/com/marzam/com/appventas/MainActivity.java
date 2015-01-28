@@ -28,19 +28,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.WebService.WebServices;
-
-
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

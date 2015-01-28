@@ -23,9 +23,9 @@ import org.kobjects.base64.Base64;
 
 public class WebServices {
 
-            //static String ip="http://201.134.159.126/WebService/WebService.asmx";
+            //static String ip="http://201.134.159.126/WebService/WebServicePruebas.asmx";
               static String ip="http://190.1.4.120/WebService/WebService.asmx";
-
+            //static String ip="http://201.134.159.126/WebServicePruebas/WebService.asmx";
 
     public Object Upload_BD(String zip,String nombre){
 
@@ -365,7 +365,6 @@ public class WebServices {
         return response.toString();
     }
 
-
     public byte[] ConvertToByte(File file){
         byte[] bytes=null;
         try {
@@ -391,6 +390,7 @@ public class WebServices {
             }
         return bytes;
     }
+
     public String EncodeToBase64(String Archivo)throws IOException{
 
              File file=new File(Archivo);

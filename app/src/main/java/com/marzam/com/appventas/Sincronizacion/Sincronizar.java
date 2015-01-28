@@ -12,7 +12,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,22 +23,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.marzam.com.appventas.MainActivity;
 import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.WebService.WebServices;
-
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -371,38 +366,8 @@ public class Sincronizar extends Activity {
 
         return clave;
     }
-    public String ObtenerConsecutivo(String agente){
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
-        Cursor rs=null;
-        String consecutivo="";
-
-        rs=db.rawQuery("select id from consecutivo where clave_agente='"+agente+"'",null);
 
 
-        if(rs.moveToFirst()){
-            consecutivo=rs.getString(0);
-        }
-
-
-        return consecutivo;
-    }
-    public String ObtenerConsecutivo_Visitas(String agente){
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
-        Cursor rs=null;
-        String consecutivo="";
-
-        rs=db.rawQuery("select id from Consecutivo_visitas where clave_agente='"+agente+"'",null);
-
-
-        if(rs.moveToFirst()){
-            consecutivo=rs.getString(0);
-        }
-
-
-        return consecutivo;
-    }
 
     private String getDate(){
 
@@ -648,10 +613,8 @@ public class Sincronizar extends Activity {
             BufferedReader br=new BufferedReader(archivo);
 
             String agente=br.readLine();
-            String consecutivo=br.readLine();
-            String con_visitas=br.readLine();
 
-           ActualizarBD(agente,consecutivo,con_visitas);
+           ActualizarBD(agente);
 
 
         } catch (Exception e) {
@@ -667,9 +630,7 @@ public class Sincronizar extends Activity {
 
             OutputStreamWriter writer2=new OutputStreamWriter(openFileOutput("datos.txt",Context.MODE_PRIVATE));
             String agente=ObtenerAgenteActivo();
-            String con=ObtenerConsecutivo(agente);
-            String cont2=ObtenerConsecutivo_Visitas(agente);
-            writer2.write(agente+"\n"+con+"\n"+cont2);
+            writer2.write(agente);
             writer2.close();
           //ObtenerArchivos2();
         }catch (Exception e){
@@ -678,17 +639,9 @@ public class Sincronizar extends Activity {
 
     }
 
-    public void ActualizarBD(String agente,String con1,String cont2){
+    public void ActualizarBD(String agente){
 
         lite=new CSQLite(context);
-
-        SQLiteDatabase db=lite.getWritableDatabase();
-        db.execSQL("update consecutivo set id='"+con1+"' where clave_agente='"+agente+"'");
-        db.close();
-
-        SQLiteDatabase db1=lite.getWritableDatabase();
-        db1.execSQL("update Consecutivo_visitas set id='"+cont2+"' where clave_agente='"+agente+"'");
-        db1.close();
 
         SQLiteDatabase db2=lite.getWritableDatabase();
         db2.execSQL("update agentes set Sesion=1 where clave_agente='"+agente+"'");

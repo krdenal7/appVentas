@@ -122,6 +122,7 @@ public class pcabecera extends Activity {
         SQLiteDatabase db=lite.getWritableDatabase();
         String clave="";
 
+
         Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
         if(rs.moveToFirst()){
 

@@ -7,18 +7,18 @@
         tools:ignore="AppCompatResource" />
 
     <item android:id="@+id/ClientesdeHoy" android:title="Clientes de hoy"
-        android:orderInCategory="100" android:showAsAction="never|withText"
+        android:orderInCategory="100" android:showAsAction="never"
         tools:ignore="AppCompatResource"/>
     <item android:id="@+id/ClientesTotales" android:title="Clientes totales"
-        android:orderInCategory="100" android:showAsAction="never|withText"
+        android:orderInCategory="100" android:showAsAction="never"
         tools:ignore="AppCompatResource"/>
     <item android:id="@+id/Buscarcliente" android:title="Buscar cliente"
         android:orderInCategory="100" android:showAsAction="never|withText"
         tools:ignore="AppCompatResource"/>
     <item android:id="@+id/Estatuspedidos" android:title="Estatus de pedidos"
-        android:orderInCategory="100" android:showAsAction="never|withText"
+        android:orderInCategory="100" android:showAsAction="never"
         tools:ignore="AppCompatResource"/>
     <item android:id="@+id/Sincronizacion" android:title="Sincronización"
-        android:orderInCategory="100" android:showAsAction="never|withText"
+        android:orderInCategory="100" android:showAsAction="never"
         tools:ignore="AppCompatResource"/>
 </menu>

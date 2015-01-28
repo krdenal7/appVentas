@@ -1,4 +1,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.marzam.com.appventas.Tab_pedidos.pedido">
+    <item android:id="@+id/Pedido" android:showAsAction="never"
+         android:title="Enviar pedido" android:orderInCategory="100"
+        tools:ignore="AppCompatResource" />
+    <item android:id="@+id/Firma" android:showAsAction="never"
+        android:title="Agregar firma" android:orderInCategory="100"
+        tools:ignore="AppCompatResource" />
+    <item android:id="@+id/Producto" android:showAsAction="never"
+        android:title="Agregar productos" android:orderInCategory="100"
+        tools:ignore="AppCompatResource" />
 </menu>

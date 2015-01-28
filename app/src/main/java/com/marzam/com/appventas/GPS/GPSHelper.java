@@ -24,6 +24,7 @@ public class GPSHelper {
                 MINIMUM_TIME_BETWEEN_UPDATES,
                 MINIMUM_DISTANCE_CHANGE_FOR_UPDATES,
                 new MyLocationListener());
+
     }
 
 
@@ -70,5 +71,6 @@ public class GPSHelper {
         public void onProviderEnabled(String s){
 
         }
+
     }
 }

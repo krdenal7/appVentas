@@ -1,13 +1,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.marzam.com.appventas.KPI.KPI_General">
-    <item android:id="@+id/Pedidos" android:showAsAction="never|withText"
+    <item android:id="@+id/Pedidos" android:showAsAction="never"
         android:title="Pedidos" android:orderInCategory="100"
         tools:ignore="AppCompatResource" />
-    <item android:id="@+id/Actualizar" android:showAsAction="never|withText"
+    <item android:id="@+id/Actualizar" android:showAsAction="never"
         android:title="Actualizar coordenadas" android:orderInCategory="100"
         tools:ignore="AppCompatResource" />
-    <item android:id="@+id/Cerra" android:showAsAction="never|withText"
+    <item android:id="@+id/Cerra" android:showAsAction="never"
         android:title="Cerrar visita" android:orderInCategory="100"
         tools:ignore="AppCompatResource" />
 </menu>
