@@ -6,9 +6,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
+import com.marzam.com.appventas.Email.Mail;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.WebService.WebServices;
 
@@ -25,9 +27,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-/**
- * Created by SAMSUMG on 01/12/2014.
- */
+
+
 public class envio_pedidoFaltante {
 
     Context context;
@@ -38,6 +39,12 @@ public class envio_pedidoFaltante {
     WebServices services;
     File directorio;
     static InputStream stream;
+
+    Mail m;
+    String subject;
+    String body;
+    String from="envio_pedidoFaltante.java";
+
 
     public String Enviar(Context context){
         this.context=context;
@@ -95,9 +102,6 @@ public class envio_pedidoFaltante {
         while (rs.moveToNext()){
 
             try {
-
-
-
                 object.put("numero_empleado",rs.getString(0));
                 object.put("id_cliente",rs.getString(1));
                 object.put("latitud",rs.getString(2));
@@ -112,7 +116,9 @@ public class envio_pedidoFaltante {
 
 
             } catch (JSONException e) {
-                e.printStackTrace();
+                subject="Agente:"+ObtenerAgenteActivo()+"\njsonVisitas";
+                body="Array:"+ array+"\nObject: "+object+"\nError: "+e.toString();
+                new sendEmail().execute("");
             }
 
 
@@ -120,6 +126,21 @@ public class envio_pedidoFaltante {
 
         return array.length()==0 ? null: array.toString();
 
+    }
+
+    public String ObtenerAgenteActivo(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        String clave="";
+
+        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
+        if(rs.moveToFirst()){
+
+            clave=rs.getString(0);
+        }
+
+        return clave;
     }
 
 
@@ -186,11 +207,12 @@ public class envio_pedidoFaltante {
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
+        JSONArray array = null;
 
         try {
 
 
-            JSONArray array=new JSONArray(json);
+                array=new JSONArray(json);
 
             for(int i=0;i<array.length();i++){
 
@@ -205,8 +227,10 @@ public class envio_pedidoFaltante {
 
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            String err=e.toString();
+
+            subject="Agente:"+ObtenerAgenteActivo()+"\njsonVisitas";
+            body="Array:"+ array+"\nObject: "+json+"\nError: "+e.toString();
+            new sendEmail().execute("");
         }
 
 
@@ -269,7 +293,7 @@ public class envio_pedidoFaltante {
                        json.put("total_piezas", rs.getString(4));
                        json.put("impote_total", rs.getString(5));
                        json.put("tipo_orden", rs.getString(6));
-                       json.put("fecha_captura", rs.getString(8)!=null?  rs.getString(8).replace(":","|"):"01-01-2014 00|00|00");
+                       json.put("fecha_captura", rs.getString(8)!=null?  rs.getString(8).replace(":","|").replace("/","-"):"01-01-2014 00|00|00");
                        json.put("fecha_transmision", fec.replace(":","|"));
                        json.put("id_estatus", "0");
                        json.put("no_pedido_cliente", rs.getString(10));
@@ -280,8 +304,9 @@ public class envio_pedidoFaltante {
 
                    } catch (Exception e) {
 
-                       String err = e.toString();
-                       Log.d("Error al crear JsonCab:", err);
+                       subject="Agente:"+ObtenerAgenteActivo()+"\njsonVisitas";
+                       body="Array:"+ array+"\nObject: "+json+"\nError: "+e.toString();
+                       new sendEmail().execute("");
 
                    }
                }
@@ -321,8 +346,9 @@ public class envio_pedidoFaltante {
                       array.put(json);
                       json=new JSONObject();
                   }catch (Exception e){
-                      String err=e.toString();
-                      Log.d("Error JSONDetalle",err);
+                      subject="Agente:"+ObtenerAgenteActivo()+"\njsonVisitas";
+                      body="Array:"+ array+"\nObject: "+json+"\nError: "+e.toString();
+                      new sendEmail().execute("");
                   }
               }
           }
@@ -355,5 +381,30 @@ public class envio_pedidoFaltante {
         return false;
     }
 
+
+    public class sendEmail extends AsyncTask<String,Void,Object> {
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+
+            m = new Mail("rodrigo.cabrera.it129@gmail.com", "juanito1.");
+            String[] toArr = {"imartinez@marzam.com.mx","cardenal.07@hotmail.com"};
+            m.setTo(toArr);
+            m.setFrom(from);
+            m.setSubject(subject);
+            m.setBody(body);
+
+            try {
+
+                m.send();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+    }
 
 }

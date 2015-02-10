@@ -684,7 +684,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                 Double latitud=Double.parseDouble(gpsHelper.getLatitude());
                 Double longitud=Double.parseDouble(gpsHelper.getLongitude());
 
-                if(latitud<=0 || longitud <=0){
+                if(latitud==0.00 && longitud ==0.00){
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(19.56317359796029,  -99.04562934016724),12.0f));
                 }else {
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitud,longitud),12.0f));

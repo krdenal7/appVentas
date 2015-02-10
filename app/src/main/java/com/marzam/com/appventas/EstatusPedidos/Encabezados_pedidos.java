@@ -124,9 +124,42 @@ public class Encabezados_pedidos extends Activity {
         }
         NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
         DecimalFormat dec=(DecimalFormat)nf;
+
+        if(importe==0.00){
+        importe=ObtenerTotal_SobrePiezaspedidas(id_pedido);
+        }
         return  "$"+dec.format(importe).toString();
     }
 
+    public Double ObtenerTotal_SobrePiezaspedidas(String id_pedido){
+
+        int piezas=0;
+        Double precio=0.0;
+        Double importe=0.00;
+
+        try{
+
+            if(lite==null)
+                lite=new CSQLite(context);
+
+            SQLiteDatabase db=lite.getWritableDatabase();
+            Cursor rs= db.rawQuery("select piezas_pedidas,precio_neto from detalle_pedido where id_pedido='"+id_pedido+"'",null);
+
+            while (rs.moveToNext()){
+
+                piezas=rs.getInt(0);
+                precio=Double.parseDouble(rs.getString(1));
+
+                Double subtotal=piezas*precio;
+
+                importe+=subtotal;
+            }
+
+        }catch (Exception e){
+
+        }
+        return importe;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

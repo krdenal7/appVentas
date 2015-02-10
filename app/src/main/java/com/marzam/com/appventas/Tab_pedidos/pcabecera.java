@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.marzam.com.appventas.Email.Mail;
 import com.marzam.com.appventas.Gesture.Dib_firma;
 import com.marzam.com.appventas.KPI.KPI_General;
 import com.marzam.com.appventas.R;
@@ -44,6 +45,10 @@ public class pcabecera extends Activity {
     ProgressDialog progress;
     CSQLite lite;
     Spinner spinner;
+    Mail m;
+    String subject;
+    String from="pcabecera.java";
+    String body;
 
 
 
@@ -67,27 +72,33 @@ public class pcabecera extends Activity {
         txt_idPedido=(TextView)findViewById(R.id.textView9);
         txt_idPedido.setText(LeerTXT());
 
-        spinner=(Spinner)findViewById(R.id.spinner);
-        LlenarList();
-
-
         lite=new CSQLite(context);
         final SQLiteDatabase db=lite.getWritableDatabase();
         try {
-            db.execSQL("ALTER TABLE tipo_fuerza ADD COLUMN isCheck int DEFAULT 0");
+          db.execSQL("ALTER TABLE tipo_fuerza ADD COLUMN isCheck varchar MAX");
         }catch (Exception e){
             e.printStackTrace();
         }
+        spinner=(Spinner)findViewById(R.id.spinner);
+        LlenarList();
+
+        String no_empleado=ObtenerAgenteActivo();
+        Cursor rs=db.rawQuery("select id_fuerza from agentes where numero_empleado='" + no_empleado + "'", null);
+        String id_fuerza = null;
+
+        if(rs.moveToFirst()){
+            id_fuerza=rs.getString(0);
+        }
 
         String tipo_fuerza=spinner.getSelectedItem().toString();
-        db.execSQL("update tipo_fuerza set isCheck=1 where tipo_orden='"+tipo_fuerza+"'");
+        db.execSQL("update tipo_fuerza set isCheck='"+tipo_fuerza+"' where id_fuerza='"+id_fuerza+"'");
 
+        final String finalId_fuerza = id_fuerza;
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String tipo_fuerza=spinner.getSelectedItem().toString();
-
-                  db.execSQL("update tipo_fuerza set isCheck=1 where tipo_orden='"+tipo_fuerza+"'");
+                String tipo_fuerza = spinner.getSelectedItem().toString();
+                db.execSQL("update tipo_fuerza set isCheck='" + tipo_fuerza + "' where id_fuerza='" + finalId_fuerza + "'");
 
             }
 
@@ -99,34 +110,53 @@ public class pcabecera extends Activity {
 
     }
     public void LlenarList(){
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
+        try {
+            String no_empleado = ObtenerAgenteActivo();
+            lite = new CSQLite(context);
+            SQLiteDatabase db = lite.getWritableDatabase();
+            Cursor rs = db.rawQuery("select id_fuerza from agentes where numero_empleado='" + no_empleado + "'", null);
 
-        Cursor rs=db.rawQuery("select tipo_orden from tipo_fuerza",null);
-        String[]tipoFac=new String[rs.getCount()];
-        int contador=0;
-        while (rs.moveToNext()){
+            if (rs.moveToFirst()) {
 
-            tipoFac[contador]=rs.getString(0);
-            contador++;
+                Cursor rs2 = db.rawQuery("select tipo_orden from tipo_fuerza  where id_fuerza='" + rs.getString(0) + "'", null);
+
+                if (rs2.moveToFirst()) {
+                    String[] tipoFac = rs2.getString(0).split(",");
+                    if (tipoFac.length != 0) {
+                        String query = "update tipo_fuerza set isCheck='" + tipoFac[0] + "' where id_fuerza='" + rs.getString(0) + "'";
+                        try {
+                            db.execSQL(query);
+                        } catch (Exception e) {
+                            subject="pcabecera.java-LlenarList()";
+                            body="Agente:"+ObtenerAgenteActivo()+"\n"+e.toString();
+                            new sendEmail().execute("");
+                        }
+                    }
+                    ArrayAdapter arrayAdapter = new ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, tipoFac);
+                    spinner.setAdapter(arrayAdapter);
+                }
+            }
+        }catch (Exception e){
+            subject="pcabecera.java-LlenarList()";
+            body=e.toString();
+            new sendEmail().execute("");
         }
-
-        ArrayAdapter arrayAdapter=new ArrayAdapter(context,android.R.layout.simple_spinner_dropdown_item,tipoFac);
-        spinner.setAdapter(arrayAdapter);
-
 
     }
     public String ObtenerAgenteActivo(){
+        String clave = "";
+        try {
+            lite = new CSQLite(context);
+            SQLiteDatabase db = lite.getWritableDatabase();
+            Cursor rs = db.rawQuery("select clave_agente from agentes where Sesion=1", null);
+            if (rs.moveToFirst()) {
 
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
-        String clave="";
-
-
-        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
-        if(rs.moveToFirst()){
-
-            clave=rs.getString(0);
+                clave = rs.getString(0);
+            }
+        }catch (Exception e){
+            subject="pcabecera.java-ObtenerAgenteActivo()";
+            body=e.toString();
+            new sendEmail().execute("");
         }
 
         return clave;
@@ -361,6 +391,31 @@ public class pcabecera extends Activity {
     super.onResume();
     txt_idPedido.setText(LeerTXT());
 
+    }
+
+    public class sendEmail extends AsyncTask<String,Void,Object>{
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+
+            m = new Mail("rodrigo.cabrera.it129@gmail.com", "juanito1.");
+            String[] toArr = {"imartinez@marzam.com.mx","cardenal.07@hotmail.com"};
+            m.setTo(toArr);
+            m.setFrom(from);
+            m.setSubject(subject);
+            m.setBody(body);
+
+            try {
+
+                m.send();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
     }
 
 }

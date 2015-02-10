@@ -290,8 +290,8 @@ public class pcatalogo extends Activity {
             db.close();
             lite.close();
         }catch (Exception e){
-            subject="LlenarHasmap";
-            body="Error: "+e.toString()+"\nData: "+data.toString();
+            subject="pcatalogo.java-LlenarHasmap";
+            body="Agente: "+ObtenerAgenteActivo()+"\nError: "+e.toString()+"\nData: "+data.toString();
             new sendEmail().execute("");
         }
 
@@ -308,8 +308,8 @@ public class pcatalogo extends Activity {
                            "from productos as p left join ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo limit 1000 ",null);
 
         }catch (Exception e){
-            subject="LlenarmodelItems";
-            body="Error: "+ e.toString();
+            subject="pcatalogo.java-LlenarmodelItems";
+            body="Agente:"+ObtenerAgenteActivo()+"\nError: "+ e.toString();
             new sendEmail().execute("");
         }
 
@@ -377,8 +377,8 @@ public class pcatalogo extends Activity {
             }
 
         }catch (Exception e){
-            subject="ObtenerInfoProductos";
-            body="ConsultaSQL: "+ consulta+"\nError: "+e.toString();
+            subject="pcatalogo.java-ObtenerInfoProductos";
+            body="Agente: "+ObtenerAgenteActivo()+"ConsultaSQL: "+ consulta+"\nError: "+e.toString();
             new sendEmail().execute("");
         }
 
@@ -405,8 +405,8 @@ public class pcatalogo extends Activity {
             txt2.setText(info[1]);
             txt3.setText(info[2]);
         }catch (Exception e){
-            subject="Eventos_Button";
-            body="Error al consultar arreglo info[]: "+ e.toString();
+            subject="pcatalogo.java-Eventos_Button";
+            body="Agente: "+ObtenerAgenteActivo()+"\nError al consultar arreglo info[]: "+ e.toString();
             new sendEmail().execute("");
         }
 
@@ -475,8 +475,8 @@ public class pcatalogo extends Activity {
                 }
             });
         }catch (Exception e){
-            subject="Eventos_Button";
-            body="Error en los eventos del boton: "+ e.toString();
+            subject="pcatalogo.java-Eventos_Button";
+            body="Agente: "+ObtenerAgenteActivo()+"\nError en los eventos del boton: "+ e.toString();
             new sendEmail().execute("");
         }
 
@@ -514,8 +514,8 @@ public class pcatalogo extends Activity {
                 lite.close();
             }
         }catch (Exception e){
-            subject="AgregarProducto";
-            body="Consulta1: "+ query1+"\nConsulta2: "+query2+"\nError: "+e.toString();
+            subject="pcatalogo.java-AgregarProducto";
+            body="Agente: "+ObtenerAgenteActivo()+"\nConsulta1: "+ query1+"\nConsulta2: "+query2+"\nError: "+e.toString();
             new sendEmail().execute("");
         }
 
@@ -527,6 +527,25 @@ public class pcatalogo extends Activity {
         LlenarHasmap();//llena el arreglo para el simpleAdapter
         simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple,new String[]{"A","B","E","G","C","F","H","I","D"},new int[]{R.id.textView30,R.id.textView31,R.id.textView60,R.id.textView61,R.id.textView32,R.id.textView71,R.id.textView74,R.id.textView73,R.id.textView75});
 
+    }
+
+    public String ObtenerAgenteActivo(){
+        String clave = "";
+        try {
+            lite = new CSQLite(context);
+            SQLiteDatabase db = lite.getWritableDatabase();
+            Cursor rs = db.rawQuery("select clave_agente from agentes where Sesion=1", null);
+            if (rs.moveToFirst()) {
+
+                clave = rs.getString(0);
+            }
+        }catch (Exception e){
+            subject="pcatalogo.java-ObtenerAgenteActivo()";
+            body=e.toString();
+            new sendEmail().execute("");
+        }
+
+        return clave;
     }
 
     private class UpdateList extends AsyncTask<String,Void,Object> {

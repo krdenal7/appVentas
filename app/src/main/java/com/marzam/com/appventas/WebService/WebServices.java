@@ -1,7 +1,13 @@
 package com.marzam.com.appventas.WebService;
 
 
+import android.os.AsyncTask;
 import android.util.Log;
+
+import com.marzam.com.appventas.Email.Mail;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.PropertyInfo;
 import org.ksoap2.serialization.SoapObject;
@@ -17,15 +23,18 @@ import java.net.Proxy;
 import org.kobjects.base64.Base64;
 
 
-/**
- * Created by SAMSUMG on 15/11/2014.
- */
+
 
 public class WebServices {
 
-            //static String ip="http://201.134.159.126/WebService/WebServicePruebas.asmx";
-              static String ip="http://190.1.4.120/WebService/WebService.asmx";
-            //static String ip="http://201.134.159.126/WebServicePruebas/WebService.asmx";
+              //static String ip="http://201.134.159.126/WebService/WebService.asmx";
+                static String ip="http://190.1.4.120/WebService/WebService.asmx";
+             //static String ip="http://201.134.159.126/WebServicePruebas/WebService.asmx";
+
+    String from="WebServices";
+    String subject;
+    String body;
+    Mail m;
 
     public Object Upload_BD(String zip,String nombre){
 
@@ -84,6 +93,10 @@ public class WebServices {
         String SOAP_ADDRESS=ip;
 
         SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
+
+          // if(!valida_Encabezado(encabezado))
+          //                        return null;
+
         request.addProperty("encabezado",encabezado);
         request.addProperty("detalle",detalle);
 
@@ -400,6 +413,31 @@ public class WebServices {
         Log.i("BIT", encode);
 
         return encode;
+    }
+
+    public class sendEmail extends AsyncTask<String,Void,Object> {
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+
+            m = new Mail("rodrigo.cabrera.it129@gmail.com", "juanito1.");
+            String[] toArr = {"imartinez@marzam.com.mx","cardenal.07@hotmail.com"};
+            m.setTo(toArr);
+            m.setFrom(from);
+            m.setSubject(subject);
+            m.setBody(body);
+
+            try {
+
+                m.send();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
     }
 
 }
