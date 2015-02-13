@@ -348,7 +348,7 @@ public class envio_pedido {
 
       try {
 
-          query="select precio_final,Cantidad,ieps,iva from productos where isCheck=1";
+          query="select precio_oferta,Cantidad,ieps,iva from productos where isCheck=1";
           Cursor rs = db.rawQuery(query, null);
 
           while (rs.moveToNext()) {
@@ -496,7 +496,7 @@ try {
       try {
           SQLiteDatabase db = lite.getWritableDatabase();
           String Fecha = getDate2();
-          Cursor rs = db.rawQuery("select descuento from ofertas where codigo='" + codigo + "'  and vigencia_incio >='" + Fecha + "'   and vigencia_fin <= '" + Fecha + "'", null);
+          Cursor rs = db.rawQuery("select descuento from ofertas where codigo='" + codigo + "'", null);
 
 
           if (rs.moveToFirst())

@@ -252,7 +252,7 @@ public class pdetalle extends Activity {
         int Cantidad=0;
         Double precio=0.00;
 
-        String query="select descripcion,precio_final,Cantidad,codigo  from productos where isCheck=1";
+        String query="select descripcion,precio_final,Cantidad,codigo,precio_oferta  from productos where isCheck=1";
 
         rs=db.rawQuery(query,null);
         data=new ArrayList<HashMap<String, ?>>();
@@ -267,7 +267,7 @@ public class pdetalle extends Activity {
             data.add(producto_row);
             producto_row=new HashMap<String, String>();
 
-           precio=Double.parseDouble(rs.getString(1));
+           precio=Double.parseDouble(rs.getString(4));
            Cantidad=Integer.parseInt(rs.getString(2));
 
            monto+=(precio*Cantidad);
@@ -300,7 +300,7 @@ public class pdetalle extends Activity {
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
-        Cursor rs=db.rawQuery("select descripcion,precio_final,Cantidad from productos where codigo='"+ean+"'",null);
+        Cursor rs=db.rawQuery("select descripcion,precio_oferta,Cantidad from productos where codigo='"+ean+"'",null);
 
         if(rs.moveToFirst()){
             info[0]=rs.getString(0);
@@ -475,7 +475,6 @@ public class pdetalle extends Activity {
             }
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

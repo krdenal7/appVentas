@@ -129,7 +129,7 @@ public class pliquidacion extends Activity {
         iva=0.00;
         ieps=0.00;
 
-        Cursor rs=db.rawQuery("select precio_final,Cantidad,ieps,iva from productos where isCheck=1",null);
+        Cursor rs=db.rawQuery("select precio_oferta,Cantidad,ieps,iva from productos where isCheck=1",null);
        // CantProductos=rs.getCount();
         while (rs.moveToNext()){
 
