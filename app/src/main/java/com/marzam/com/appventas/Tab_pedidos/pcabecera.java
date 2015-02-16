@@ -3,7 +3,6 @@ package com.marzam.com.appventas.Tab_pedidos;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -29,7 +28,6 @@ import com.marzam.com.appventas.Sincronizacion.envio_pedido;
 import com.marzam.com.appventas.WebService.WebServices;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
@@ -289,11 +287,19 @@ public class pcabecera extends Activity {
         Calendar cal = new GregorianCalendar();
         Date dt = cal.getTime();
 
+        int dia=cal.get(Calendar.DAY_OF_YEAR);
+
         SimpleDateFormat df=new SimpleDateFormat("yy");
         String formatteDate=df.format(dt.getTime());
 
         SimpleDateFormat df1=new SimpleDateFormat("ddd");
-        String formatteDate1=df1.format(dt.getTime());
+
+        int tam=3-String.valueOf(dia).length();
+        String formatteDate1="";
+        for(int i=0;i<tam;i++){
+            formatteDate1+="0";
+        }
+            formatteDate1+=String.valueOf(dia);
 
         SimpleDateFormat df2=new SimpleDateFormat("HHmmss");
         String formatteDate2=df2.format(dt.getTime());

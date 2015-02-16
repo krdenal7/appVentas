@@ -11,13 +11,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Typeface;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.InputType;
-import android.text.Layout;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -28,7 +26,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,32 +34,26 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.marzam.com.appventas.EstatusPedidos.RespuestaPedidos;
 import com.marzam.com.appventas.GPS.GPSHelper;
 import com.marzam.com.appventas.Graficas.Grafica_Vendedor;
 import com.marzam.com.appventas.KPI.KPI_General;
-import com.marzam.com.appventas.KPI.estatus_respuestas;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Sincronizacion.Crear_precioFinal;
 import com.marzam.com.appventas.Sincronizacion.Sincronizar;
-import com.marzam.com.appventas.Sincronizacion.envio_pedido;
 import com.marzam.com.appventas.WebService.WebServices;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -170,6 +161,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
              String cuenta=textView.getText().toString().toUpperCase().replace("'","");
 
+
              if(cuenta.equals("")) {
                  dialogInterface.dismiss();
                  Toast.makeText(context,"Campo vacio.Ingrese una clave de agente",Toast.LENGTH_LONG).show();
@@ -177,12 +169,24 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
                  String num_emp=ObtenerAgenteActivo();
 
-                 if(Verificar_ClienteExiste(cuenta,num_emp)){
-                     if(!VerificarSesion_Cliente(cuenta))
+                 char isLetter = 0;
+
+                     if(cuenta.length()>=2)
+                         isLetter=cuenta.charAt(1);
+
+                 if(Character.isDigit(isLetter)) {
+                     if (Verificar_ClienteExiste(cuenta, num_emp)) {
+                         if (!VerificarSesion_Cliente(cuenta))
                              ShowSesionActiva();
-                 }else {
-                     Toast.makeText(context,"No se encontro el cliente.Intente nuevamente",Toast.LENGTH_LONG).show();
-                 }
+                     } else {
+                         Toast.makeText(context, "No se encontro el cliente.Intente nuevamente", Toast.LENGTH_LONG).show();
+                     }
+                 }//En caso de que sea Numero realiza la busqueda por cuenta
+                 else{
+                     if(Character.isLetter(isLetter)){
+                         ShowBuscarXnombre(cuenta,num_emp);
+                     }
+                 }//Va a entrar en caso de que detecte una letra
 
              }
          }
@@ -196,6 +200,62 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         AlertDialog alertDialog=alert.create();
         alertDialog.show();
 
+    }
+
+    public void ShowBuscarXnombre(String palabra, final String num_emp){
+        final String[] clientes=ObtenerClientesLike(palabra);
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Seleccione");
+        alert.setItems(clientes,new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                String[] cuentas=clientes[i].split("-");
+                String cuenta="";
+
+                if(cuentas.length!=0)
+                       cuenta=cuentas[0];
+
+                if (Verificar_ClienteExiste(cuenta, num_emp)) {
+                    if (!VerificarSesion_Cliente(cuenta)){
+                        dialogInterface.dismiss();
+                        ShowSesionActiva();}
+                } else {
+                    Toast.makeText(context, "No se encontro el cliente.Intente nuevamente", Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });
+        alert.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+
+        AlertDialog alertDialog=alert.create();
+        alertDialog.show();
+
+    }
+
+    public String[] ObtenerClientesLike(String palabra){
+
+        String no_empleado=ObtenerAgenteActivo();
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+
+        Cursor rs=db.rawQuery("select distinct(a.id_cliente),c.nombre from  agenda as a inner join clientes " +
+                               "as c on a.id_cliente=c.id_cliente where c.nombre like'%"+palabra+"%' and a.numero_empleado='"+no_empleado+"'",null);
+        String[] clientes=new String[rs.getCount()];
+        int contador=0;
+
+        while (rs.moveToNext()){
+            clientes[contador]=rs.getString(0)+"-"+rs.getString(1);
+            contador++;
+        }
+
+        return clientes;
     }
 
 
@@ -571,39 +631,41 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         @Override
         protected Object doInBackground(String... strings) {
-            WebServices web=new WebServices();
-                            String json=jsonVisitas();
-
-
 
             Crear_precioFinal precioFinal=new Crear_precioFinal();
             precioFinal.Ejecutar(context);
 
-            String resp= web.SincronizarVisitas(json);
-            if(resp!=null)
-                     ActualizarStatusVisita(resp);
-
             return "";
         }
 
         @Override
         protected void onPostExecute(Object result){
 
-            if(progressDialog.isShowing()){
-                progressDialog.dismiss();
-                Intent intent = new Intent(context, KPI_General.class);
-                startActivity(intent);
+    if (progressDialog.isShowing()) {
+        progressDialog.dismiss();
+        progressDialog=ProgressDialog.show(context,"Registrando Visita","Enviando",true,false);
+        new Task_EnviarVisita().execute("");
 
-            }
-
-        }
+    }
+    }
     }
 
-    private class Task_Create_PrecioFinal extends AsyncTask<String,Void,Object> {
+    private class Task_EnviarVisita extends AsyncTask<String,Void,Object> {
+
+        @Override
+        protected void onPreExecute(){
+
+        }
 
         @Override
         protected Object doInBackground(String... strings) {
 
+            WebServices web=new WebServices();
+            String json=jsonVisitas();
+
+            String resp= web.SincronizarVisitas(json);
+            if(resp!=null)
+                ActualizarStatusVisita(resp);
 
             return "";
         }
@@ -611,11 +673,14 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         @Override
         protected void onPostExecute(Object result){
 
-
+            if(progressDialog.isShowing()) {
+                progressDialog.dismiss();
+                Intent intent = new Intent(context, KPI_General.class);
+                startActivity(intent);
+            }
         }
 
     }
-
 
 
     public String[][] ObtenerCoordenadas(){
@@ -854,7 +919,6 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
 
     }
-
 
 
     private String getDate(){

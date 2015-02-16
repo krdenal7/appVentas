@@ -17,9 +17,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.marzam.com.appventas.Gesture.Dib_firma;
 import com.marzam.com.appventas.KPI.KPI_General;
@@ -29,13 +27,9 @@ import com.marzam.com.appventas.Sincronizacion.envio_pedido;
 import com.marzam.com.appventas.WebService.WebServices;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Objects;
 
 public class pliquidacion extends Activity {
 

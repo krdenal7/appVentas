@@ -8,7 +8,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
 import com.marzam.com.appventas.Email.Mail;
 import com.marzam.com.appventas.SQLite.CSQLite;
@@ -293,7 +292,7 @@ public class envio_pedidoFaltante {
                        json.put("total_piezas", rs.getString(4));
                        json.put("impote_total", rs.getString(5));
                        json.put("tipo_orden", rs.getString(6));
-                       json.put("fecha_captura", rs.getString(8)!=null?  rs.getString(8).replace(":","|").replace("/","-"):"01-01-2014 00|00|00");
+                       json.put("fecha_captura", rs.getString(8)!=null?  rs.getString(8).replace(":","|").replace("/","-").replace(".",""):"01-01-2014 00|00|00");
                        json.put("fecha_transmision", fec.replace(":","|"));
                        json.put("id_estatus", "0");
                        json.put("no_pedido_cliente", rs.getString(10));

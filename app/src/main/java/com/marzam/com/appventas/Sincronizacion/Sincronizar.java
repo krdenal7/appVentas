@@ -12,10 +12,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.kobjects.base64.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,15 +19,23 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.marzam.com.appventas.MainActivity;
 import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.WebService.WebServices;
+
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.kobjects.base64.Base64;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;

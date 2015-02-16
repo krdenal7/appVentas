@@ -1,26 +1,19 @@
 package com.marzam.com.appventas.PushNotifications;
 
-import android.app.Activity;
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.admin.DevicePolicyManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Camera;
-import android.graphics.PixelFormat;
 import android.media.MediaRecorder;
 import android.net.Uri;
-import android.os.*;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.view.Window;
-import android.view.WindowManager;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.marzam.com.appventas.Email.Mail;
@@ -28,7 +21,6 @@ import com.marzam.com.appventas.GPS.GPSHelper;
 import com.marzam.com.appventas.MainActivity;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
-
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -18,11 +17,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.marzam.com.appventas.KPI.KPI_General;
-import com.marzam.com.appventas.MainActivity;
-import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.WebService.WebServices;
@@ -30,9 +26,6 @@ import com.marzam.com.appventas.WebService.WebServices;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.kobjects.base64.Base64;
-
-import java.io.File;
 
 public class Actualizar_Coordenadas extends Activity {
 

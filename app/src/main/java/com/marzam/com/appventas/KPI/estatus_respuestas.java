@@ -12,27 +12,18 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.Toast;
 
 import com.marzam.com.appventas.Adapters.CustomAdapter_ListExpandible;
-import com.marzam.com.appventas.MainActivity;
 import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
-import com.marzam.com.appventas.Sincronizacion.Crear_precioFinal;
 import com.marzam.com.appventas.WebService.WebServices;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class estatus_respuestas extends Activity {
 

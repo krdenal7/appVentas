@@ -1,20 +1,15 @@
 package com.marzam.com.appventas.Sincronizacion;
 
 
-
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.text.InputType;
 import android.util.Base64;
 import android.util.Log;
-import android.widget.TextView;
-
 
 import com.marzam.com.appventas.Email.Mail;
 import com.marzam.com.appventas.SQLite.CSQLite;
@@ -683,7 +678,7 @@ while (rs.moveToNext()) {
         json.put("total_piezas", rs.getString(4));
         json.put("impote_total", rs.getString(5));
         json.put("tipo_orden", rs.getString(6));
-        json.put("fecha_captura", rs.getString(7).replace(":","|").replace("/","-"));
+        json.put("fecha_captura", rs.getString(7).replace(":","|").replace("/","-").replace(".",""));
         json.put("fecha_transmision", getDates2().replace(":","|"));
         json.put("id_estatus","10");
         json.put("no_pedido_cliente", rs.getString(10));

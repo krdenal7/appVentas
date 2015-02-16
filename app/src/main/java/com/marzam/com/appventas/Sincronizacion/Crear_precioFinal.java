@@ -9,8 +9,6 @@ import android.widget.Toast;
 
 import com.marzam.com.appventas.SQLite.CSQLite;
 
-import java.sql.SQLDataException;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;

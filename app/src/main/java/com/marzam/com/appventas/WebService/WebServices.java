@@ -6,21 +6,19 @@ import android.util.Log;
 
 import com.marzam.com.appventas.Email.Mail;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.kobjects.base64.Base64;
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.PropertyInfo;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapPrimitive;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
-
-import org.kobjects.base64.Base64;
 
 public class WebServices {
 

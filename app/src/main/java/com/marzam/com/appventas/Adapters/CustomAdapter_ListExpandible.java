@@ -9,8 +9,6 @@ import android.widget.AbsListView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
-import com.marzam.com.appventas.R;
-
 /**
  * Created by SAMSUMG on 26/12/2014.
  */
