@@ -1,5 +1,6 @@
 package com.marzam.com.appventas;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -12,8 +13,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.text.InputType;
 import android.util.DisplayMetrics;
@@ -24,6 +28,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -54,6 +60,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -78,6 +86,8 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     ProgressDialog progressDialog;
     Marker customMarker;
     String id_visita;
+    String mCurrentPhotoPath;
+    static final int REQUEST_TAKE_PHOTO = 1;
 
     CSQLite lite;
     TextView txtCte;
@@ -148,9 +158,10 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     public void ShowBuscarCte(){
 
         final EditText textView=new EditText(context);
-        textView.setHint("Numero de cuenta:");
+        textView.setHint("Ingrese cuenta o nombre:");
         textView.setInputType(InputType.TYPE_CLASS_TEXT);
         textView.setFocusable(true);
+
 
      AlertDialog.Builder alert=new AlertDialog.Builder(context);
      alert.setTitle("Clientes");
@@ -158,7 +169,6 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
      alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
          @Override
          public void onClick(DialogInterface dialogInterface, int i) {
-
              String cuenta=textView.getText().toString().toUpperCase().replace("'","");
 
 
@@ -198,6 +208,13 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
          }
      });
         AlertDialog alertDialog=alert.create();
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(textView, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
         alertDialog.show();
 
     }
@@ -683,6 +700,52 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     }
 
 
+    public void Inicia_camera(){
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+
+            }
+
+            if (photoFile != null) {
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                        Uri.fromFile(photoFile));
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            }
+        }
+    }
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        return image;
+    }
+
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+    }
+
+
+
+
     public String[][] ObtenerCoordenadas(){
 
         lite=new CSQLite(context);
@@ -692,13 +755,13 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         Cursor rs=null;
         for(int i=0;i<clientesH.length;i++){
 
-            rs=db.rawQuery("select nombre,latitud,longitud from clientes where id_cliente='"+clientesH[i]+"' ",null);
+            rs=db.rawQuery("select id_cliente,nombre,latitud,longitud from clientes where id_cliente='"+clientesH[i]+"' ",null);
 
             if(rs.moveToFirst()){
 
-                datos[i][0]=rs.getString(0);
-                datos[i][1]=rs.getString(1);
-                datos[i][2]=rs.getString(2);
+                datos[i][0]=rs.getString(0)+"-"+rs.getString(1);
+                datos[i][1]=rs.getString(2);
+                datos[i][2]=rs.getString(3);
 
             }
 
@@ -758,11 +821,28 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
                 addMarker();
 
+                final String[] cuenta = {""};
+
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
 
+                        String[]cuentas= marker.getTitle().split("-");
 
+
+                        if(cuentas.length!=0){
+                            if(cuenta[0].equals(cuentas[0])){
+                                String num_emp=ObtenerAgenteActivo();
+                                if (Verificar_ClienteExiste(cuenta[0], num_emp)) {
+                                    if (!VerificarSesion_Cliente(cuenta[0
+                                            ]))
+                                        ShowSesionActiva();
+                                }
+                            }else {
+                                cuenta[0] =cuentas[0];
+                                //Toast.makeText(context,"Diferente 1 click",Toast.LENGTH_LONG).show();
+                            }
+                        }
                         return false;
                     }
                 });
@@ -779,7 +859,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         String[][] datos=ObtenerCoordenadas();
 
         for(int i=0;i<datos.length;i++){
-            numTXT.setText(String.valueOf(i));
+            numTXT.setText(String.valueOf(i+1));
             String nombre=datos[i][0];
             String lat=datos[i][1];
             String lon=datos[i][2];
@@ -791,12 +871,13 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
              LatLng latLng=new LatLng(latitud,longitud);
 
             customMarker=mMap.addMarker(new MarkerOptions()
-            .position(latLng)
-            .title(nombre)
-            .snippet("Farmacia")
-            .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(context,marker))));
+                    .position(latLng)
+                    .title(nombre)
+                    .snippet("Farmacia")
+                    .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(context, marker))));
 
         }
+
 
 
 

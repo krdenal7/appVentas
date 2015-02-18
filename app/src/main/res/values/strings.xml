@@ -11,8 +11,8 @@
     <string name="titulo">134057 - EDGAR JIMENEZ</string>
     <string name="ctehoy">Clientes de hoy</string>
     <string name="ctetotales">Clientes totales</string>
-    <string name="ReporteVendedor">Graficas</string>
-    <string name="title_activity_grafica__vendedor">Grafica del Vendedor</string>
+    <string name="ReporteVendedor">Gráficas</string>
+    <string name="title_activity_grafica__vendedor">Gráfica del Vendedor</string>
     <string name="title_activity_kpi__general">KPI_General</string>
     <string name="visitas">Visitados:</string>
     <string name="title_activity_pedidos">Pedidos</string>
@@ -31,11 +31,11 @@
     <string name="Guardar">Guardar</string>
     <string name="Eliminar">Eliminar</string>
     <string name="Agregarp">Agregar productos de catalogo</string>
-    <string name="title_activity_actualizar_coord">Actualizar_coord</string>
+    <string name="title_activity_actualizar_coord">Actualizar coord</string>
     <string name="Latitud">Latitud:</string>
     <string name="Longitud">Longitud:</string>
     <string name="Actualizar">Actualizar</string>
-    <string name="title_activity_actualizar__coordenadas">Actualizar_Coordenadas</string>
+    <string name="title_activity_actualizar__coordenadas">Actualizar Coordenadas</string>
     <string name="title_activity_info_producto">Info_producto</string>
     <string name="title_activity_dib_firma">Dib_firma</string>
     <string name="title_activity_sincronizar">Sincronizar</string>

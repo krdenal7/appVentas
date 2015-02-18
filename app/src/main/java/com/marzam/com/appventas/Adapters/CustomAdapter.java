@@ -13,6 +13,7 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -145,7 +146,7 @@ try {
 
 
     public void ShowDialog( int position , final View view){
-        llenar_picker();//llena el picker
+
 
      LayoutInflater inflater=((Activity)context).getLayoutInflater();
      View botones=inflater.inflate(R.layout.botones_cantidad,null);
@@ -171,7 +172,7 @@ try {
 
     }
     public void ShowDialog_picker(final int posicion, final View view){
-        llenar_picker();
+
 
         final EditText txtCantidad=new EditText(context);
         txtCantidad.setHint("cantidad");
@@ -180,15 +181,15 @@ try {
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Seleccione una cantidad");
         alert.setView(txtCantidad);
-        alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+        alert.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
 
-                int cant=Integer.parseInt(txtCantidad.getText().toString());
+                int cant = Integer.parseInt(txtCantidad.getText().toString());
 
-                Agregar_Producto(view,0,posicion);
-                Agregar_Producto(view,cant,posicion);
+                Agregar_Producto(view, 0, posicion);
+                Agregar_Producto(view, cant, posicion);
 
             }
         });
@@ -199,25 +200,18 @@ try {
             }
         });
         alertDialog_picker=alert.create();
+        alertDialog_picker.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                InputMethodManager imm = (InputMethodManager)((Activity)context).getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(txtCantidad, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
         alertDialog_picker.show();
     }
 
 
-    public void llenar_picker(){
 
-        picker = new NumberPicker(context);
-        String[] nums = new String[20];
-        for(int i=0; i<nums.length; i++)
-            nums[i] = Integer.toString(i);
-
-        picker.setMinValue(1);
-        picker.setMaxValue(nums.length);
-        picker.setWrapSelectorWheel(false);
-        picker.setDisplayedValues(nums);
-        picker.setValue(2);
-
-
-    }
     public int AgregarProducto(String ean,int cantidad,int isChecked,View view){
 
         try {

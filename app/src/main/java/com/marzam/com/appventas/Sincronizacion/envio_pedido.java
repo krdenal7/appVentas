@@ -146,8 +146,6 @@ public class envio_pedido {
 
         try {
 
-
-
             array=new JSONArray(json);
 
             for(int i=0;i<array.length();i++){
@@ -159,17 +157,12 @@ public class envio_pedido {
                 db.execSQL("update visitas set status_visita='"+status+"' where id_visita='" + id + "'");
 
             }
-
-
-
         } catch (JSONException e) {
             from="envio_pedido";
             subject="envio_pedido.java- ActualizarEstatusVisitas";
-            body="Agente: "+ObtenerAgenteActivo()+"\n Array: "+array+"Json: "+json;
+            body="Agente: "+ObtenerAgenteActivo()+"\n Array: "+array+"Json: "+json+"\nError:"+e.toString();
             new sendEmail().execute("");
         }
-
-
     }
 
 

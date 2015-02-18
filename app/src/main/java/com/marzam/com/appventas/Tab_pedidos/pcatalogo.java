@@ -17,6 +17,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -78,6 +80,8 @@ public class pcatalogo extends Activity {
         context=this;
 
          EditBuscar=(EditText)findViewById(R.id.editText4);
+         EditBuscar.requestFocus();
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
          lproductos=(ListView)findViewById(R.id.listView2);
 
 
@@ -196,7 +200,7 @@ public class pcatalogo extends Activity {
     }
     public void ShowDialog_picker(final String codigo){
 
-        llenar_picker();
+
         final EditText txtCantidad=new EditText(context);
         txtCantidad.setHint("cantidad");
         txtCantidad.setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -217,11 +221,6 @@ public class pcatalogo extends Activity {
                 else
                 AgregarProducto(codigo,0,0);
 
-               // adapter1=new CustomAdapter(context,modelItems);
-               // lproductos.setAdapter(adapter1);
-               // EditBuscar.setText("");
-               // new UpdateList().execute("");
-
             }
         });
         alert1.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
@@ -232,29 +231,20 @@ public class pcatalogo extends Activity {
         });
 
         alertDialog_picker=alert1.create();
+        alertDialog_picker.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(txtCantidad, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
         alertDialog_picker.show();
 
 
 
     }
 
-    public void llenar_picker(){
 
-        picker = new NumberPicker(context);
-        String[] nums = new String[1000];
-        for(int i=0; i<nums.length; i++)
-            nums[i] = Integer.toString(i);
-
-        picker.setMinValue(1);
-        picker.setMaxValue(nums.length);
-        picker.setWrapSelectorWheel(false);
-        picker.setDisplayedValues(nums);
-        picker.setValue(2);
-
-
-
-
-    }
     public void LlenarHasmap(){
 
         lite=new CSQLite(context);
