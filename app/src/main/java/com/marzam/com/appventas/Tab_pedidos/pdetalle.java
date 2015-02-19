@@ -25,7 +25,6 @@ import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.NumberPicker;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -63,7 +62,7 @@ public class pdetalle extends Activity {
     Button boton4;
     Button boton5;
     Button boton6;
-    NumberPicker picker;
+
 
     /*Cambio de Prueba*/
 

@@ -16,8 +16,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
-import android.os.Bundle;
+import android.net.Uri;
+import android.os.*;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -95,6 +95,7 @@ public class MainActivity extends Activity {
         context=this;
 
 
+
        txtUsuario=(TextView)findViewById(R.id.textViewTitle);
        locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
        CrearDirectorioDownloads();
@@ -114,8 +115,6 @@ public class MainActivity extends Activity {
             }
         }
 
-
-
       ShowEnableGPS();//Muestra el alert en caso de que el GPS del dispositivo se encuentre desactivado
 
       final  Intent i=new Intent(context,MapsLocation.class);
@@ -124,7 +123,6 @@ public class MainActivity extends Activity {
         btnAceptar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
 
 
                 password=((EditText)findViewById(R.id.editText)).getText().toString();
@@ -826,7 +824,25 @@ try {
     }
 
 
+   public void Pruebas_exec(){
 
+       try{
+           Intent intent=new Intent(Intent.ACTION_VIEW);
+           File path= android.os.Environment.getExternalStorageDirectory();
+           String Folder=path+"/Download/app-debug.apk";
+           Uri uri=Uri.parse("file:///"+Folder);
+           intent.setDataAndType( uri,"application/vnd.android.package-archive");
+
+           File file=new File(Folder);
+           if(file.exists())
+           startActivity(intent);
+
+       }catch (Exception e){
+           String error=e.toString();
+           e.printStackTrace();
+       }
+
+   }
 
 }
 
