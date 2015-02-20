@@ -94,15 +94,13 @@ public class MainActivity extends Activity {
         setTitle("Ventas");
         context=this;
 
-
-
        txtUsuario=(TextView)findViewById(R.id.textViewTitle);
        locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
        CrearDirectorioDownloads();
        //ObtenerArchivos2();
       // EliminarBD();
 
-          if(!existTxt(txt))
+        if(!existTxt(txt))
                     CrearTXT();
 
         if(ExistsBD()) {
@@ -146,7 +144,6 @@ public class MainActivity extends Activity {
     }
 
     public void CrearDirectorioDownloads(){
-
 
         try {
             File folder = android.os.Environment.getExternalStorageDirectory();

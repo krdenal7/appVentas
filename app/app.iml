@@ -80,18 +80,19 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 19 Platform (1)" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="zip4j_1.3.2" level="project" />
-    <orderEntry type="library" exported="" name="support-v4-20.0.0" level="project" />
     <orderEntry type="library" exported="" name="additionnal" level="project" />
     <orderEntry type="library" exported="" name="ksoap2-android-assembly-2.6.4-jar-with-dependencies" level="project" />
     <orderEntry type="library" exported="" name="mail" level="project" />
-    <orderEntry type="library" exported="" name="commons-codec-1.10" level="project" />
-    <orderEntry type="library" exported="" name="gson-1.7.1" level="project" />
-    <orderEntry type="library" exported="" name="Libraries" level="project" />
-    <orderEntry type="library" exported="" name="appcompat-v7-19.0.0" level="project" />
-    <orderEntry type="library" exported="" name="activation" level="project" />
+    <orderEntry type="library" exported="" name="librerias" level="project" />
     <orderEntry type="library" exported="" name="play-services-6.1.71" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-20.0.0" level="project" />
+    <orderEntry type="library" exported="" name="zip4j_1.3.2" level="project" />
+    <orderEntry type="library" exported="" name="support-v4-20.0.0" level="project" />
+    <orderEntry type="library" exported="" name="Utilidades" level="project" />
+    <orderEntry type="library" exported="" name="commons-codec-1.10" level="project" />
+    <orderEntry type="library" exported="" name="gson-1.7.1" level="project" />
+    <orderEntry type="library" exported="" name="appcompat-v7-19.0.0" level="project" />
+    <orderEntry type="library" exported="" name="activation" level="project" />
   </component>
 </module>
 
