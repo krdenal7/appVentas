@@ -53,7 +53,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
 
-public class MainActivity extends Activity {
+public class  MainActivity extends Activity {
 
     Context context;
     boolean press=false;
@@ -93,6 +93,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.login);
         setTitle("Ventas");
         context=this;
+        int a;
 
        txtUsuario=(TextView)findViewById(R.id.textViewTitle);
        locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
