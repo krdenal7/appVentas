@@ -610,6 +610,7 @@ public class pcatalogo extends Activity {
               .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
         finish();
     }
+
     @Override
     protected void onResume(){
         super.onResume();

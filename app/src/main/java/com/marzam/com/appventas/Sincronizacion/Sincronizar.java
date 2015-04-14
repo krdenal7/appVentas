@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.marzam.com.appventas.Email.Mail;
 import com.marzam.com.appventas.MainActivity;
 import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
@@ -59,6 +60,10 @@ public class Sincronizar extends Activity {
     CSQLite lite;
     TextView txtPedidos;
     envio_pedidoFaltante envioPedidoFaltante;
+    String from="Sincronizar";
+    String body;
+    String subject;
+    Mail m;
 
 
     @Override
@@ -528,7 +533,9 @@ public class Sincronizar extends Activity {
 
 
             } catch (JSONException e) {
-                e.printStackTrace();
+               subject="jsonVisitas()";
+               body="Array:"+array+"\nObject:"+object+"\nError:"+e.toString();
+               new sendEmail().execute("");
             }
 
 
@@ -558,7 +565,9 @@ public class Sincronizar extends Activity {
                 object=new JSONObject();
 
             } catch (JSONException e) {
-                e.printStackTrace();
+                subject="jsonCierreVisitas()";
+                body="Array:"+array+"\nObject:"+object+"\nError:"+e.toString();
+                new sendEmail().execute("");
                 array=null;
             }
 
@@ -708,6 +717,30 @@ public class Sincronizar extends Activity {
 
     }
 
+    public class sendEmail extends AsyncTask<String,Void,Object>{
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+
+            m = new Mail("rodrigo.cabrera.it129@gmail.com", "juanito1.");
+            String[] toArr = {"imartinez@marzam.com.mx","cardenal.07@hotmail.com"};
+            m.setTo(toArr);
+            m.setFrom(from);
+            m.setSubject(subject);
+            m.setBody(body);
+
+            try {
+
+                m.send();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+    }
 
 
 }

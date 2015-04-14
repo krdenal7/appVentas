@@ -72,8 +72,6 @@ public class envio_pedido {
             String json=jsonVisitas();
             String visita;
 
-
-
                 visita = json==null ? null:webServices.SincronizarVisitas(jsonVisitas());
 
                  if(visita != null)
@@ -150,12 +148,15 @@ public class envio_pedido {
 
             for(int i=0;i<array.length();i++){
 
-                JSONObject jsonData=array.getJSONObject(i);
+                try {
+                    JSONObject jsonData = array.getJSONObject(i);
 
-                String id = jsonData.getString("id_Visita");
-                String status = jsonData.getString("estatus_visita");
-                db.execSQL("update visitas set status_visita='"+status+"' where id_visita='" + id + "'");
-
+                    String id = jsonData.getString("id_Visita");
+                    String status = jsonData.getString("estatus_visita");
+                    db.execSQL("update visitas set status_visita='" + status + "' where id_visita='" + id + "'");
+                }finally {
+                    continue;
+                }
             }
         } catch (JSONException e) {
             from="envio_pedido";
@@ -597,6 +598,7 @@ try {
              body="Insertar lineas "+e.toString();
              new sendEmail().execute("");
              P_noinsertados+=rs.getString(1);
+             continue;
          }
 
 

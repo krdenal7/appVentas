@@ -22,9 +22,9 @@ import java.net.Proxy;
 
 public class WebServices {
 
-                //static String ip="http://201.134.159.126/WebService/WebService.asmx";
-                  static String ip="http://190.1.4.120/WebService/WebService.asmx";
-               // static String ip="http://201.134.159.126/WebServicePruebas/WebService.asmx";
+              //static String ip="http://201.134.159.126/WebService/WebService.asmx";
+              //static String ip="http://190.1.4.120/WebService/WebService.asmx";
+                static String ip="http://201.134.159.126/WebServicePruebas/WebService.asmx";
 
     String from="WebServices";
     String subject;

@@ -4,11 +4,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
+import android.os.AsyncTask;
 import android.widget.Toast;
-
+import com.marzam.com.appventas.Email.Mail;
 import com.marzam.com.appventas.SQLite.CSQLite;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -29,6 +28,10 @@ public class Crear_precioFinal {
     String [] clasificacion_No_aplica;
     HashMap<String,String> Hasproducto;
     static ArrayList<HashMap<String,?>> data=null;
+    Mail m;
+    String from="CrearPrecioFinal";
+    String subject;
+    String body;
 
 
 
@@ -92,12 +95,23 @@ public class Crear_precioFinal {
        clasificacion_Desc_menor=desmenor.split(",");
        clasificacion_No_aplica=noaplica.split(",");
 
+        //Cierra las conexiónes
+
+        if(rs!=null)
+            rs.close();
+        if(db!=null)
+            db.close();
+
 
    }//Llena los arreglos segun con el tipo de clasificacion fiscal
 
    public Double Obtener_DescuentoDelCliente(String id_cliente){
 
        SQLiteDatabase db=lite.getWritableDatabase();
+
+       if(!db.isOpen())
+           db=lite.getWritableDatabase();
+
        Cursor rs=db.rawQuery("select descuento_comercial from clientes where id_cliente='"+id_cliente+"'",null);
 
        Double descuento=0.00;
@@ -106,6 +120,7 @@ public class Crear_precioFinal {
           descuento=Double.parseDouble(rs.getString(0));
       }
 
+       if(db!=null)
        db.close();
 
        return descuento;
@@ -115,6 +130,9 @@ public class Crear_precioFinal {
 
        lite=new CSQLite(context);
        SQLiteDatabase db=lite.getWritableDatabase();
+
+       if(!db.isOpen())
+           db=lite.getWritableDatabase();
 
        Cursor rs=null;
 
@@ -134,7 +152,11 @@ public class Crear_precioFinal {
            Hasproducto=new HashMap<String, String>();
        }
 
+       if(rs!=null)
+           rs.close();
+       if(db!=null)
       db.close();
+
 
     }//Llena una lista con los productos a los cuales se les aplica el descuento directamente
    public void Obtener_Productos_DescMenor(){
@@ -225,18 +247,27 @@ public class Crear_precioFinal {
 
 
            /*se obtiene la oferta*/
-            Cursor   rs = db.rawQuery("select descuento from ofertas where codigo='" + codigo + "'", null);
+                   Cursor rs = null;
+                   try {
+                       rs=db.rawQuery("select descuento from ofertas where codigo='" + codigo + "'", null);
+                       if (rs.moveToFirst())
+                           oferta = Double.parseDouble(rs.getString(0));
+                   }finally {
 
-               if (rs.moveToFirst())
-                   oferta = Double.parseDouble(rs.getString(0));
+                       if(rs!=null)
+                       rs.close();
+                   }
 
-                   rs.close();
+
 
                Double precio1 = ((precioFarmacia - (precioFarmacia * oferta / 100)));
                Double precio2 = (precio1 - (precio1 * desc_comercial / 100));
                Double total = precio2;
 
-               db.execSQL("update productos set precio_oferta='"+String.format(Locale.US, "%.2f", total)+"' where codigo='"+codigo+"'");
+                   if(!db.isOpen())
+                       db=lite.getWritableDatabase();
+
+                       db.execSQL("update productos set precio_oferta='"+String.format(Locale.US, "%.2f", total)+"' where codigo='"+codigo+"'");
 
                //Calculo de impuestos;
 
@@ -247,6 +278,8 @@ public class Crear_precioFinal {
                    total=(total+((total*iva)/100));
                }
 
+                   if(!db.isOpen())
+                       db=lite.getWritableDatabase();
 
                String Stotal = String.format(Locale.US,"%.2f", total);
                db.execSQL("update productos set precio_final='" + Stotal + "' where codigo='" + codigo + "'");
@@ -258,9 +291,10 @@ public class Crear_precioFinal {
                ieps=0.00;
                }catch (Exception e){
 
-                   String err=e.toString();
-                   Log.d("Error al crear PrecioFinal;", err);
-                   continue;
+                 subject="Generar_PrecioFinal_Descliente()";
+                 body="Agente: "+Obtener_NoEmpleado()+e.toString();
+                 new sendEmail().execute("");
+                 continue;
 
                }
            }
@@ -271,11 +305,10 @@ public class Crear_precioFinal {
    public void Generar_PrecioFinal_DescMenor(){
 
        String codigo="";
-       String Fecha=getDate();
-       Double iva=0.00;
-       Double ieps=0.00;
-       Double desc_producto=0.00;
-       Double precioFarmacia=0.00;
+       Double iva;
+       Double ieps;
+       Double desc_producto;
+       Double precioFarmacia;
        Double oferta=0.00;
        Double desc_comercial=Obtener_DescuentoDelCliente(Obtener_idCliente());
 
@@ -295,12 +328,20 @@ public class Crear_precioFinal {
 
 
            /*se obtiene la oferta*/
-            Cursor   rs = db.rawQuery("select descuento from ofertas where codigo='" + codigo + "'", null);
+            Cursor   rs = null;
 
-               if (rs.moveToFirst())
-                   oferta = Double.parseDouble(rs.getString(0));
+               try {
+                   rs = db.rawQuery("select descuento from ofertas where codigo='" + codigo + "'", null);
 
-               rs.close();
+                   if (rs.moveToFirst())
+                       oferta = Double.parseDouble(rs.getString(0));
+               }finally {
+
+                   if(rs!=null)
+                       rs.close();
+               }
+
+
 
                Double desc_aplica=0.00;
 
@@ -319,6 +360,9 @@ public class Crear_precioFinal {
                Double precio2 = (precio1 - ((precio1*oferta)/100));
                Double total = precio2;
 
+               if(!db.isOpen())
+                   db=lite.getWritableDatabase();
+
                db.execSQL("update productos set precio_oferta='"+String.format(Locale.US, "%.2f", total)+"' where codigo='"+codigo+"'");
 
                if(ieps!=0){
@@ -328,22 +372,20 @@ public class Crear_precioFinal {
                    total=(total+(total*iva/100));
                }
 
+               if(!db.isOpen())
+                   db=lite.getWritableDatabase();
 
                String Stotal = String.format(Locale.US, "%.2f", total);
                db.execSQL("update productos set precio_final='" + Stotal + "' where codigo='" + codigo + "'");
 
-
-               iva = 0.00;
-               ieps = 0.00;
-               precioFarmacia = 0.00;
                oferta = 0.00;
-               desc_producto=0.00;
-               desc_aplica=0.00;
+
 
            }catch (Exception e){
 
-               String err=e.toString();
-               Log.d("Error al crear PrecioFinal;", err);
+               subject="Generar_PrecioFinal_DescMenor()";
+               body="Agente: "+Obtener_NoEmpleado()+e.toString();
+               new sendEmail().execute("");
                continue;
 
            }
@@ -411,15 +453,13 @@ try {
              lite=new CSQLite(context);
              db=lite.getWritableDatabase();
              db.update("productos",values,"codigo='"+codigo+"'",null);
-             Toast.makeText(context,e.toString(),Toast.LENGTH_LONG).show();
+             subject="Generar_PrecioFinal_SoloOferta()";
+             body="Agente: "+Obtener_NoEmpleado()+e.toString();
+             new sendEmail().execute("");
+             continue;
+
          }
-
-
-         precio=0.00;
-         total=0.00;
          oferta=0.00;
-         ieps=0.00;
-         iva=0.00;
 
      }
     }//Clasificación N,Na,F,O,....,etc.
@@ -448,6 +488,53 @@ try {
         String formatteDate=df.format(dt.getTime());
 
         return formatteDate;
+    }
+
+    public String Obtener_NoEmpleado(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        String clave="";
+        String query="";
+
+        try {
+            query="select numero_empleado from agentes where Sesion=1";
+            Cursor rs = db.rawQuery(query, null);
+            if (rs.moveToFirst()) {
+
+                clave = rs.getString(0);
+            }
+        }catch (Exception e){
+
+        }
+
+        return clave;
+    }
+
+
+    public class sendEmail extends AsyncTask<String,Void,Object> {
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+
+            m = new Mail("rodrigo.cabrera.it129@gmail.com", "juanito1.");
+            String[] toArr = {"imartinez@marzam.com.mx","cardenal.07@hotmail.com"};
+            m.setTo(toArr);
+            m.setFrom(from);
+            m.setSubject(subject);
+            m.setBody(body);
+
+            try {
+
+                m.send();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
     }
 
 }
