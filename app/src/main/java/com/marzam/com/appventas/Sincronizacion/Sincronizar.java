@@ -3,10 +3,12 @@ package com.marzam.com.appventas.Sincronizacion;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -50,6 +52,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 
 public class Sincronizar extends Activity {
 
@@ -140,9 +143,15 @@ public class Sincronizar extends Activity {
                 if(!VerificarSesionActiva()) {
                     if (VerificarPedidosPendientes() <= 0) {
                         if (isOnline()) {
-                            progres = ProgressDialog.show(context, "Sincronizando", "Cargando", true, false);
+
+                            //Estas lineas son del actual AsyncTask, se comentan para probar la nueva sincronización
+                           progres = ProgressDialog.show(context, "Sincronizando", "Cargando", true, false);
                             new UpLoadTask().execute("");
-                            //progres = ProgressDialog.show(context, "Realizando cierre", "Cargando", true, false);
+
+                           /* new Task_Json().execute(); //Sincronización inteligente*/
+
+
+
                         } else {
                         Toast.makeText(context, "Verifique su conexión a internet e intente nuevamente", Toast.LENGTH_LONG).show();
                         }
@@ -156,7 +165,7 @@ public class Sincronizar extends Activity {
         });
         alert.setNegativeButton("No",new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
+        public void onClick(DialogInterface dialogInterface, int i) {
 
             }
         });
@@ -375,9 +384,6 @@ public class Sincronizar extends Activity {
 
         return clave;
     }
-
-
-
     private String getDate(){
 
         Calendar cal = new GregorianCalendar();
@@ -387,6 +393,15 @@ public class Sincronizar extends Activity {
 
         return formatteDate;
     }
+    public String getDate2(){
+        Calendar cal = new GregorianCalendar();
+        Date dt = cal.getTime();
+        SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd");
+        String formatteDate=df.format(dt.getTime());
+
+
+        return formatteDate;
+    }//formato dd/mm/yyyy
 
     private class UpLoadTask extends AsyncTask<String,Void,Object> {
 
@@ -503,7 +518,409 @@ public class Sincronizar extends Activity {
             }
         }
 
-    }
+    }//Asynck de la actual sincronización
+    private class Task_Json extends  AsyncTask<String,Integer,Object>{
+
+
+
+        @Override
+        protected void onProgressUpdate(Integer... value) {
+            super.onProgressUpdate(value);
+
+            progres.incrementProgressBy(value[0]);
+
+
+        }
+        @Override
+        protected void onPreExecute() {
+
+            //make the progressDialog
+            progres = new ProgressDialog(context);
+            progres.setTitle("Sincronizando ...");
+            progres.setIndeterminate(false);
+            progres.setCancelable(false);
+            progres.setMessage("Descargando información...");
+            progres.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progres.setProgress(0);
+            progres.setMax(100);
+            progres.show();
+
+
+        }
+        @Override
+        protected Object doInBackground(String... strings) {
+
+
+            WebServices web=new WebServices();
+            String json=web.DownJson();
+
+            if(json==null)
+                 return null;
+
+            String[] jsonTable=json.split("\\*");
+
+            int div=(jsonTable.length/3); //Obtiene el numero de json que se van a procesar
+            String table = null;
+            String id=null;
+
+            int contador=0;
+            int contador2=0;
+
+            for(int i=1;i<jsonTable.length;i++){//Recorre el arreglo que contiene el nombre de la tabla y el json
+
+               if(contador==0){
+                 id=jsonTable[i];
+                   contador++;
+               }
+               else{
+                if(contador==1){   //Si el mod de i es 0 corresponde al dato del cabecero
+                    table=jsonTable[i];
+
+                    float val=(contador2*100);
+                    float res=val/div;
+                    double mod=res%2;
+
+                    if(mod==1 || mod ==0)
+                    publishProgress(1);
+
+                    contador2++;
+                    contador++;
+                }//Recorre el nombre de la tabla
+                else {  //Si el mod de i es 1 corresponde al json
+                    //Recorremos los Json
+
+                    try {
+
+                        JSONArray array = new JSONArray(jsonTable[i]); //se crea un array con el json
+                        for (int i1 = 0; i1 < array.length(); i1++) { //Recorre cada elemento del json
+
+                            JSONObject object = array.getJSONObject(i1);
+                            Iterator interator = object.keys();
+
+                            String[][] arreglo = new String[object.length() - 1][2];
+                            int operacion = 0;
+                            int con = 0;
+
+                            while (interator.hasNext()) {
+
+                                String key = (String) interator.next();
+
+                                if (!key.equals("ID_SINC")) {
+
+                                    if(!key.equals("fecha_actualizacion")) {
+                                        arreglo[con][0] = key;
+                                        arreglo[con][1] = object.getString(key);
+                                    }else {
+                                        arreglo[con][0] = key;
+                                        arreglo[con][1] = getDate2();
+                                    }
+
+                                    con++;
+
+                                }
+                                else {
+                                    operacion = Integer.parseInt(object.getString(key));
+                                }
+
+                            }//cierre de while
+
+
+                            switch (operacion) {
+                                case 1:
+                                    Insertar(table, arreglo);
+                                    break;
+                                case 2:
+                                    Eliminar(table, arreglo);
+                                    break;
+                                case 3:
+                                    Actualizar(table, arreglo);
+                                    break;
+                            }//cierre de switch
+                        }
+
+                    } catch (JSONException e) {
+                        subject="Actualizar()";
+                        body="Agente:"+ObtenerAgenteActivo()
+                                +"Error:"+e.toString()
+                                +"Arreglo: "+jsonTable;
+                        new sendEmail().execute("");
+                    }
+                    contador = 0;
+                }
+                }//Recorre los json
+
+            }//Cierre del for
+
+            return json;
+        }
+        @Override
+        protected void onPostExecute(Object res){
+
+            AlertDialog.Builder alert=new AlertDialog.Builder(context);
+            alert.setTitle("Sincronización");
+
+            if(progres.isShowing()){
+
+                if(res==null){
+                 publishProgress(0);
+                 alert.setMessage("No se pudo completar la sincronización.Desea intentar nuevamente");
+                 alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
+                     @Override
+                     public void onClick(DialogInterface dialogInterface, int i) {
+                         new Task_Json().execute("");
+                     }
+                 });
+                 alert.setNegativeButton("No",new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                        }
+                    });
+
+                }//En caso de que haya fallado la comunicación con el web service
+
+                else{
+
+                alert.setMessage("Se ha completado la sincronización.");
+                alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                    }
+                });
+                }
+
+                    progres.dismiss();
+                    AlertDialog alertDialog=alert.create();
+                    alertDialog.show();
+
+
+            }//en caso de que el Dialogo este visible
+        }
+
+
+
+
+        //Metodos de actualización
+        private void Insertar(String table,String[][] arreglo){
+
+            lite=new CSQLite(context);
+            SQLiteDatabase db=lite.getWritableDatabase();
+
+            try{
+
+                ContentValues values=new ContentValues();
+
+                for(int i=0;i<arreglo.length;i++){
+                    values.put(arreglo[i][0],arreglo[i][1]);
+                }
+
+              // long val=db.insert(table,null,values);
+
+                for(int i=0;i<4;i++) {
+                    try {
+
+                        long val = db.insertOrThrow(table, null, values);
+                        String a="";
+                        break;
+
+                    } catch (SQLException e) {
+
+                        subject="Insertar()";
+                        body="Agente:"+ObtenerAgenteActivo()
+                            +"Error:"+e.toString()
+                            +"Tabla:"+table
+                            +"Values: "+values.toString();
+                              new sendEmail().execute("");
+                        continue;
+
+                    }
+                }
+
+
+
+            }catch (Exception e){
+
+                String error=e.toString();
+                e.printStackTrace();
+
+            }finally {
+                if(db!=null)
+                    db.close();
+                if(lite!=null)
+                    lite.close();
+            }
+        }
+        private void Actualizar(String table,String[][] arreglo){
+
+            lite=new CSQLite(context);
+            SQLiteDatabase db=lite.getWritableDatabase();
+
+            String llave = null;
+            String valor = null;
+
+            if(table.toLowerCase().equals("productos"))
+                llave="codigo";
+            if(table.toLowerCase().equals("ofertas"))
+                llave="codigo,metodo";
+            if(table.toLowerCase().equals("clientes"))
+                llave="id_cliente";
+
+
+
+            try{
+                 String[] WhereKey=llave.split(",");
+                 ContentValues values=new ContentValues();
+
+                if(WhereKey.length<=1) { //Se ejecuta el comando en caso de que solo necesite una llave para identificar el valor
+                    for (int i = 0; i < arreglo.length; i++) {
+                        values.put(arreglo[i][0], arreglo[i][1]);
+
+                        if (arreglo[i][0].equals(llave)) {
+                            valor = arreglo[i][1];
+                        }//Busca la llave y extrae su valor
+
+                    }//Recorre el arreglo y llena el ContentValues
+
+                    int val = db.update(table, values, llave + "=" + "'" + valor + "'", null);
+                    String a="";
+
+                }//if
+                else {
+
+                    StringBuilder build=new StringBuilder();
+                    String[] args=new String[WhereKey.length];
+
+                    for(int i=0;i<arreglo.length;i++){
+                        values.put(arreglo[i][0], arreglo[i][1]);
+
+                        for(int j=0;j<WhereKey.length;j++){
+
+                            if(WhereKey[j].equals(arreglo[i][0])){
+
+                                args[j]=arreglo[i][1];
+
+                                if(j<WhereKey.length-1)
+                                    build.append(WhereKey[j]+"=? AND ");
+                                else
+                                    build.append(WhereKey[j]+"=? ");
+                            }
+
+                        }
+                    }//cierre del for
+
+                    int val = db.update(table, values, build.toString(), args);
+                    String a="";
+
+
+                    }//cierre del else
+
+
+            }catch (Exception e){
+
+                subject="Actualizar()";
+                body="Agente:"+ObtenerAgenteActivo()
+                        +"Error:"+e.toString()
+                        +"Tabla:"+table
+                        +"Llave: "+llave;
+                new sendEmail().execute("");
+
+            }   finally
+            {
+
+                 if(db!=null)
+                     db.close();
+                if(lite!=null)
+                    lite.close();
+
+            }
+
+        }
+        private void Eliminar(String table,String[][] arreglo){
+
+            lite=new CSQLite(context);
+            SQLiteDatabase db=lite.getWritableDatabase();
+
+            String llave = null;
+            String valor = null;
+
+            if(table.toLowerCase().equals("productos"))
+                llave="codigo";
+            if(table.toLowerCase().equals("ofertas"))
+                llave="codigo,metodo";
+            if(table.toLowerCase().equals("clientes"))
+                llave="id_cliente";
+
+
+
+            try{
+
+            String[] WhereKey=llave.split(",");
+
+            if(WhereKey.length<=1) { //Se ejecuta el comando en caso de que solo necesite una llave para identificar el valor
+                for (int i = 0; i < arreglo.length; i++) {
+                    if (arreglo[i][0].equals(llave)) {
+                        valor = arreglo[i][1];
+                    }//Busca la llave y extrae su valor
+                }//Recorre el arreglo y llena el ContentValues
+
+                int val = db.delete(table, llave + "=" + "'" + valor + "'", null);
+                String a="";
+
+                                  }//Fien del if
+
+            else {
+
+                StringBuilder build=new StringBuilder();
+                String[] args=new String[WhereKey.length];
+
+                for(int i=0;i<arreglo.length;i++){
+
+                    for(int j=0;j<WhereKey.length;j++){
+
+                        if(WhereKey[j].equals(arreglo[i][0])){
+
+                            args[j]=arreglo[i][1];
+
+                            if(j<WhereKey.length-1)
+                               build.append(WhereKey[j]+"=? AND ");
+                            else
+                              build.append(WhereKey[j]+"=? ");
+                        }
+
+                    }
+                }//cierre del for
+
+                   int val=db.delete(table,build.toString(),args);
+                   String a="";
+
+
+                                         }//cierre del else
+
+
+            }catch (Exception e){
+
+                subject="Actualizar()";
+                body="Agente:"+ObtenerAgenteActivo()
+                        +"Error:"+e.toString()
+                        +"Tabla:"+table
+                        +"Llave: "+llave;
+                new sendEmail().execute("");
+
+            }   finally
+            {
+
+                if(db!=null)
+                    db.close();
+                if(lite!=null)
+                    lite.close();
+
+            }
+
+        }
+
+
+
+
+    }//Asynck de la sincronización inteligente
 
     public String jsonVisitas(){
         lite=new CSQLite(context);
@@ -579,6 +996,7 @@ public class Sincronizar extends Activity {
         return  array.length()==0 ? null: array.toString();
     }
 
+
     @Override
     public void onDestroy(){
         super.onDestroy();
@@ -587,8 +1005,6 @@ public class Sincronizar extends Activity {
             progres=null;
         }
     }
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -610,6 +1026,8 @@ public class Sincronizar extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+
+
     public  boolean isOnline(){
 
         ConnectivityManager cm=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -619,7 +1037,6 @@ public class Sincronizar extends Activity {
         }
         return false;
     }
-
     public void LeerTxt(){
         try {
             InputStreamReader archivo=new InputStreamReader(openFileInput("datos.txt"));
@@ -636,7 +1053,6 @@ public class Sincronizar extends Activity {
         }
 
     }
-
     public void EscribirTXT(){
 
         try{
@@ -651,7 +1067,6 @@ public class Sincronizar extends Activity {
         }
 
     }
-
     public void ActualizarBD(String agente){
 
         lite=new CSQLite(context);

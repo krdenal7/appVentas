@@ -59,10 +59,13 @@ public class pcabecera extends Activity {
 
         if(!existTxt("Pedidos.txt"))
                           CrearTXT();
+        spinner=(Spinner)findViewById(R.id.spinner);
+        LlenarList();
 
-        String id_pedido=Obtener_idpedido2();
 
-        EscribirTXT(id_pedido);
+        final String[] id_pedido = {Obtener_idpedido2(spinner.getSelectedItem().toString())};
+
+        EscribirTXT(id_pedido[0]);
 
         txtFpedido=(TextView)findViewById(R.id.textView25);
         txtFpedido.setText(getDate());
@@ -77,8 +80,7 @@ public class pcabecera extends Activity {
         }catch (Exception e){
             e.printStackTrace();
         }
-        spinner=(Spinner)findViewById(R.id.spinner);
-        LlenarList();
+
 
         String no_empleado=ObtenerAgenteActivo();
         Cursor rs=db.rawQuery("select id_fuerza from agentes where numero_empleado='" + no_empleado + "'", null);
@@ -97,6 +99,9 @@ public class pcabecera extends Activity {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String tipo_fuerza = spinner.getSelectedItem().toString();
                 db.execSQL("update tipo_fuerza set isCheck='" + tipo_fuerza + "' where id_fuerza='" + finalId_fuerza + "'");
+                id_pedido[0] =Obtener_idpedido2(spinner.getSelectedItem().toString());
+                EscribirTXT(id_pedido[0]);
+                txt_idPedido.setText(LeerTXT());
 
             }
 
@@ -112,6 +117,11 @@ public class pcabecera extends Activity {
             String no_empleado = ObtenerAgenteActivo();
             lite = new CSQLite(context);
             SQLiteDatabase db = lite.getWritableDatabase();
+            try {
+                db.execSQL("ALTER TABLE tipo_fuerza ADD COLUMN isCheck varchar MAX");
+            }catch (Exception e){
+                e.printStackTrace();
+            }
             Cursor rs = db.rawQuery("select id_fuerza from agentes where numero_empleado='" + no_empleado + "'", null);
 
             if (rs.moveToFirst()) {
@@ -175,13 +185,13 @@ public class pcabecera extends Activity {
 
         return id;
     }
-    public String Obtener_idpedido2(){
+    public String Obtener_idpedido2(String iniciales){
 
         StringBuilder builder=new StringBuilder();
 
 
         /*Iniciales*/
-        builder.append("FG");
+        builder.append(iniciales);
 
         /*Id agente*/
        String id_agente=ObtenerIdAgente();
@@ -245,9 +255,15 @@ public class pcabecera extends Activity {
 
             id_pedido=br.readLine();
 
-        }catch (Exception e){
+            if(br!=null)
+                br.close();
+            if(archivo!=null)
+                archivo.close();
 
+        }catch (Exception e){
+e.printStackTrace();
         }
+
 
         return  id_pedido;
     }

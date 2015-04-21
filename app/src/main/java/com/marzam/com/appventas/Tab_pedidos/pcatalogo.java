@@ -247,95 +247,106 @@ public class pcatalogo extends Activity {
 
     public void LlenarHasmap(){
 
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
-
-        Cursor rs=null;
-
-        String query="select distinct descripcion,precio,p.Cantidad,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad from productos as p left join " +
-                " ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo ";
-
-        try {
-
-            rs = db.rawQuery(query, null);
-            data = new ArrayList<HashMap<String, ?>>();
-            producto_row = new HashMap<String, String>();
-
-            while (rs.moveToNext()) {
-
-                String oferta = (rs.getString(6) == null) ? "0" : rs.getString(6);
-
-                producto_row.put("A", rs.getString(0));
-                producto_row.put("B", "Precio Lista: $" + rs.getString(1));
-                producto_row.put("C", "Cantidad: " + rs.getString(2));
-                producto_row.put("D", rs.getString(3));
-                producto_row.put("E", "Precio Final: $" + rs.getString(4));
-                producto_row.put("F", "Clasificación: " + rs.getString(5));
-                producto_row.put("G", "Oferta: " + oferta + "%");
-                producto_row.put("H", rs.getString(7));
-                producto_row.put("I", "Existencia: " + rs.getString(8));
-                data.add(producto_row);
-                producto_row = new HashMap<String, String>();
-            }
-
-            rs.close();
-            db.close();
+        if(lite!=null)
             lite.close();
-        }catch (Exception e){
-            subject="pcatalogo.java-LlenarHasmap";
-            body="Agente: "+ObtenerAgenteActivo()+"\nError: "+e.toString()+"\nData: "+data.toString();
-            new sendEmail().execute("");
+
+
+
+        for(int i=0;i<4;i++) {
+            lite=new CSQLite(context);
+            SQLiteDatabase db=lite.getWritableDatabase();
+            Cursor rs = null;
+
+            String query = "select distinct descripcion,precio,p.Cantidad,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad from productos as p left join " +
+                    " ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo ";
+
+            try {
+
+                rs = db.rawQuery(query, null);
+                data = new ArrayList<HashMap<String, ?>>();
+                producto_row = new HashMap<String, String>();
+
+                while (rs.moveToNext()) {
+
+                    String oferta = (rs.getString(6) == null) ? "0" : rs.getString(6);
+
+                    producto_row.put("A", rs.getString(0));
+                    producto_row.put("B", "Precio Lista: $" + rs.getString(1));
+                    producto_row.put("C", "Cantidad: " + rs.getString(2));
+                    producto_row.put("D", rs.getString(3));
+                    producto_row.put("E", "Precio Final: $" + rs.getString(4));
+                    producto_row.put("F", "Clasificación: " + rs.getString(5));
+                    producto_row.put("G", "Oferta: " + oferta + "%");
+                    producto_row.put("H", rs.getString(7));
+                    producto_row.put("I", "Existencia: " + rs.getString(8));
+                    data.add(producto_row);
+                    producto_row = new HashMap<String, String>();
+                }
+
+                rs.close();
+                db.close();
+                lite.close();
+                break;
+            } catch (Exception e) {
+                subject = "pcatalogo.java-LlenarHasmap";
+                body = "Agente: " + ObtenerAgenteActivo() + "\nError: " + e.toString() + "\nData: " + data.toString();
+                new sendEmail().execute("");
+                continue;
+            }
         }
 
     }//Con email
     public void LlenarModelItems(){
 
-      lite=new CSQLite(context);
-      SQLiteDatabase db=lite.getWritableDatabase();
-      Cursor rs=null;
-
-        try {
-
-            rs=db.rawQuery("select distinct descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad " +
-                           "from productos as p left join ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo limit 1000 ",null);
-
-        }catch (Exception e){
-            subject="pcatalogo.java-LlenarmodelItems";
-            body="Agente:"+ObtenerAgenteActivo()+"\nError: "+ e.toString();
-            new sendEmail().execute("");
-        }
-
-
-
-        modelItems=new Model[rs.getCount()];
-
-
-        int cont=0;
-
-        while (rs.moveToNext()){
-
-            String of=rs.getString(7);
-            String oferta;
-
-            if(of==null){
-                oferta="0";
-            }else {
-                oferta=of;
-            }
-
-            modelItems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),oferta,rs.getString(8),rs.getString(9));
-            cont++;
-        }
-
-        int tamaño=cont;
-
-        if(rs!=null)
-        rs.close();
-        if(db!=null)
-        db.close();
-
         if(lite!=null)
-        lite.close();
+            lite.close();
+
+      for(int i=0;i<4;i++) {
+          lite = new CSQLite(context);
+          SQLiteDatabase db = lite.getWritableDatabase();
+          Cursor rs = null;
+
+          try {
+
+              rs = db.rawQuery("select distinct descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad " +
+                      "from productos as p left join ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo limit 1000 ", null);
+
+              modelItems = new Model[rs.getCount()];
+
+
+              int cont = 0;
+
+              while (rs.moveToNext()) {
+
+                  String of = rs.getString(7);
+                  String oferta;
+
+                  if (of == null) {
+                      oferta = "0";
+                  } else {
+                      oferta = of;
+                  }
+
+                  modelItems[cont] = new Model(rs.getString(0), rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6), oferta, rs.getString(8), rs.getString(9));
+                  cont++;
+              }
+
+              break;
+
+          } catch (Exception e) {
+              subject = "pcatalogo.java-LlenarmodelItems";
+              body = "Agente:" + ObtenerAgenteActivo()
+                      + "Cursor:" + rs.toString()
+                      + "DB: " + db.toString()
+                      + "\nError: " + e.toString();
+              new sendEmail().execute("");
+              continue;
+          }
+
+
+      }
+
+
     }//Con email
 
 

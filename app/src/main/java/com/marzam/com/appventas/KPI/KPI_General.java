@@ -281,6 +281,16 @@ public class KPI_General extends Activity {
         params.add(new BasicNameValuePair("E", rs.getString(4)));
         params.add(new BasicNameValuePair("F", rs.getString(5)));
         datos = URLEncodedUtils.format(params, "utf-8");
+    }else{
+        List<NameValuePair> params = new LinkedList<NameValuePair>();
+        params.add(new BasicNameValuePair("A", "0"));
+        params.add(new BasicNameValuePair("B", "0"));
+        params.add(new BasicNameValuePair("C", "0"));
+        params.add(new BasicNameValuePair("D", "0"));
+        params.add(new BasicNameValuePair("E", "0"));
+        params.add(new BasicNameValuePair("F", "0"));
+        datos = URLEncodedUtils.format(params, "utf-8");
+
     }
 
      return datos;

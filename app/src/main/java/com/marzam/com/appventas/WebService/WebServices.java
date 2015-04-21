@@ -24,7 +24,8 @@ public class WebServices {
 
               //static String ip="http://201.134.159.126/WebService/WebService.asmx";
               //static String ip="http://190.1.4.120/WebService/WebService.asmx";
-                static String ip="http://201.134.159.126/WebServicePruebas/WebService.asmx";
+              //static String ip="http://201.134.159.126/WebServicePruebas/WebService.asmx";
+              static String ip="http://201.134.159.126/WSFuerzasExternas/WebService.asmx";
 
     String from="WebServices";
     String subject;
@@ -371,6 +372,44 @@ public class WebServices {
         }
 
         return response.toString();
+    }
+
+    public String DownJson(){
+
+        String SOAP_ACTION="http://tempuri.org/TransfiereJson";
+        String OPERATION_NAME="TransfiereJson";
+        String WSDL_TARGET_NAMESPACE="http://tempuri.org/";
+        String SOAP_ADDRESS=ip;
+
+       // SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
+
+        // if(!valida_Encabezado(encabezado))
+        //                        return null;
+
+       /* request.addProperty("encabezado",encabezado);
+        request.addProperty("detalle",detalle);*/
+
+        SoapSerializationEnvelope envelope=new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.dotNet=true;
+
+        //envelope.setOutputSoapObject(request);
+
+        HttpTransportSE httpTransportSE=new HttpTransportSE(SOAP_ADDRESS);
+        Object response=null;
+
+        try{
+
+            httpTransportSE.call(SOAP_ACTION,envelope);
+            response=envelope.getResponse();
+
+        }catch (Exception e){
+            String a=e.toString();
+            Log.d("WebServiceBakError",a);
+            return null;
+        }
+
+        return response.toString();
+
     }
 
     public byte[] ConvertToByte(File file){

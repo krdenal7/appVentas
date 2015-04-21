@@ -1,10 +1,13 @@
 package com.marzam.com.appventas.PushNotifications;
 
+import android.app.Activity;
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -41,6 +44,7 @@ public class GCMIntentService extends IntentService{
     Mail m;
     CSQLite lite;
     File directorio;
+    ProgressDialog progress;
 
     public GCMIntentService() {
         super("GCMIntentService");
@@ -112,6 +116,13 @@ public class GCMIntentService extends IntentService{
         if(com[0].equals("05")){
             new SendEmail_BD().execute("");
         }
+        if(com[0].equals("06")){
+
+
+            new Restaurar_BD().execute("");
+
+
+        }
 
 
     }
@@ -168,52 +179,20 @@ public class GCMIntentService extends IntentService{
         }
     }
 
-    private void sendMessage(){
-        GoogleCloudMessaging gcm=GoogleCloudMessaging.getInstance(getApplicationContext());
-        String to="AIzaSyDKTM0TT0gBrFrWh4FcroMLPMXTnAW-JQY";
-        AtomicInteger msgId= new AtomicInteger();
-        String id=Integer.toString(msgId.incrementAndGet());
-        Bundle data=new Bundle();
-        data.putString("hello","world");
+    private String ObtenerAgenteActivo(){
 
-        try {
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        String clave="";
 
-            gcm.send(to,id,data);
+        Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
+        if(rs.moveToFirst()){
 
-        } catch (IOException e) {
-            String err=e.toString();
-            e.printStackTrace();
-        }
-    }
-
-    private void sendEmail_Coordenadas(){
-
-        gps=new GPSHelper(getApplicationContext());
-
-        lat=gps.getLatitude();
-        lon=gps.getLongitude();
-
-        Intent itSend=new Intent(Intent.ACTION_SEND);
-        itSend.setType("plain/text");
-        itSend.putExtra(Intent.EXTRA_EMAIL,new String[]{"imartinez@marzam.com.mx","cardenal.07@hotmail.com"});
-        itSend.putExtra(Intent.EXTRA_SUBJECT,"Coordenadas");
-        itSend.putExtra(Intent.EXTRA_TEXT,"Latitud: "+lat+"\nLongitud: "+lon);
-
-        Intent new_intent=Intent.createChooser(itSend,"Send Message");
-        new_intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        try {
-
-            getApplicationContext().startActivity(new_intent);
-
-        }catch (Exception e){
-
-            String err=e.toString();
-            e.printStackTrace();
+            clave=rs.getString(0);
         }
 
 
-
+        return clave;
     }
 
     private void mostrarNotification(String msg) {
@@ -239,51 +218,6 @@ public class GCMIntentService extends IntentService{
         mBuilder.setContentIntent(contIntent);
 
         mNotificationManager.notify(NOTIF_ALERTA_ID, mBuilder.build());
-    }
-
-    public void ObtenerArchivos2(){
-
-        File directorio = new File("/data/data/com.marzam.com.appventas/databases/");
-        File[] files=directorio.listFiles();
-
-
-        String err="";
-              CopiarArchivos2(files);
-    }
-    public void CopiarArchivos2(File[] files){
-        byte[] buffer=new byte[1024];
-        int length;
-        FileOutputStream myOuput=null;
-        try {
-
-            FileInputStream myInput=null;
-
-            File folder = android.os.Environment.getExternalStorageDirectory();
-            File directorio2 = new File(folder.getAbsolutePath() + "/Marzam/preferencias");
-
-
-
-            for(int i=0;i<files.length;i++){
-                try {
-                    myInput = new FileInputStream(files[i]);
-                    String archivo = files[i].getName();
-                    myOuput = new FileOutputStream(directorio2 + "/" + archivo);
-                    while ((length = myInput.read(buffer)) > 0) {
-                        myOuput.write(buffer, 0, length);
-                    }
-
-
-                    myInput.close();
-                }catch (Exception e){continue;}
-
-            }
-            myOuput.close();
-            myOuput.flush();
-        }
-        catch (Exception e){
-            String err=e.toString();
-            Log.e("ErrorCopiar:",e.toString());
-        }
     }
 
     public class SendEmail_Audio extends AsyncTask<String,Void,Object>{
@@ -399,7 +333,45 @@ public class GCMIntentService extends IntentService{
         }
     }
 
+    public  class Restaurar_BD extends  AsyncTask<String,Void,Object>{
 
+
+        @Override
+        protected void onPreExecute(){
+
+
+        }
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+
+          /* Intent dialogIntent = new Intent(getBaseContext(),MainActivity.class);
+           dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+           getApplication().startActivity(dialogIntent);*/
+
+
+            Intent intent = new Intent(getBaseContext(), MainActivity.class);
+            intent.setAction(Intent.ACTION_VIEW);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra("Restaurar",true);
+            intent.putExtra("Agente",ObtenerAgenteActivo());
+            getApplication().startActivity(intent);
+
+
+
+            return null;
+        }
+
+        @Override
+        protected  void onPostExecute(Object obj){
+
+
+
+        }
+    }
 
 }
 

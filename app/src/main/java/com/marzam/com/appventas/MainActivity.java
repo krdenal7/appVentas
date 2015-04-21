@@ -75,6 +75,7 @@ public class  MainActivity extends Activity {
     static final String TAG = "Marzam-Push:";
 
     ProgressDialog pd;
+    ProgressDialog progressRestaurar;
 
 
     File directorio;
@@ -86,6 +87,7 @@ public class  MainActivity extends Activity {
     String[] clave_agente;
     TextView txtUsuario;
     String txt="datos.txt";
+    Bundle bundle;
 
 
 
@@ -96,6 +98,11 @@ public class  MainActivity extends Activity {
         setTitle("Ventas");
         context=this;
 
+           bundle = getIntent().getExtras();
+
+        if(bundle!=null){
+            new Task_RestaurarBD().execute("");
+        }
 
 
        txtUsuario=(TextView)findViewById(R.id.textViewTitle);
@@ -321,8 +328,17 @@ try {
     @Override
     public void onBackPressed(){
 
-        finish();
+       IntentHome();
 
+    }
+
+    private void IntentHome(){
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        finish();
     }
 
 
@@ -542,6 +558,92 @@ try {
             }
         }
     }
+    private class Task_RestaurarBD extends  AsyncTask<String,Void,Object>{
+
+
+
+        @Override
+        protected void onPreExecute(){
+
+            progressRestaurar=ProgressDialog.show(context,"Restaurando base de datos","cargando",true,false);
+
+        }
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+            String agente=bundle.getString("Agente");
+            WebServices web=new WebServices();
+            String bd64=web.Down_DB(agente+".zip");
+
+
+            if(bd64==null)
+                return null;
+
+            byte[] data;
+
+            try {
+                data = Base64.decode(bd64); //Convierte de Base64 a un arreglo de bit[]
+
+            }catch (Exception e){
+                return null;
+            }
+
+            unStreamZip(data);//Convierte el arreglo de bite[] en el .zip
+            File f=new File(directorio+"/db_down.zip");
+
+            if(!f.exists())
+                return null;
+
+                EliminarBD();
+
+            if( CopiarBD()==false)
+                return null;
+
+            AgregarColumnProductos();
+
+            if(f.exists())
+                 f.delete();
+
+            ActualizarSesionAgente(agente);
+
+            return "1";
+        }
+
+
+        @Override
+        protected void onPostExecute(Object result){
+
+
+            AlertDialog.Builder alert=new AlertDialog.Builder(context);
+            alert.setMessage("Restaurar");
+
+            if(progressRestaurar.isShowing()) {
+                progressRestaurar.dismiss();
+                if (result == null) {
+                  alert.setMessage("No se pudo restaurar la base de datos.");
+                }//cierre del if
+                else {
+                  alert.setMessage("La Base de datos se ha restaurado satisfactoriamente.");
+                }
+
+                alert.setPositiveButton("OK",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+
+                AlertDialog alertDialog=alert.create();
+                alertDialog.show();
+            }
+
+        }
+
+
+    }
+
+
     public void unZipBD(String origen){
 
         try{
@@ -571,7 +673,6 @@ try {
             unZipBD(directorio + "/db_down.zip");
             myInput=new FileInputStream(filedown);
             File fi=new File("/data/data/com.marzam.com.appventas");
-            File[] files=fi.listFiles();
             myOutput=new FileOutputStream("/data/data/com.marzam.com.appventas/databases/db.db");
 
             while ((length=myInput.read(buffer))>0){
