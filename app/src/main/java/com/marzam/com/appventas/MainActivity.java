@@ -46,6 +46,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.kobjects.base64.Base64;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -53,6 +54,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 
 
 public class  MainActivity extends Activity {
@@ -88,6 +92,8 @@ public class  MainActivity extends Activity {
     TextView txtUsuario;
     String txt="datos.txt";
     Bundle bundle;
+    ProgressDialog progressApk;
+    private static String file_url = "http://190.1.4.120/ActualizacionAndroid";
 
 
 
@@ -98,16 +104,27 @@ public class  MainActivity extends Activity {
         setTitle("Ventas");
         context=this;
 
-           bundle = getIntent().getExtras();
+        CrearDirectorioDownloads();
+        txtUsuario=(TextView)findViewById(R.id.textViewTitle);
+        locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
+        ShowEnableGPS();//Muestra el alert en caso de que el GPS del dispositivo se encuentre desactivado
+
+        if(VerificarActualizacion())
+                    Show_New_Version();
+
+        bundle = getIntent().getExtras();
 
         if(bundle!=null){
+
+            if(bundle.getBoolean("Restaurar"))
             new Task_RestaurarBD().execute("");
+
+
         }
 
 
-       txtUsuario=(TextView)findViewById(R.id.textViewTitle);
-       locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
-       CrearDirectorioDownloads();
+
+
        //ObtenerArchivos2();
       // EliminarBD();
 
@@ -124,7 +141,7 @@ public class  MainActivity extends Activity {
             }
         }
 
-      ShowEnableGPS();//Muestra el alert en caso de que el GPS del dispositivo se encuentre desactivado
+
 
       final  Intent i=new Intent(context,MapsLocation.class);
 
@@ -135,8 +152,9 @@ public class  MainActivity extends Activity {
 
 
                 password=((EditText)findViewById(R.id.editText)).getText().toString();
+                String no_Agente=ObtenerAgenteActivo();
 
-                if(VerificaContraseña(password,nombre_agente)){
+                if(VerificaContraseña(password,no_Agente)){
                     finish();
                     startActivity(i);
                 }else {
@@ -154,6 +172,24 @@ public class  MainActivity extends Activity {
 
     }
 
+    public boolean VerificarActualizacion(){
+
+        int version=0;
+
+        SharedPreferences prefs =
+                getSharedPreferences("Actualizaciones",Context.MODE_PRIVATE);
+                version=prefs.getInt("VersionAp",1);
+
+
+        int version_pref=version;
+        int version_app=getAppVersion(context);
+
+        if(version_pref!=version_app){
+            return true;
+        }
+        return false;
+    }
+
     public void CrearDirectorioDownloads(){
 
         try {
@@ -167,6 +203,19 @@ public class  MainActivity extends Activity {
             if(database.exists()==false){
                 database.mkdirs();
             }
+
+            File apk=new File(folder.getAbsolutePath() + "/Marzam/apk");
+
+            if(apk.exists()) {
+               for (File file:apk.listFiles()){
+                   boolean resp= file.delete();
+               }}
+
+            if(apk.exists()==false){
+                apk.mkdirs();
+            }
+
+
         }catch (Exception e){
             Log.d("ErrorCrearDir", e.toString());
         }
@@ -235,18 +284,40 @@ public class  MainActivity extends Activity {
 
 
     }
+    public void Show_New_Version(){
+
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Actualización");
+        alert.setMessage("Hay una nueva actualización de la aplicación. Desea instalarla");
+        alert.setIcon(android.R.drawable.ic_dialog_info);
+        alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                 new Task_DownApk().execute("");
+            }
+        });
+        alert.setNegativeButton("Más tarde",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        AlertDialog alertDialog=alert.create();
+        alertDialog.show();
+
+    }
 
 
     public boolean VerificaContraseña(String password,String nombre){
 try {
-    String[] valor = {password, nombre};
+    String[] valor = {nombre,password};
 
     lite = new CSQLite(context);
     lite.getDataBase();
 
     SQLiteDatabase db = lite.getWritableDatabase();
 
-    String query = "Select * From agentes where numero_empleado=? and nombre=?";
+    String query = "Select * From agentes where numero_empleado=? and password=?";
     Cursor cursor = db.rawQuery(query, valor);
 
     while (cursor.moveToFirst()) {
@@ -552,6 +623,7 @@ try {
                     Toast.makeText(context,"BD agregada correctamente",Toast.LENGTH_SHORT).show();
                 }else {
                     Toast.makeText(context,result.toString(),Toast.LENGTH_SHORT).show();
+                    Show_IngresarUsuario();
                 }
 
                 pd.dismiss();
@@ -638,6 +710,108 @@ try {
                 alertDialog.show();
             }
 
+        }
+
+
+    }
+
+    private class Task_DownApk extends AsyncTask<String,Integer,Object>{
+
+        @Override
+        protected void onPreExecute(){
+
+            progressApk=new ProgressDialog(context);
+            progressApk.setTitle("AppVentas");
+            progressApk.setMessage("Descargando archivo");
+            progressApk.setIndeterminate(false);
+            progressApk.setCancelable(false);
+            progressApk.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progressApk.setProgress(0);
+            progressApk.setMax(100);
+            progressApk.show();
+
+        }
+
+        @Override
+        protected Object doInBackground(String... strings) {
+            int count;
+            try {
+
+                URL url=new URL(file_url);
+                URLConnection connection=url.openConnection();
+                connection.connect();
+
+                int lenghtOfFile = connection.getContentLength();
+
+                InputStream input = new BufferedInputStream(url.openStream(), 8192);
+
+                File folder = android.os.Environment.getExternalStorageDirectory();
+
+                OutputStream output = new FileOutputStream(folder.getAbsolutePath()+"/Marzam/apk/app-debug.apk");
+
+                byte data[] = new byte[1024];
+
+                long total = 0;
+
+                while ((count = input.read(data)) != -1) {
+                    total += count;
+                    // publishing the progress....
+                    // After this onProgressUpdate will be called
+                    publishProgress((int)((total*100)/lenghtOfFile));
+
+                    // writing data to file
+                    output.write(data, 0, count);
+                }
+
+                // flushing output
+                output.flush();
+
+                // closing streams
+                output.close();
+                input.close();
+
+            } catch (MalformedURLException e) {
+                return null;
+            } catch (IOException e) {
+                String error=e.toString();
+                return null;
+            }
+
+            return "";
+        }
+
+        @Override
+        protected void onPostExecute(Object resul){
+
+            AlertDialog.Builder alert=new AlertDialog.Builder(context);
+            alert.setTitle("AppVentas");
+
+            if(progressApk.isShowing()){
+                progressApk.dismiss();
+
+                if(resul==null){
+
+                    alert.setMessage("Error al descargar archivo.Verifique su conexión a Internet e intente mas tarde");
+                    alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                        }
+                    });
+
+                    AlertDialog alertDialog=alert.create();
+                    alertDialog.show();
+
+                }else {
+                    IntentApk();
+                }
+            }
+
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... value){
+                 progressApk.setProgress(value[0]);
         }
 
 
@@ -944,12 +1118,12 @@ try {
     }
 
 
-   public void Pruebas_exec(){
+   public void IntentApk(){
 
        try{
            Intent intent=new Intent(Intent.ACTION_VIEW);
            File path= android.os.Environment.getExternalStorageDirectory();
-           String Folder=path+"/Download/app-debug.apk";
+           String Folder=path+"/Marzam/apk/app-debug.apk";
            Uri uri=Uri.parse("file:///"+Folder);
            intent.setDataAndType( uri,"application/vnd.android.package-archive");
 

@@ -67,6 +67,8 @@ public class Sincronizar extends Activity {
     String body;
     String subject;
     Mail m;
+    String id=null;
+    String mensaje_progres;
 
 
     @Override
@@ -145,10 +147,11 @@ public class Sincronizar extends Activity {
                         if (isOnline()) {
 
                             //Estas lineas son del actual AsyncTask, se comentan para probar la nueva sincronización
-                           progres = ProgressDialog.show(context, "Sincronizando", "Cargando", true, false);
+                            progres = ProgressDialog.show(context, "Sincronizando", "Cargando", true, false);
                             new UpLoadTask().execute("");
 
-                           /* new Task_Json().execute(); //Sincronización inteligente*/
+
+                            /*new Verificar_idsPendientes().execute("");*/
 
 
 
@@ -218,6 +221,65 @@ public class Sincronizar extends Activity {
         }catch (Exception e){
 
         }
+
+    }
+
+    private void  ActualizarStatusVisita(String json){
+
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        try {
+
+
+            JSONArray array=new JSONArray(json);
+
+            for(int i=0;i<array.length();i++){
+
+                JSONObject jsonData=array.getJSONObject(i);
+
+                String id = jsonData.getString("id_Visita");
+                db.execSQL("update visitas set status_visita='20' where id_visita='" + id + "'");
+
+            }
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            String err=e.toString();
+        }
+
+
+    }
+    public void   ActualizarCierreVisitas(String json){
+
+        String estatus="20";
+        String id_visita="";
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+
+        try {
+
+            JSONArray array=new JSONArray(json);
+
+            for(int i=0;i<array.length();i++){
+
+                JSONObject object=new JSONObject(array.getJSONObject(i).toString());
+                estatus=object.get("estatus_visita").toString();
+                id_visita=object.get("id_visita").toString();
+                db.execSQL("update visitas set status_visita='"+estatus+"',fecha_cierre='"+getDate2()+"' where id_visita='"+id_visita+"'");
+
+            }
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -376,7 +438,7 @@ public class Sincronizar extends Activity {
         SQLiteDatabase db=lite.getWritableDatabase();
         String clave="";
 
-        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
+        Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
         if(rs.moveToFirst()){
 
             clave=rs.getString(0);
@@ -519,16 +581,73 @@ public class Sincronizar extends Activity {
         }
 
     }//Asynck de la actual sincronización
+
+    private class Verificar_idsPendientes extends  AsyncTask<String,Integer,Object>{
+
+        @Override
+        protected void onPreExecute(){
+            progres = new ProgressDialog(context);
+            progres.setTitle("Sincronizando ...");
+            progres.setIndeterminate(true);
+            progres.setCancelable(false);
+            progres.setMessage("Verificando si hay datos pendientes por enviar");
+            progres.show();
+        }
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+
+            WebServices web=new WebServices();
+
+            if(lite!=null)
+                lite.close();
+
+            lite=new CSQLite(context);
+            SQLiteDatabase db=lite.getWritableDatabase();
+
+            Cursor rs=db.rawQuery("select * from estatus_sincronizacion where terminado=1",null);
+            JSONArray array=new JSONArray();
+            JSONObject object=new JSONObject();
+
+            while (rs.moveToNext()){
+                try {
+
+                    object.put("id",rs.getInt(0));
+                    array.put(object);
+                     object=new JSONObject();
+
+                } catch (JSONException e) {
+                    subject="GenerarJsonID()";
+                    body="Array:"+array+"\nObject:"+object+"\nError:"+e.toString();
+                    new sendEmail().execute("");
+                }
+
+            }
+              if(array.length()>0)
+                  web.UploadEstatusSincronizacion(array.toString());
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object res){
+
+            if(progres.isShowing()) {
+                progres.dismiss();
+                new Task_Json().execute(); //Sincronización inteligente
+            }
+
+
+        }
+
+    }
     private class Task_Json extends  AsyncTask<String,Integer,Object>{
-
-
 
         @Override
         protected void onProgressUpdate(Integer... value) {
-            super.onProgressUpdate(value);
 
-            progres.incrementProgressBy(value[0]);
-
+            progres.setProgress(value[0]);
 
         }
         @Override
@@ -551,8 +670,27 @@ public class Sincronizar extends Activity {
         protected Object doInBackground(String... strings) {
 
 
+
+            String num_empleado=ObtenerAgenteActivo();
             WebServices web=new WebServices();
-            String json=web.DownJson();
+
+            String json1=jsonVisitas();
+            String visita;
+            visita = json1==null ? null:web.SincronizarVisitas(json1);
+            if(visita!=null)
+                ActualizarStatusVisita(json1);
+
+            String json_cierre=jsonCierreVisitas();
+            visita = json_cierre==null?"":web.CierreVisitas(json_cierre);
+            if(visita!=null)
+            ActualizarCierreVisitas(visita);
+
+
+         //guardar en la base de datos los json pendientes
+
+
+         //Descarga los json de actualizacion
+            String json=web.DownJson(num_empleado);
 
             if(json==null)
                  return null;
@@ -561,7 +699,7 @@ public class Sincronizar extends Activity {
 
             int div=(jsonTable.length/3); //Obtiene el numero de json que se van a procesar
             String table = null;
-            String id=null;
+
 
             int contador=0;
             int contador2=0;
@@ -570,18 +708,16 @@ public class Sincronizar extends Activity {
 
                if(contador==0){
                  id=jsonTable[i];
-                   contador++;
+                    contador++;
                }
                else{
                 if(contador==1){   //Si el mod de i es 0 corresponde al dato del cabecero
                     table=jsonTable[i];
 
                     float val=(contador2*100);
-                    float res=val/div;
-                    double mod=res%2;
+                    int res= (int) (val/div);
 
-                    if(mod==1 || mod ==0)
-                    publishProgress(1);
+                    publishProgress(res);
 
                     contador2++;
                     contador++;
@@ -649,7 +785,14 @@ public class Sincronizar extends Activity {
                 }
                 }//Recorre los json
 
-            }//Cierre del for
+            }//Cierre del for  Termina la inserccion de los json
+
+
+
+
+            if(json.equals("[]"))
+            return "0";
+
 
             return json;
         }
@@ -660,6 +803,7 @@ public class Sincronizar extends Activity {
             alert.setTitle("Sincronización");
 
             if(progres.isShowing()){
+                progres.dismiss();
 
                 if(res==null){
                  publishProgress(0);
@@ -667,7 +811,7 @@ public class Sincronizar extends Activity {
                  alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
                      @Override
                      public void onClick(DialogInterface dialogInterface, int i) {
-                         new Task_Json().execute("");
+                         new Verificar_idsPendientes().execute("");
                      }
                  });
                  alert.setNegativeButton("No",new DialogInterface.OnClickListener() {
@@ -676,27 +820,32 @@ public class Sincronizar extends Activity {
                         }
                     });
 
-                }//En caso de que haya fallado la comunicación con el web service
-
-                else{
-
-                alert.setMessage("Se ha completado la sincronización.");
-                alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                    }
-                });
-                }
-
-                    progres.dismiss();
                     AlertDialog alertDialog=alert.create();
                     alertDialog.show();
 
+                }//En caso de que haya fallado la comunicación con el web service
 
+                else{
+                    if(res.equals("0")){
+                        alert.setMessage("No hay datos por sincronizar");
+                        alert.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                            }
+                        });
+
+                        AlertDialog alertDialog=alert.create();
+                        alertDialog.show();
+
+                    }else{
+
+                        new Task_UpLoadJson().execute("");
+                    }
+
+                }
             }//en caso de que el Dialogo este visible
         }
-
-
 
 
         //Metodos de actualización
@@ -704,6 +853,9 @@ public class Sincronizar extends Activity {
 
             lite=new CSQLite(context);
             SQLiteDatabase db=lite.getWritableDatabase();
+
+             if(table.toLowerCase().equals("productos_obligados"))
+                table="productos";
 
             try{
 
@@ -713,17 +865,15 @@ public class Sincronizar extends Activity {
                     values.put(arreglo[i][0],arreglo[i][1]);
                 }
 
-              // long val=db.insert(table,null,values);
-
                 for(int i=0;i<4;i++) {
                     try {
 
                         long val = db.insertOrThrow(table, null, values);
-                        String a="";
+                        ActualizarEstatusID(id,true);
                         break;
 
                     } catch (SQLException e) {
-
+                        ActualizarEstatusID(id,false);
                         subject="Insertar()";
                         body="Agente:"+ObtenerAgenteActivo()
                             +"Error:"+e.toString()
@@ -763,6 +913,8 @@ public class Sincronizar extends Activity {
                 llave="codigo,metodo";
             if(table.toLowerCase().equals("clientes"))
                 llave="id_cliente";
+            if(table.toLowerCase().equals("agenda"))
+                llave="id_cliente,dia,id_frecuencia";
 
 
 
@@ -780,14 +932,26 @@ public class Sincronizar extends Activity {
 
                     }//Recorre el arreglo y llena el ContentValues
 
-                    int val = db.update(table, values, llave + "=" + "'" + valor + "'", null);
-                    String a="";
+                    Cursor rs=db.rawQuery("select * from "+table+" where "+llave+"=?",new String[]{valor});
+
+                    if(rs.moveToFirst()){
+                        int val = db.update(table, values, llave + "=" + "'" + valor + "'", null);
+                        Boolean estatus=val>=1?true:false;
+                        ActualizarEstatusID(id,estatus);
+                    }else {
+                        ActualizarEstatusID(id,true);
+                    }
+
+
+
 
                 }//if
+
                 else {
 
                     StringBuilder build=new StringBuilder();
                     String[] args=new String[WhereKey.length];
+                    int contadorWhere=0;
 
                     for(int i=0;i<arreglo.length;i++){
                         values.put(arreglo[i][0], arreglo[i][1]);
@@ -796,19 +960,30 @@ public class Sincronizar extends Activity {
 
                             if(WhereKey[j].equals(arreglo[i][0])){
 
-                                args[j]=arreglo[i][1];
-
-                                if(j<WhereKey.length-1)
+                                    args[contadorWhere]=arreglo[i][1];
                                     build.append(WhereKey[j]+"=? AND ");
-                                else
-                                    build.append(WhereKey[j]+"=? ");
+                                    contadorWhere++;
+
                             }
 
                         }
                     }//cierre del for
 
-                    int val = db.update(table, values, build.toString(), args);
-                    String a="";
+                    String where=build.toString().substring(0,build.toString().length()-4);
+
+                    Cursor rs=db.rawQuery("select * from " + table + " where " + where, args);
+
+                    if(rs.moveToFirst()){
+                        int val = db.update(table, values, where, args);
+                        Boolean estatus=val>=1?true:false;
+                        ActualizarEstatusID(id,estatus);
+                    }else{
+
+                        ActualizarEstatusID(id,true);
+                    }
+
+
+
 
 
                     }//cierre del else
@@ -848,8 +1023,10 @@ public class Sincronizar extends Activity {
                 llave="codigo,metodo";
             if(table.toLowerCase().equals("clientes"))
                 llave="id_cliente";
-
-
+            if(table.toLowerCase().equals("agenda"))
+                llave="id_cliente,dia,id_frecuencia";
+            if(table.toLowerCase().equals("productos_obligados"))
+                llave="codigo";
 
             try{
 
@@ -862,15 +1039,37 @@ public class Sincronizar extends Activity {
                     }//Busca la llave y extrae su valor
                 }//Recorre el arreglo y llena el ContentValues
 
-                int val = db.delete(table, llave + "=" + "'" + valor + "'", null);
-                String a="";
+                //Valida que la tabla sea de productos obligados
+                if(table.toLowerCase().equals("productos_obligados")){
 
-                                  }//Fien del if
+                    Cursor rs = db.rawQuery("select * from ofertas where codigo=?", new String[]{valor});
+                    if (rs.moveToFirst()) {
+                        int val = db.delete("productos", llave + "=" + "'" + valor + "'", null);
+                        Boolean estatus = val >= 1 ? true : false;
+                        ActualizarEstatusID(id, estatus);
+                    }else{
+
+                        ActualizarEstatusID(id, true);
+                    }
+                }else {
+                    Cursor rs = db.rawQuery("select * from " + table + " where " + llave + "=?", new String[]{valor});
+                    if (rs.moveToFirst()) {
+                        int val = db.delete(table, llave + "=" + "'" + valor + "'", null);
+                        Boolean estatus = val >= 1 ? true : false;
+                        ActualizarEstatusID(id, estatus);
+                    } else {
+                        ActualizarEstatusID(id, true);
+                    }
+                }//Validacion de Tablas
+
+
+               }//Fien del if
 
             else {
 
                 StringBuilder build=new StringBuilder();
                 String[] args=new String[WhereKey.length];
+                int contadorWhere=0;
 
                 for(int i=0;i<arreglo.length;i++){
 
@@ -878,27 +1077,33 @@ public class Sincronizar extends Activity {
 
                         if(WhereKey[j].equals(arreglo[i][0])){
 
-                            args[j]=arreglo[i][1];
+                            args[contadorWhere]=arreglo[i][1];
+                            build.append(WhereKey[j]+"=? AND ");
+                            contadorWhere++;
 
-                            if(j<WhereKey.length-1)
-                               build.append(WhereKey[j]+"=? AND ");
-                            else
-                              build.append(WhereKey[j]+"=? ");
                         }
 
                     }
                 }//cierre del for
 
-                   int val=db.delete(table,build.toString(),args);
-                   String a="";
 
+                String where=build.toString().substring(0,build.toString().length()-4);
 
-                                         }//cierre del else
+                Cursor rs=db.rawQuery("select * from "+table+" where "+where,args);
+
+                if(rs.moveToFirst()){
+                    int val=db.delete(table,where,args);
+                    Boolean estatus=val>=1?true:false;
+                    ActualizarEstatusID(id,estatus);
+                }else {
+                    ActualizarEstatusID(id,true);
+                }
+                }//cierre del else
 
 
             }catch (Exception e){
 
-                subject="Actualizar()";
+                subject="Eliminar()";
                 body="Agente:"+ObtenerAgenteActivo()
                         +"Error:"+e.toString()
                         +"Tabla:"+table
@@ -917,10 +1122,237 @@ public class Sincronizar extends Activity {
 
         }
 
+        private void ActualizarEstatusID(String id, Boolean estatus){
+
+            if(lite!=null)
+                lite.close();
+
+            lite=new CSQLite(context);
+            SQLiteDatabase db=lite.getWritableDatabase();
+
+            ContentValues values=new ContentValues();
+            values.put("id",id);
+            values.put("terminado",estatus);
+
+            long val=db.insert("estatus_sincronizacion", null, values);
+            String valor="";
+        }
 
 
 
     }//Asynck de la sincronización inteligente
+    private class Task_UpLoadJson extends  AsyncTask<String,Integer,Object>{
+
+        @Override
+        protected void onProgressUpdate(Integer... value) {
+
+
+            progres.setProgress(value[0]);
+
+        }
+        @Override
+        protected void onPreExecute() {
+
+            //make the progressDialog
+            progres = new ProgressDialog(context);
+            progres.setTitle("Sincronizando");
+            progres.setIndeterminate(false);
+            progres.setCancelable(false);
+            progres.setMessage("Actualizando base de datos");
+            progres.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progres.setProgress(0);
+            progres.setMax(100);
+            progres.show();
+
+
+        }
+        @Override
+        protected Object doInBackground(String... strings) {
+
+            String json=GenerarJsonID();
+            WebServices webServices=new WebServices();
+
+            String resp = null;
+
+            if(json!=null)
+             resp=webServices.UploadEstatusSincronizacion(json);
+
+
+            return resp;
+        }
+        @Override
+        protected void onPostExecute(Object res){
+
+            AlertDialog.Builder alert=new AlertDialog.Builder(context);
+            alert.setTitle("Sincronización");
+
+            if(progres.isShowing()){
+
+                if(res==null){
+                    publishProgress(0);
+                    alert.setMessage("Se ha completado la sincronización.");
+                    alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                        }
+                    });
+
+                    progres.dismiss();
+                    AlertDialog alertDialog=alert.create();
+                    alertDialog.show();
+
+                }//En caso de que haya fallado la comunicación con el web service
+                else {
+
+                    progres.dismiss();
+                    new Task_LimpiarBD().execute(String.valueOf(res));
+
+                }
+
+            }//en caso de que el Dialogo este visible
+        }
+
+        private String GenerarJsonID(){
+
+            if(lite!=null)
+                lite.close();
+
+            lite=new CSQLite(context);
+            SQLiteDatabase db=lite.getWritableDatabase();
+
+
+            Cursor rs=db.rawQuery("select * from estatus_sincronizacion where terminado=1",null);
+            JSONArray array=new JSONArray();
+            JSONObject object=new JSONObject();
+
+            int contador=0;
+            int tamaño=rs.getCount();
+
+            while (rs.moveToNext()){
+                try {
+
+                    object.put("id",rs.getInt(0));
+                    array.put(object);
+                    object=new JSONObject();
+
+                } catch (JSONException e) {
+                    subject="GenerarJsonID()";
+                    body="Array:"+array+"\nObject:"+object+"\nError:"+e.toString();
+                    new sendEmail().execute("");
+                }
+
+                float res=contador*100;
+                int prog= (int) (res/tamaño);
+                publishProgress(prog);
+                contador++;
+            }
+
+            return  array.length()==0 ? null: array.toString();
+        }
+
+
+    } //Asynck de la sincronización inteligente envio de json
+    private class Task_LimpiarBD extends  AsyncTask<String,Integer,Object>{
+
+        @Override
+        protected void onProgressUpdate(Integer... value) {
+
+                progres.setProgress(value[0]);
+
+        }
+        @Override
+        protected void onPreExecute() {
+
+            //make the progressDialog
+            progres = new ProgressDialog(context);
+            progres.setTitle("Sincronizando");
+            progres.setIndeterminate(false);
+            progres.setCancelable(false);
+            progres.setMessage("Terminado sincronización");
+            progres.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progres.setProgress(0);
+            progres.setMax(100);
+            progres.show();
+
+
+        }
+        @Override
+        protected Object doInBackground(String... strings) {
+
+
+            if(lite!=null)
+                lite.close();
+
+            lite=new CSQLite(context);
+            SQLiteDatabase db=lite.getWritableDatabase();
+
+            try {
+
+                JSONArray array=new JSONArray(strings[0]);
+
+                int tamaño=array.length();
+
+                for(int i=0;i<array.length();i++){
+
+                    JSONObject object = array.getJSONObject(i);
+                    Iterator interator = object.keys();
+                    String id = null;
+
+                    while (interator.hasNext()) {
+
+                        String key = (String) interator.next();
+
+                        id=object.getString(key);
+
+                    }
+
+                    int val=db.delete("estatus_sincronizacion","id=?",new String[]{id});
+                    String a="";
+
+                    float prog=i*100;
+                    int progres= (int) (prog/tamaño);
+                    publishProgress(progres);
+
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Object res){
+
+            AlertDialog.Builder alert=new AlertDialog.Builder(context);
+            alert.setTitle("Sincronización");
+
+            if(progres.isShowing()){
+
+
+                    publishProgress(0);
+                    alert.setMessage("Se ha completado la sincronización.");
+                    alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                        }
+                    });
+
+                progres.dismiss();
+                AlertDialog alertDialog=alert.create();
+                alertDialog.show();
+
+
+            }//en caso de que el Dialogo este visible
+        }
+
+
+
+    } //Asynck de la sincronización inteligente envio de limpia bd
+
 
     public String jsonVisitas(){
         lite=new CSQLite(context);

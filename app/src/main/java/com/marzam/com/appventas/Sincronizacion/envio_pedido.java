@@ -151,7 +151,7 @@ public class envio_pedido {
                 try {
                     JSONObject jsonData = array.getJSONObject(i);
 
-                    String id = jsonData.getString("id_Visita");
+                    String id = jsonData.getString("id_visita");
                     String status = jsonData.getString("estatus_visita");
                     db.execSQL("update visitas set status_visita='" + status + "' where id_visita='" + id + "'");
                 }finally {

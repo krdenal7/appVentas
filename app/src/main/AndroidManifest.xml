@@ -157,6 +157,9 @@
             android:label="@string/title_activity_detalle_pedidos"
             android:screenOrientation="portrait">
         </activity>
+        <activity android:name=".AltaClientesDr.AltaClientes"
+            android:label="Alta de clientes"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

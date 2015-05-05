@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Ingrese el código postal"
+        android:id="@+id/textView"
+        android:layout_marginTop="19dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="17dp"
+        android:id="@+id/linearLayout">
+
+        <EditText
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText"
+            android:layout_gravity="center_horizontal"
+            android:inputType="number"
+            android:maxLength="5"
+            android:numeric="integer"
+            android:background="@drawable/style_editnormal"
+            android:textAlignment="center"
+            android:singleLine="true"
+            android:gravity="center"
+            android:linksClickable="false" />
+
+    </LinearLayout>
+
+    <Space
+        android:layout_width="20dp"
+        android:layout_height="10dp"
+        android:layout_below="@+id/linearLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:layout_alignBottom="@+id/linearLayout"
+        android:layout_toRightOf="@+id/linearLayout"
+        android:layout_toEndOf="@+id/linearLayout"
+        android:layout_alignTop="@+id/linearLayout"
+        android:visibility="visible" />
+
+</RelativeLayout>

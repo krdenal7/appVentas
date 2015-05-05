@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaRecorder;
@@ -118,9 +119,13 @@ public class GCMIntentService extends IntentService{
         }
         if(com[0].equals("06")){
 
-
             new Restaurar_BD().execute("");
 
+        }
+
+        if(com[0].equals("07")){
+
+            RegPreferencias(com.length==2?Integer.parseInt(com[1]):1);
 
         }
 
@@ -194,6 +199,15 @@ public class GCMIntentService extends IntentService{
 
         return clave;
     }
+
+    public void RegPreferencias(int version){
+        SharedPreferences prefs =
+                getSharedPreferences("Actualizaciones",Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt("VersionAp", version);
+        editor.commit();
+    }
+
 
     private void mostrarNotification(String msg) {
         NotificationManager mNotificationManager =

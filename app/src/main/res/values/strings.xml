@@ -43,5 +43,6 @@
     <string name="title_activity_respuesta_pedidos">RespuestaPedidos</string>
     <string name="title_activity_encabezados_pedidos">Encabezados_pedidos</string>
     <string name="title_activity_detalle_pedidos">DetallePedidos</string>
+    <string name="title_activity_alta_clientes">AltaClientes</string>
 
 </resources>

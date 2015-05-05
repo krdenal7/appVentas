@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +48,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.marzam.com.appventas.AltaClientesDr.AltaClientes;
 import com.marzam.com.appventas.EstatusPedidos.RespuestaPedidos;
 import com.marzam.com.appventas.GPS.GPSHelper;
 import com.marzam.com.appventas.Graficas.Grafica_Vendedor;
@@ -110,6 +112,8 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         ObtenerClientesVisitados();
 
         id_visita=Obtener_Idvisita();
+
+
 
     }
 
@@ -744,8 +748,6 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     }
 
 
-
-
     public String[][] ObtenerCoordenadas(){
 
         lite=new CSQLite(context);
@@ -949,6 +951,11 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                 startActivity(new Intent(getBaseContext(), Sincronizar.class)
                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
                 finish();
+            break;
+            case R.id.AltaCte:
+                startActivity(new Intent(getBaseContext(), AltaClientes.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -962,6 +969,18 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        int tam=menu.size();
+        for(int i=0;i<tam;i++){
+            String a = menu.getItem(4).getTitle().toString();
+            if(a.equals("Alta de clientes"))
+                menu.getItem(i).setVisible(false);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+        @Override
     public boolean onKeyDown(int keyCode,KeyEvent event){
 
 
