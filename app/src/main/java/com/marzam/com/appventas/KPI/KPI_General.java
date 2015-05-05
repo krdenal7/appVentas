@@ -20,6 +20,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.TextView;
 
+import com.marzam.com.appventas.DevolucionesLite.DevolucionesLite;
 import com.marzam.com.appventas.GPS.Actualizar_Coordenadas;
 import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
@@ -182,7 +183,7 @@ public class KPI_General extends Activity {
         SQLiteDatabase db=lite.getWritableDatabase();
         String clave="";
 
-        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
+        Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
         if(rs.moveToFirst()){
 
             clave=rs.getString(0);
@@ -321,11 +322,63 @@ public class KPI_General extends Activity {
                Intent intent2=new Intent(context, Actualizar_Coordenadas.class);
                startActivity(intent2);
            break;
+           case R.id.Devoluciones_lite:
+               Intent i = new Intent(context, DevolucionesLite.class);
+               i.putExtra("pharmacy", ((TextView)findViewById( R.id.textView55 )).getText());
+               startActivity( i );
+               break;
            case R.id.Cerra:
                ShowCierreVisita();
        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        int tam = menu.size();
+        String[] menus=ObtenerMenuFuerzas();
+
+        for(int i=0;i<tam;i++){
+
+            String item=menu.getItem(i).getTitle().toString();
+
+            for(int j=0;j<menus.length;j++){
+
+                if(item.equals(menus[j])) {
+                    menu.getItem(i).setVisible(true);
+                }
+            }
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    public String[] ObtenerMenuFuerzas(){
+
+       String agente=ObtenerClavedeAgente();
+
+        if(lite!=null)
+            lite.close();
+
+       lite=new CSQLite(context);
+       SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select menu from funciones_menu where id_menu in (select id_menu from menu_fuerzas " +
+                "where id_fuerza=(select id_fuerza from agentes where numero_empleado=?))",new String[]{agente});
+
+         if(rs.getCount()<=0)
+                 return new String[]{""};
+
+        String[] menu=new String[rs.getCount()];
+        int contador=0;
+
+        if(rs.moveToNext()){
+            menu[contador]=rs.getString(0);
+            contador++;
+        }
+        return menu;
     }
 
     @Override

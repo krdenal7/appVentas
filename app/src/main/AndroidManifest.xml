@@ -160,6 +160,11 @@
         <activity android:name=".AltaClientesDr.AltaClientes"
             android:label="Alta de clientes"
             android:screenOrientation="portrait"/>
+        <activity
+            android:name=".DevolucionesLite.DevolucionesLite"
+            android:label="@string/title_activity_detalle_pedidos"
+            android:screenOrientation="portrait">
+        </activity>
     </application>
 
 </manifest>

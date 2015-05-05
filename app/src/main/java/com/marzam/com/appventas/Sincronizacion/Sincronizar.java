@@ -483,8 +483,18 @@ public class Sincronizar extends Activity {
             String visita;
             visita = json==null ? null:web.SincronizarVisitas(json);
 
-            String json_cierre=jsonCierreVisitas();
-            visita = json_cierre==null?"":web.CierreVisitas(json_cierre);
+            String json_cierre = null;
+            try {
+                json_cierre = jsonCierreVisitas();
+                visita = json_cierre == null ? "" : web.CierreVisitas(json_cierre);
+            }catch (Exception e){
+                subject="UpLoadTask_Normal()";
+                body="Agente:"+ObtenerAgenteActivo()
+                        +"Error:"+e.toString()
+                        +"json:"+json_cierre
+                        +"visita: "+visita;
+                new sendEmail().execute("");
+            }
 
             File back=new File(directorio+"/"+archivoBack+".zip");
             String bd64=web.Down_DB(nomAgente+".zip");

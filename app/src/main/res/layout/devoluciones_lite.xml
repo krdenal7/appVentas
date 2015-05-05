@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/devoluciones_lite"
+    android:background="#FFFFFF">
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/idBtnFinishReturnProduct">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/bacgroundAll"
+                android:background="#CC000000" />
+        </FrameLayout>
+
+        <TabHost
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tabHost"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_above="@+id/idBtnFinishReturnProduct"
+            android:layout_alignParentTop="true">
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:id="@+id/conteinerTabs">
+
+                <TabWidget
+                    android:id="@android:id/tabs"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="#FF7727"></TabWidget>
+
+                <FrameLayout
+                    android:id="@android:id/tabcontent"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="3dp">
+
+                    <LinearLayout
+                        android:id="@+id/Captura"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <ScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/scrollView3"
+                            android:layout_marginBottom="10dp">
+
+                            <LinearLayout
+                                android:orientation="vertical"
+                                android:layout_width="fill_parent"
+                                android:layout_height="fill_parent" >
+
+                                <LinearLayout
+                                    android:orientation="vertical"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="2"
+                                    android:paddingLeft="5dp"
+                                    android:paddingRight="5dp">
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textAppearance="?android:attr/textAppearanceLarge"
+                                        android:text="@string/txtDevLiteCaptReasonRefund"
+                                        android:id="@+id/idDevLiteCaptReasonRefund"
+                                        android:textSize="15sp"
+                                        android:textStyle="normal"
+                                        android:textColor="#FFFFFF"
+                                        android:layout_marginTop="5dp"
+                                        android:layout_weight="1"
+                                        android:layout_gravity="left|center_vertical" />
+
+                                    <RelativeLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_gravity="top"
+                                        android:layout_weight="1">
+
+                                        <ImageView
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:id="@+id/imageView6"
+                                            android:background="@drawable/background_txtfile" />
+
+                                        <ImageButton
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:id="@+id/imageButton7"
+                                            android:src="@drawable/arrow"
+                                            android:background="#00000000"
+                                            android:layout_alignWithParentIfMissing="true"
+                                            android:layout_alignParentTop="true"
+                                            android:layout_alignParentRight="true"
+                                            android:layout_alignParentEnd="true" />
+
+                                        <Spinner
+                                            android:layout_width="match_parent"
+                                            android:layout_height="33dp"
+                                            android:id="@+id/idSetDevLiteCaptReasonRefund"
+                                            android:layout_gravity="center_vertical|right"
+                                            android:layout_alignParentRight="false"
+                                            android:layout_alignParentEnd="false"
+                                            android:layout_alignParentStart="true"
+                                            android:layout_alignParentLeft="true"
+                                            android:layout_alignWithParentIfMissing="true"
+                                            android:layout_alignParentTop="true"
+                                            android:background="#00FFFFFF" />
+
+                                    </RelativeLayout>
+
+                                </LinearLayout>
+
+                                <!--android:elegantTextHeight="false" /-->
+
+
+                                <LinearLayout
+                                    android:orientation="vertical"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="2"
+                                    android:paddingLeft="5dp"
+                                    android:paddingRight="5dp">
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textAppearance="?android:attr/textAppearanceLarge"
+                                        android:text="@string/txtDevLiteCaptProductSelect"
+                                        android:id="@+id/idDevLiteCaptProductSelect"
+                                        android:textSize="15sp"
+                                        android:textStyle="normal"
+                                        android:textColor="#FFFFFF"
+                                        android:layout_weight="1"
+                                        android:layout_gravity="left|center_vertical" />
+
+                                    <RelativeLayout
+                                        android:layout_width="fill_parent"
+                                        android:layout_height="fill_parent"
+                                        android:layout_gravity="center_vertical">
+
+                                        <ImageView
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:id="@+id/imageView7"
+                                            android:background="@drawable/background_txtfile" />
+
+                                        <ImageButton
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:id="@+id/idSetDevLiteCaptIconSearch"
+                                            android:src="@drawable/lupa"
+                                            android:background="#00000000"
+                                            android:paddingLeft="3dp"
+                                            android:layout_alignParentTop="true"
+                                            android:layout_alignParentLeft="true"
+                                            android:layout_alignParentStart="true" />
+
+                                        <ImageButton
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:id="@+id/idSetDevLiteCaptCancelSearch"
+                                            android:src="@drawable/exis"
+                                            android:background="#00000000"
+                                            android:layout_alignWithParentIfMissing="false"
+                                            android:layout_alignParentTop="true"
+                                            android:layout_alignParentRight="true"
+                                            android:layout_alignParentEnd="true" />
+
+                                        <EditText
+                                            android:layout_width="fill_parent"
+                                            android:layout_height="40dp"
+                                            android:inputType="text"
+                                            android:ems="10"
+                                            android:id="@+id/idSetDevLiteCaptProductSearch"
+                                            android:textSize="15sp"
+                                            android:layout_weight="1"
+                                            android:layout_gravity="center_vertical|right"
+                                            android:background="#00000000"
+                                            android:layout_marginRight="40dp"
+                                            android:textStyle="normal"
+                                            android:layout_alignTop="@+id/imageView7"
+                                            android:gravity="center_vertical"
+                                            android:layout_marginLeft="40dp"
+                                            android:layout_alignParentBottom="true" />
+
+                                    </RelativeLayout>
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+                        </ScrollView>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <ListView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:id="@+id/idSetDevLiteCaptProductList"
+                                android:background="#000000"
+                                android:scrollingCache="false"
+                                android:cacheColorHint="@android:color/white"
+
+                                android:fastScrollEnabled="false"
+                                android:drawSelectorOnTop="false"
+                                android:clickable="false"
+                                android:layout_alignParentTop="true"
+                                android:layout_alignParentLeft="true"
+                                android:layout_alignParentStart="true"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentRight="true" />
+                            <!--android:nestedScrollingEnabled="false"11-->
+                        </RelativeLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/Resumen"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:orientation="vertical">
+                        <!--android:touchscreenBlocksFocus="false"-->
+                        <ListView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:id="@+id/idSetDevLiteCaptProductSumaryList"
+                            android:background="#000000"
+                            android:scrollingCache="false"
+                            android:cacheColorHint="@android:color/white"
+                            android:fastScrollEnabled="false"
+                            android:drawSelectorOnTop="false"
+                            android:clickable="false"
+                            android:layout_alignParentTop="true"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentBottom="true"
+                            android:layout_alignParentRight="true" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/Configuracion"
+                        android:layout_width="fill_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <ScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/scrollView2" >
+
+                            <LinearLayout
+                                android:orientation="vertical"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content">
+
+                                <LinearLayout
+                                    android:orientation="horizontal"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="2"
+                                    android:padding="5dp">
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textAppearance="?android:attr/textAppearanceLarge"
+                                        android:text="@string/txtDevLiteConfAmountPackages"
+                                        android:id="@+id/idDevLiteConfAmountPackages"
+                                        android:textSize="15sp"
+                                        android:textStyle="normal"
+                                        android:textColor="#FFFFFF"
+                                        android:layout_marginTop="5dp"
+                                        android:layout_marginBottom="5dp"
+                                        android:layout_weight="1"
+                                        android:layout_gravity="left|center_vertical" />
+
+                                    <EditText
+                                        android:layout_width="fill_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="number"
+                                        android:ems="10"
+                                        android:id="@+id/idSetDevLiteConfAmountPackages"
+                                        android:textSize="15sp"
+                                        android:background="@drawable/background_txtfile"
+                                        android:layout_weight="1"
+                                        android:paddingLeft="10dp"
+                                        android:paddingRight="10dp"
+                                        android:layout_marginLeft="5dp" />
+
+                                    <!--NumberPicker
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:scaleX="0.7"
+                                        android:scaleY="0.7"
+                                        android:id="@+id/idSetDevLiteConfAmountPackages"
+                                        android:orientation="horizontal"
+                                        android:layout_weight="2"
+                                        android:layout_gravity="center"
+                                        android:showDividers="none"
+                                        android:background="#FFFFFF" >
+                                    </NumberPicker-->
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:orientation="horizontal"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:padding="5dp">
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textAppearance="?android:attr/textAppearanceLarge"
+                                        android:text="@string/txtDevLiteConfDocumentType"
+                                        android:id="@+id/idDevLiteConfDocumentType"
+                                        android:textSize="15sp"
+                                        android:textStyle="normal"
+                                        android:textColor="#FFFFFF"
+                                        android:layout_marginTop="5dp"
+                                        android:layout_marginBottom="5dp"
+                                        android:layout_gravity="left|center_vertical"
+                                        android:gravity="left"
+                                        android:layout_weight="1" />
+
+                                    <RelativeLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="1"
+                                        android:layout_gravity="right">
+
+                                        <ImageView
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:id="@+id/imageView5"
+                                            android:background="@drawable/background_txtfile" />
+
+                                        <ImageButton
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:id="@+id/imageButton6"
+                                            android:src="@drawable/arrow"
+                                            android:background="#00000000"
+                                            android:layout_alignParentTop="true"
+                                            android:layout_alignParentRight="true"
+                                            android:layout_alignParentEnd="true"
+                                            android:layout_alignWithParentIfMissing="true" />
+
+                                        <Spinner
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:id="@+id/idSetDevLiteConfDocumentType"
+                                            android:layout_gravity="center_vertical|right"
+                                            android:layout_marginLeft="5dp"
+                                            android:background="#00FFFFFF" />
+
+                                    </RelativeLayout>
+
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:orientation="horizontal"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="2"
+                                    android:padding="5dp">
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textAppearance="?android:attr/textAppearanceLarge"
+                                        android:text="@string/txtDevLiteConfFolioDocument"
+                                        android:id="@+id/idDevLiteConfFolioDocument"
+                                        android:textSize="15sp"
+                                        android:textStyle="normal"
+                                        android:textColor="#FFFFFF"
+                                        android:layout_marginTop="5dp"
+                                        android:layout_marginBottom="5dp"
+                                        android:layout_weight="1"
+                                        android:layout_gravity="left|center_vertical" />
+
+                                    <EditText
+                                        android:layout_width="fill_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="number"
+                                        android:ems="10"
+                                        android:id="@+id/idSetDevLiteConfFolioDocument"
+                                        android:textSize="15sp"
+                                        android:background="@drawable/background_txtfile"
+                                        android:layout_weight="1"
+                                        android:layout_gravity="center_vertical|right"
+                                        android:layout_marginLeft="5dp"
+                                        android:paddingLeft="10dp"
+                                        android:paddingRight="10dp" />
+
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:orientation="horizontal"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="2"
+                                    android:padding="5dp">
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textAppearance="?android:attr/textAppearanceLarge"
+                                        android:text="@string/txtDevLiteConfNumberRepayment"
+                                        android:id="@+id/idDevLiteConfNumberRepayment"
+                                        android:textSize="15sp"
+                                        android:textColor="#FFFFFF"
+                                        android:layout_marginTop="5dp"
+                                        android:layout_marginBottom="5dp"
+                                        android:layout_weight="1"
+                                        android:layout_gravity="left|center_vertical"
+                                        android:textStyle="normal" />
+
+                                    <EditText
+                                        android:layout_width="fill_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="number"
+                                        android:ems="10"
+                                        android:id="@+id/idSetDevLiteConfNumberRepayment"
+                                        android:textSize="15sp"
+                                        android:background="@drawable/background_txtfile"
+                                        android:layout_weight="1"
+                                        android:layout_gravity="center_vertical|right"
+                                        android:layout_marginLeft="5dp"
+                                        android:paddingLeft="10dp"
+                                        android:paddingRight="10dp" />
+                                </LinearLayout>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAppearance="?android:attr/textAppearanceLarge"
+                                    android:text="Capturar por:"
+                                    android:id="@+id/idDevLiteConfInstructionAddPakageOrProduct"
+                                    android:layout_marginTop="30dp"
+                                    android:layout_gravity="center_horizontal"
+                                    android:textStyle="normal"
+                                    android:textSize="15sp"
+                                    android:textColor="#FFFFFF" />
+
+                                <Switch
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:id="@+id/idSwDevLiteConfPackageOrProduct"
+                                    android:textStyle="normal"
+                                    android:textOff="Paquetes"
+                                    android:textOn="Productos"
+                                    android:layout_weight="7.16"
+                                    android:layout_gravity="center_horizontal"
+                                    android:layout_marginTop="5dp" />
+
+
+                                <Button
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/txtDevLiteConfAddPackage"
+                                    android:id="@+id/idBtnDevLiteConfAddPackage"
+                                    android:layout_gravity="center_horizontal"
+                                    android:background="@color/colorMarzam"
+                                    android:textColor="#FFFFFF"
+                                    android:paddingLeft="20dp"
+                                    android:paddingRight="20dp"
+                                    android:layout_marginTop="30dp" />
+
+                            </LinearLayout>
+                        </ScrollView>
+
+                    </LinearLayout>
+                </FrameLayout>
+            </LinearLayout>
+        </TabHost>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/txtBtnFinishReturnProduct"
+            android:id="@+id/idBtnFinishReturnProduct"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:background="@color/colorMarzam"
+            android:textSize="15sp"
+            android:textColor="#FFFFFF" />
+
+    </RelativeLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Button"
+        android:id="@+id/button8" />
+
+</LinearLayout>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">appVentas</string>
+    <string name="app_name">Aplicación de Ventas</string>
     <string name="Mapa">Mapa</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -44,5 +44,43 @@
     <string name="title_activity_encabezados_pedidos">Encabezados_pedidos</string>
     <string name="title_activity_detalle_pedidos">DetallePedidos</string>
     <string name="title_activity_alta_clientes">AltaClientes</string>
-
+    <string name="tittleDevolucionesTxt">Devoluciones</string>
+    <string name="disponibilidadTxt">Disponibilidad de devoluciones</string>
+    <string name="promedioTxt">Promedio de venta (3 meses):</string>
+    <string name="datosTxt">Datos</string>
+    <string name="importeTxt">Importe</string>
+    <string name="foliosDentroPresupuestodoTxt">Folios en el presupuesto:</string>
+    <string name="foliosAutorizacionMermaTxt">Folios merma:</string>
+    <string name="foliosNoAceptadosTxt">Folios NO aceptados:</string>
+    <string name="devolucionDisponibleTxt">Devolución disponible:</string>
+    <string name="devolucionPptoTxt">Devoluciones autorizadas con ppto:</string>
+    <string name="consultaDevolucionesTxt">Consulta devoluciones</string>
+    <string name="nuevaDevolucionTxt">Nueva devolucion</string>
+    <string name="txtDevLiteConfTittleClient">Nombre del Cliente</string>
+    <string name="txtDevLiteConfAmountPackages">Cantidad de bultos</string>
+    <string name="txtDevLiteConfDocumentType">Tipo de documento</string>
+    <string name="txtDevLiteConfFolioDocument">Folio de factura</string>
+    <string name="txtDevLiteConfNumberRepayment">Folio de devolución</string>
+    <string name="txtDevLiteCaptReasonRefund">Motivo de devolución</string>
+    <string name="txtDevLiteCaptShortName">Nombre corto</string>
+    <string name="txtDevLiteCaptCodeMarzam">Código Marzam</string>
+    <string name="txtDevLiteCaptBarcode">Código de barras</string>
+    <string name="txtDevLiteCaptProductSelect">Selecciona el poducto</string>
+    <string name="txtDevLitePromptProduct">Producto:</string>
+    <string name="txtDevLitePromptProductAmount">Cantidad:</string>
+    <string name="txtDevLitePromptAdd1">+1</string>
+    <string name="txtDevLitePromptAdd2">+2</string>
+    <string name="txtDevLitePromptAdd5">+5</string>
+    <string name="txtDevLitePromptAdd10">+10</string>
+    <string name="txtDevLitePromptAccept">Aceptar</string>
+    <string name="txtAmountProductReturn">Cantidad:</string>
+    <string name="txtCodeProduct">Código producto:</string>
+    <string name="txtReasonDocument">Documento de devolución:</string>
+    <string name="txtReasonReturn">Motivo devolución:</string>
+    <string name="txtBtnFinishReturnProduct">Enviar la devoluciones</string>
+    <string name="txtDevLitePromptReset0">0</string>
+    <string name="txtDevLiteConfAddPackage">Agregar bulto</string>
+    <string name="txtDevLiteCaptSearchByName">Buscar por nombre</string>
+    <string name="txtDevLiteCaptSearchByMarzamCode">Buscar por codigo marzam</string>
+    <string name="txtDevLiteCaptSearchByBarCode">Buscar por código de barras</string>
 </resources>

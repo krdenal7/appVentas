@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/idTxtName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="false"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="5dp"
+            android:layout_gravity="center_vertical|right"
+            android:layout_alignParentRight="false"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignWithParentIfMissing="false"
+            android:background="#00000000"
+            android:text="Name" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/txtAmountProductReturn"
+            android:id="@+id/idAmountProductReturn"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:layout_below="@+id/idTxtName" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="4"
+            android:id="@+id/idSetAmountProductReturn"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:layout_above="@+id/gridLayout"
+            android:layout_toRightOf="@+id/idAmountProductReturn"
+            android:layout_toEndOf="@+id/idAmountProductReturn"
+            android:layout_marginLeft="10dp" />
+
+        <GridLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="2"
+            android:rowCount="3"
+            android:id="@+id/gridLayout"
+            android:layout_below="@+id/idAmountProductReturn"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true">
+
+            <TextView
+                android:id="@+id/idTxtCodeProduct"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="#79000000"
+                android:layout_gravity="left"
+                android:layout_alignWithParentIfMissing="false"
+                android:background="#00000000"
+                android:text="@string/txtCodeProduct"
+                android:layout_below="@+id/idTxtName"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_weight="1"
+                android:layout_columnSpan="1"
+                android:layout_column="0"/>
+
+            <TextView
+                android:id="@+id/idSetCodeProduct"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical|right"
+                android:textSize="12sp"
+                android:textStyle="normal"
+                android:textColor="#79000000"
+                android:layout_alignWithParentIfMissing="false"
+                android:background="#00000000"
+                android:text="Name"
+                android:layout_alignTop="@+id/idMarzamCode"
+                android:layout_toRightOf="@+id/idMarzamCode"
+                android:layout_toEndOf="@+id/idMarzamCode"
+                android:layout_weight="1"
+                android:layout_column="1"
+                android:layout_columnSpan="1"
+                android:layout_gravity="right" />
+
+            <TextView
+                android:id="@+id/idTxtReasonDocument"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="#79000000"
+                android:layout_gravity="left"
+                android:layout_alignWithParentIfMissing="false"
+                android:background="#00000000"
+                android:text="@string/txtReasonDocument"
+                android:layout_below="@+id/idTxtName"
+                android:layout_alignRight="@+id/idTxtName"
+                android:layout_alignEnd="@+id/idTxtName"
+                android:layout_weight="1"
+                android:layout_column="0"
+                android:layout_columnSpan="1" />
+
+            <TextView
+                android:id="@+id/idSetTypeDocument"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical|right"
+                android:textSize="12sp"
+                android:textStyle="normal"
+                android:textColor="#79000000"
+                android:layout_gravity="right"
+                android:layout_alignWithParentIfMissing="false"
+                android:background="#00000000"
+                android:text="Name"
+                android:layout_below="@+id/idReasonDocument"
+                android:layout_alignRight="@+id/idTxtName"
+                android:layout_weight="1"
+                android:layout_column="1"
+                android:layout_columnSpan="1" />
+
+            <TextView
+                android:id="@+id/idTxtReasonReturn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="#79000000"
+                android:layout_gravity="left"
+                android:layout_alignWithParentIfMissing="false"
+                android:background="#00000000"
+                android:text="@string/txtReasonReturn"
+                android:layout_below="@+id/idSetTypeDocument"
+                android:layout_alignRight="@+id/idTxtName"
+                android:layout_weight="1"
+                android:layout_column="0"
+                android:layout_columnSpan="1" />
+
+            <TextView
+                android:id="@+id/idSetReasonReturn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical|right"
+                android:textSize="12sp"
+                android:textStyle="normal"
+                android:textColor="#79000000"
+                android:layout_gravity="right"
+                android:layout_alignWithParentIfMissing="false"
+                android:background="#00000000"
+                android:text="Name"
+                android:layout_below="@+id/idReasonReturn"
+                android:layout_alignRight="@+id/idTxtName"
+                android:layout_weight="1"
+                android:layout_column="1"
+                android:layout_columnSpan="1" />
+        </GridLayout>
+
+    </RelativeLayout>
+</LinearLayout>

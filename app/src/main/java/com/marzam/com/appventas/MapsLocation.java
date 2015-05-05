@@ -951,11 +951,11 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                 startActivity(new Intent(getBaseContext(), Sincronizar.class)
                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
                 finish();
-            break;
+            /*break;
             case R.id.AltaCte:
                 startActivity(new Intent(getBaseContext(), AltaClientes.class)
                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
-                finish();
+                finish();*/
         }
 
         return super.onOptionsItemSelected(item);

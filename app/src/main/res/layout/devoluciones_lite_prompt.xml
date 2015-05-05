@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/devoluciones_lite_prompt"
+    android:background="#FFFFFF"
+    android:gravity="center">>
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="202dp"
+        android:layout_gravity="center">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/txtDevLitePromptProduct"
+            android:id="@+id/idDevLitePromptProduct"
+            android:textColor="#000000"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_alignParentTop="true"
+            android:layout_alignLeft="@+id/idDevLitePromptProductAmount"
+            android:layout_alignStart="@+id/idDevLitePromptProductAmount"
+            android:layout_margin="10dp"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Small Text"
+            android:id="@+id/idSetDevLitePromptProduct"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@+id/idDevLitePromptProduct"
+            android:layout_toRightOf="@+id/idDevLitePromptProduct"
+            android:textColor="#000000"
+            android:textSize="15sp"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/txtDevLitePromptProductAmount"
+            android:id="@+id/idDevLitePromptProductAmount"
+            android:textColor="#000000"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_below="@+id/idDevLitePromptProduct"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp" />
+
+        <EditText
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:inputType="number"
+            android:ems="10"
+            android:id="@+id/idSetDevLitePromptProductAmount"
+            android:textSize="15sp"
+            android:textColor="#000000"
+            android:hint="0"
+            android:autoText="false"
+            android:focusable="true"
+            android:layout_alignTop="@+id/idDevLitePromptProductAmount"
+            android:layout_toRightOf="@+id/idDevLitePromptProductAmount"
+            android:layout_toEndOf="@+id/idDevLitePromptProductAmount" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/linearLayout2"
+            android:layout_below="@+id/idSetDevLitePromptProductAmount"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:gravity="center_horizontal">
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/txtDevLitePromptReset0"
+                android:id="@+id/idtxtDevLitePromptReset0"
+                android:layout_below="@+id/idDevLitePromptProductAmount"
+                android:textSize="15sp"
+                android:background="@android:color/holo_orange_light"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="3dp" />
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/txtDevLitePromptAdd1"
+                android:id="@+id/idDevLitePromptAdd1"
+                android:layout_below="@+id/idDevLitePromptProductAmount"
+                android:textSize="15sp"
+                android:background="@android:color/holo_orange_light"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="3dp" />
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/txtDevLitePromptAdd2"
+                android:id="@+id/idDevLitePromptAdd2"
+                android:layout_toEndOf="@+id/idDevLitePromptAdd1"
+                android:layout_alignTop="@+id/idDevLitePromptAdd1"
+                android:layout_toRightOf="@+id/idDevLitePromptAdd1"
+                android:textSize="15sp"
+                android:background="@android:color/holo_orange_light"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="3dp" />
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/txtDevLitePromptAdd5"
+                android:id="@+id/idDevLitePromptAdd5"
+                android:layout_alignBottom="@+id/idDevLitePromptAdd2"
+                android:layout_toRightOf="@+id/idDevLitePromptAdd2"
+                android:layout_toEndOf="@+id/idDevLitePromptAdd2"
+                android:textSize="15sp"
+                android:background="@android:color/holo_orange_light"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="3dp" />
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/txtDevLitePromptAdd10"
+                android:id="@+id/idDevLitePromptAdd10"
+                android:layout_alignBottom="@+id/idDevLitePromptAdd5"
+                android:layout_toRightOf="@+id/idDevLitePromptAdd5"
+                android:layout_toEndOf="@+id/idDevLitePromptAdd5"
+                android:textSize="15sp"
+                android:background="@android:color/holo_orange_light"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="3dp" />
+        </LinearLayout>
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/txtDevLitePromptAccept"
+            android:id="@+id/idDevLitePromptAccept"
+            android:background="@color/colorMarzam"
+            android:textSize="15sp"
+            android:textColor="#FFFFFF"
+            android:layout_below="@+id/linearLayout2"
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="7dp" />
+
+    </RelativeLayout>
+</LinearLayout>
