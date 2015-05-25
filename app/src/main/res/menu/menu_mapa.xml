@@ -18,10 +18,11 @@
     <item android:id="@+id/Estatuspedidos" android:title="Estatus de pedidos"
         android:orderInCategory="100" android:showAsAction="never"
         tools:ignore="AppCompatResource"/>
-   <!-- <item android:id="@+id/AltaCte" android:title="Alta de clientes"
+   <item android:id="@+id/AltaCte" android:title="Alta de clientes"
         android:orderInCategory="100" android:showAsAction="never"
-        tools:ignore="AppCompatResource"/>-->
+        tools:ignore="AppCompatResource" android:visible="false"/>
     <item android:id="@+id/Sincronizacion" android:title="Sincronización"
         android:orderInCategory="100" android:showAsAction="never"
         tools:ignore="AppCompatResource"/>
+
 </menu>

@@ -79,7 +79,7 @@ public class RespuestaPedidos extends Activity {
             lite=new CSQLite(context);
             SQLiteDatabase db=lite.getWritableDatabase();
 
-            Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
+            Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
 
             if(rs.moveToFirst()){
                 id=rs.getString(0);

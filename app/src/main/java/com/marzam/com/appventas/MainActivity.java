@@ -96,7 +96,6 @@ public class  MainActivity extends Activity {
     private static String file_url = "http://190.1.4.120/ActualizacionAndroid";
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,6 +107,8 @@ public class  MainActivity extends Activity {
         txtUsuario=(TextView)findViewById(R.id.textViewTitle);
         locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
         ShowEnableGPS();//Muestra el alert en caso de que el GPS del dispositivo se encuentre desactivado
+
+        ObtenerArchivos2();
 
         if(VerificarActualizacion())
                     Show_New_Version();
@@ -220,6 +221,7 @@ public class  MainActivity extends Activity {
             Log.d("ErrorCrearDir", e.toString());
         }
     }
+
     public void ShowEnableGPS(){
         if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
             AlertDialog.Builder alert=new AlertDialog.Builder(context);
@@ -246,6 +248,7 @@ public class  MainActivity extends Activity {
             alertDialog.show();
         }
     }
+
     public void Show_IngresarUsuario(){
 
         LayoutInflater inflate=getLayoutInflater();
@@ -284,6 +287,7 @@ public class  MainActivity extends Activity {
 
 
     }
+
     public void Show_New_Version(){
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
@@ -306,7 +310,6 @@ public class  MainActivity extends Activity {
         alertDialog.show();
 
     }
-
 
     public boolean VerificaContraseña(String password,String nombre){
 try {
@@ -336,13 +339,14 @@ try {
         return false;
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_activity_main, menu);
         return true;
     }
+
+
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -402,6 +406,7 @@ try {
        IntentHome();
 
     }
+
 
     private void IntentHome(){
         Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -463,6 +468,7 @@ try {
         }
 
     }
+
 
     public String jsonPush(String num_emp,String key,String telefono){
 

@@ -1,6 +1,7 @@
 package com.marzam.com.appventas.Sincronizacion;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -33,8 +34,6 @@ public class envio_pedidoFaltante {
     Context context;
     CSQLite lite;
     String[] id_pedidos;
-    JSONArray jsonArrayCab;
-    JSONArray jsonArrayDet;
     WebServices services;
     File directorio;
     static InputStream stream;
@@ -52,43 +51,278 @@ public class envio_pedidoFaltante {
         directorio = new File(folder.getAbsolutePath() + "/Marzam/Imagenes");
         services=new WebServices();
 
+        if(VerificarClientesPendientes()>0){
 
+            String jsonClientes=JSonClientes();
+            String claveAgente=ObtenerClaveEmpleado();
 
-        if(VerificarPedidosPendientes()){ //Verifica si se tienen pedidos pendientes
+            String jsonRespuesta=services.InsertarCliente(jsonClientes, claveAgente);
 
-            String json=jsonVisitas();
-            String visita;
-                   visita = json==null ? null:services.SincronizarVisitas(jsonVisitas());
+            if(jsonRespuesta != null){
 
+                if(jsonRespuesta!="[]"){
 
+                    ProcesaJson(jsonRespuesta);
+                    respuesta=EnvioPedido();
+                }
 
-            if(isOnline()==false)
-                return "Verifique su conexión a Internet e intente nuevamente.";
+            }
+            else{
 
-               String cabecero=Objener_JsonCabecero();
-               String detalle=Obtener_Jsondetalle();
+                respuesta = "Verifique su conexión a Internet e intente nuevamente.";
+            }
 
+        }
+        else {
 
+            respuesta=EnvioPedido();
 
-            String res=services.SincronizarPedidos(cabecero,detalle);
-
-            if(res==null)
-                return "Fallo al transmitir pedidos. Favor de verificar su conexión";
-
-            ActualizarStatusPedido(res);
-
-            if(VerificarPedidosPendientes()==false)
-                return "Pedidos transmitidos correctamente";
-
-
-        }else {
-          respuesta="No hay pedidos por sincronizar";
         }
 
 
         return respuesta;
     }
 
+    public String EnvioPedido(){
+
+        String respuesta="";
+
+        if (VerificarPedidosPendientes()) { //Verifica si se tienen pedidos pendientes
+
+            String json = jsonVisitas();
+            String visita;
+            visita = json == null ? null : services.SincronizarVisitas(jsonVisitas());
+
+
+            if (isOnline() == false)
+                 return "Verifique su conexión a Internet e intente nuevamente.";
+
+            String cabecero = Objener_JsonCabecero();
+            String detalle = Obtener_Jsondetalle();
+
+
+            String res = services.SincronizarPedidos(cabecero, detalle);
+
+            if (res == null)
+                return "Fallo al transmitir pedidos. Favor de verificar su conexión";
+
+            ActualizarStatusPedido(res);
+
+            if (VerificarPedidosPendientes() == false)
+
+                return "Pedidos transmitidos correctamente";
+
+        } else {
+
+            respuesta = "No hay información por sincronizar";
+
+        }
+
+        return respuesta;
+    }
+
+    public String JSonClientes(){
+
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getReadableDatabase();
+        JSONArray array=new JSONArray();
+        JSONObject object=new JSONObject();
+
+        Cursor rs=db.rawQuery("select * from clientesDr where estatus <> 50 ",null);
+
+        while (rs.moveToNext()){
+            try {
+                String id_largo=ObtenerIdCteLargo(rs.getString(0));
+                object.put("id_cliente",id_largo);
+                object.put("nombre",rs.getString(1));
+                object.put("rfc",rs.getString(2));
+                object.put("correo",rs.getString(3));
+                object.put("telefono",rs.getString(4));
+                object.put("cp",rs.getString(5));
+                object.put("colonia",rs.getString(6));
+                object.put("calle",rs.getString(7));
+                object.put("calle1",rs.getString(8));
+                object.put("calle2",rs.getString(9));
+                object.put("referencia",rs.getString(10));
+                object.put("no_exterior",rs.getString(11));
+                object.put("delegacion",rs.getString(12));
+                object.put("estado",rs.getString(13));
+                object.put("almacen",rs.getString(14));
+                object.put("ruta",rs.getString(15));
+                object.put("no_interior",rs.getString(16));
+                array.put(object);
+                object=new JSONObject();
+
+            } catch (JSONException e) {
+
+                e.printStackTrace();
+
+            }
+        }
+           return  array.toString();
+    }
+
+    public String ProcesaJson(String json){
+
+        String cta="";
+
+        try {
+
+            JSONArray array=new JSONArray(json);
+            int tam=array.length();
+
+            if(tam>0) {
+
+                for (int i = 0; i < tam; i++) {
+
+                    JSONObject object = array.getJSONObject(i);
+                    String id_cliente = object.getString("id_cliente");
+                    String cteIbs = object.getString("id_cliente_ibs");
+
+                    String id_corto=ObtenerIdCteCorto(id_cliente);
+
+                    if(!cteIbs.equals("")||!cteIbs.equals(null)){
+
+                        UpdateStatusCteDr(id_corto,cteIbs,"50");
+                        UpdateCteSm(id_corto,cteIbs);
+                        UpdateEncabezadoPedido(cteIbs,id_corto);
+                        UpdateAgendaPedido(cteIbs,id_corto);
+
+                    }
+
+                }
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return  cta;
+    }
+
+    public void UpdateStatusCteDr(String id,String idIBS,String estatus){
+
+        CSQLite lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        ContentValues values=new ContentValues();
+        values.put("estatus", estatus);
+        if(!idIBS.equals("")||!idIBS.equals(null))
+            values.put("id_cliente",idIBS);
+
+        long res=db.update("clientesDr", values, "id_cliente=?", new String[]{id});
+
+        db.close();
+        lite.close();
+
+    }
+
+    public void UpdateCteSm(String id,String idIBS){
+
+        CSQLite lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        ContentValues values=new ContentValues();
+        values.put("id_cliente",idIBS);
+        db.update("clientes", values, "id_cliente=?", new String[]{id});
+
+        db.close();
+        lite.close();
+
+    }
+
+    public void UpdateAgendaPedido(String newCliente,String oldCliente){
+
+        CSQLite lite1=new CSQLite(context);
+        SQLiteDatabase db=lite1.getWritableDatabase();
+
+        ContentValues values=new ContentValues();
+        values.put("id_cliente",newCliente);
+
+        try {
+
+            long val=db.update("agenda", values, "id_cliente=?", new String[]{oldCliente});
+            String a="Error";
+
+        }catch (Exception e){
+            String err=e.toString();
+            e.printStackTrace();
+        }
+
+
+        db.close();
+        lite1.close();
+
+    }
+
+    public void UpdateEncabezadoPedido(String newCliente,String oldCliente){
+        CSQLite lite1=new CSQLite(context);
+        SQLiteDatabase db=lite1.getWritableDatabase();
+
+        ContentValues values=new ContentValues();
+        values.put("id_cliente",newCliente);
+
+        db.update("encabezado_pedido", values, "id_cliente=?", new String[]{oldCliente});
+
+        db.close();
+        lite1.close();
+    }
+
+    public String ObtenerIdCteLargo(String id){
+
+        CSQLite lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getReadableDatabase();
+        String idCte="";
+
+        Cursor rs=db.rawQuery("select id_largo from RelacionClientes where id_corto=?",new String[]{id});
+
+        if(rs.moveToFirst()){
+
+            idCte=rs.getString(0);
+
+        }
+
+        db.close();
+        lite.close();
+
+        return idCte;
+    }
+
+    public String ObtenerIdCteCorto(String id){
+
+        CSQLite lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getReadableDatabase();
+        String idCte="";
+
+        Cursor rs=db.rawQuery("select id_corto from RelacionClientes where id_largo=?",new String[]{id});
+
+        if(rs.moveToFirst()){
+
+            idCte=rs.getString(0);
+
+        }
+
+        db.close();
+        lite.close();
+
+        return idCte;
+    }
+
+    public int VerificarClientesPendientes(){
+
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getReadableDatabase();
+        int val=0;
+
+        Cursor rs=db.rawQuery("select * from clientesDr where estatus <> '50'", null);
+
+        val=rs.getCount();
+
+        db.close();
+        lt.close();
+
+        return val;
+    }
 
     public String jsonVisitas(){
         lite=new CSQLite(context);
@@ -133,7 +367,7 @@ public class envio_pedidoFaltante {
         SQLiteDatabase db=lite.getWritableDatabase();
         String clave="";
 
-        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
+        Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
         if(rs.moveToFirst()){
 
             clave=rs.getString(0);
@@ -142,6 +376,31 @@ public class envio_pedidoFaltante {
         return clave;
     }
 
+    public String ObtenerClaveEmpleado(){
+        CSQLite lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getReadableDatabase();
+        String num="";
+        String query="";
+
+        query="select clave_agente from agentes where Sesion=1";
+        Cursor rs = db.rawQuery(query, null);
+        if (rs.moveToFirst()) {
+
+            num = rs.getString(0);
+        }
+
+        return num;
+    }
+
+    public void EliminarEncabezado(String id_pedido){
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getWritableDatabase();
+
+        db.delete("encabezado_pedido","id_pedido=?",new String[]{id_pedido});
+        db.close();
+        lt.close();
+
+    }
 
     public String Obtener_firma_Hexa(String id_cliente){
 
@@ -169,6 +428,7 @@ public class envio_pedidoFaltante {
 
         return builder.toString();
     }//Conpleto
+
     public static byte[] StreamArchivo(File file){
 
 
@@ -191,7 +451,7 @@ public class envio_pedidoFaltante {
 
             }
             if(offset<bytes.length){
-                Log.d("Error al convertir en bytes","Fallo");
+
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -265,6 +525,7 @@ public class envio_pedidoFaltante {
 
 
     }
+
     public String Objener_JsonCabecero(){
 
         lite=new CSQLite(context);
@@ -314,6 +575,7 @@ public class envio_pedidoFaltante {
 
         return array.toString();
     }
+
     public String Obtener_Jsondetalle(){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
@@ -344,18 +606,23 @@ public class envio_pedidoFaltante {
                       json.put("orden", rs.getString(12));
                       array.put(json);
                       json=new JSONObject();
+
                   }catch (Exception e){
                       subject="Agente:"+ObtenerAgenteActivo()+"\njsonVisitas";
                       body="Array:"+ array+"\nObject: "+json+"\nError: "+e.toString();
                       new sendEmail().execute("");
                   }
               }
+
+              if(array.length()<=0){
+                 EliminarEncabezado(id_pedidos[i]);
+              }
+
           }
 
 
         return array.toString();
     }
-
 
     public String getDate(){
 
@@ -370,6 +637,7 @@ public class envio_pedidoFaltante {
 
         return fecha;
     }//Completo
+
     public  boolean isOnline(){
 
         ConnectivityManager cm=(ConnectivityManager)((Activity)context).getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -379,7 +647,6 @@ public class envio_pedidoFaltante {
         }
         return false;
     }
-
 
     public class sendEmail extends AsyncTask<String,Void,Object> {
 

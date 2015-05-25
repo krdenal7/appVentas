@@ -374,7 +374,7 @@ public class KPI_General extends Activity {
         String[] menu=new String[rs.getCount()];
         int contador=0;
 
-        if(rs.moveToNext()){
+        while(rs.moveToNext()){
             menu[contador]=rs.getString(0);
             contador++;
         }

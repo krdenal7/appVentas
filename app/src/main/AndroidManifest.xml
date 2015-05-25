@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.marzam.com.appventas" >
 
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
@@ -14,7 +15,8 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    <uses-permission android:name="android.permission.INSTALL_PACKAGES"/>
+    <uses-permission android:name="android.permission.INSTALL_PACKAGES"
+        tools:ignore="ProtectedPermissions" />
 
     <!--
     >
@@ -43,7 +45,8 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:theme="@style/Theme.Theme_marzam" >
+        android:theme="@style/Theme.Theme_marzam"
+        >
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -145,24 +148,31 @@
         <activity
             android:name=".EstatusPedidos.RespuestaPedidos"
             android:label="@string/title_activity_respuesta_pedidos"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name=".EstatusPedidos.Encabezados_pedidos"
             android:label="@string/title_activity_encabezados_pedidos"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name=".EstatusPedidos.DetallePedidos"
             android:label="@string/title_activity_detalle_pedidos"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
         </activity>
-        <activity android:name=".AltaClientesDr.AltaClientes"
+        <activity
+            android:name=".AltaClientesDr.AltaClientes"
             android:label="Alta de clientes"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            />
         <activity
             android:name=".DevolucionesLite.DevolucionesLite"
             android:label="@string/title_activity_detalle_pedidos"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name=".AltaClientesDr.Direccion"
+            android:label="@string/title_activity_direccion"
             android:screenOrientation="portrait">
         </activity>
     </application>

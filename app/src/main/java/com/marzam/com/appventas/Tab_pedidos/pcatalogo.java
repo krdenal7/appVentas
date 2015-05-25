@@ -288,9 +288,6 @@ public class pcatalogo extends Activity {
                 lite.close();
                 break;
             } catch (Exception e) {
-                subject = "pcatalogo.java-LlenarHasmap";
-                body = "Agente: " + ObtenerAgenteActivo() + "\nError: " + e.toString() + "\nData: " + data.toString();
-                new sendEmail().execute("");
                 continue;
             }
         }
@@ -537,7 +534,7 @@ public class pcatalogo extends Activity {
         try {
             lite = new CSQLite(context);
             SQLiteDatabase db = lite.getWritableDatabase();
-            Cursor rs = db.rawQuery("select clave_agente from agentes where Sesion=1", null);
+            Cursor rs = db.rawQuery("select numero_empleado from agentes where Sesion=1", null);
             if (rs.moveToFirst()) {
 
                 clave = rs.getString(0);

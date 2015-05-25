@@ -102,11 +102,12 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.maps_info);
         setTitle("Mapa");
         context=this;
-
+        CrearTabla();
         txtCte=(TextView)findViewById(R.id.textView4);
         ObtenerCtesHoy(ObtenerAgenteActivo());
         ObtenerClientesVisitados();
@@ -124,11 +125,11 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Clientes de hoy");
-        alert.setItems(list,new DialogInterface.OnClickListener() {
+        alert.setItems(list, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
-                if(!VerificarSesion_Cliente(clientesH[i])){
+                if (!VerificarSesion_Cliente(clientesH[i])) {
 
                     ShowSesionActiva();
 
@@ -170,25 +171,25 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
      AlertDialog.Builder alert=new AlertDialog.Builder(context);
      alert.setTitle("Clientes");
      alert.setView(textView);
-     alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+     alert.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
          @Override
          public void onClick(DialogInterface dialogInterface, int i) {
-             String cuenta=textView.getText().toString().toUpperCase().replace("'","");
+             String cuenta = textView.getText().toString().toUpperCase().replace("'", "");
 
 
-             if(cuenta.equals("")) {
+             if (cuenta.equals("")) {
                  dialogInterface.dismiss();
-                 Toast.makeText(context,"Campo vacio.Ingrese una clave de agente",Toast.LENGTH_LONG).show();
-             }else{
+                 Toast.makeText(context, "Campo vacio.Ingrese una clave de agente", Toast.LENGTH_LONG).show();
+             } else {
 
-                 String num_emp=ObtenerAgenteActivo();
+                 String num_emp = ObtenerAgenteActivo();
 
                  char isLetter = 0;
 
-                     if(cuenta.length()>=2)
-                         isLetter=cuenta.charAt(1);
+                 if (cuenta.length() >= 2)
+                     isLetter = cuenta.charAt(1);
 
-                 if(Character.isDigit(isLetter)) {
+                 if (Character.isDigit(isLetter)) {
                      if (Verificar_ClienteExiste(cuenta, num_emp)) {
                          if (!VerificarSesion_Cliente(cuenta))
                              ShowSesionActiva();
@@ -196,16 +197,16 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                          Toast.makeText(context, "No se encontro el cliente.Intente nuevamente", Toast.LENGTH_LONG).show();
                      }
                  }//En caso de que sea Numero realiza la busqueda por cuenta
-                 else{
-                     if(Character.isLetter(isLetter)){
-                         ShowBuscarXnombre(cuenta,num_emp);
+                 else {
+                     if (Character.isLetter(isLetter)) {
+                         ShowBuscarXnombre(cuenta, num_emp);
                      }
                  }//Va a entrar en caso de que detecte una letra
 
              }
          }
      });
-     alert.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
+     alert.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
          @Override
          public void onClick(DialogInterface dialogInterface, int i) {
 
@@ -227,27 +228,28 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         final String[] clientes=ObtenerClientesLike(palabra);
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Seleccione");
-        alert.setItems(clientes,new DialogInterface.OnClickListener() {
+        alert.setItems(clientes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
-                String[] cuentas=clientes[i].split("-");
-                String cuenta="";
+                String[] cuentas = clientes[i].split("-");
+                String cuenta = "";
 
-                if(cuentas.length!=0)
-                       cuenta=cuentas[0];
+                if (cuentas.length != 0)
+                    cuenta = cuentas[0];
 
                 if (Verificar_ClienteExiste(cuenta, num_emp)) {
-                    if (!VerificarSesion_Cliente(cuenta)){
+                    if (!VerificarSesion_Cliente(cuenta)) {
                         dialogInterface.dismiss();
-                        ShowSesionActiva();}
+                        ShowSesionActiva();
+                    }
                 } else {
                     Toast.makeText(context, "No se encontro el cliente.Intente nuevamente", Toast.LENGTH_LONG).show();
                 }
 
             }
         });
-        alert.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
+        alert.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
@@ -279,7 +281,16 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         return clientes;
     }
 
+    public void CrearTabla(){
+        CSQLite lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
 
+        db.execSQL("CREATE TABLE IF NOT EXISTS RelacionClientes(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,id_largo varchar(50),id_corto varchar(50))");
+
+        db.close();
+        lite.close();
+
+    }
 
     public void ShowSesionActiva(){
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
@@ -346,6 +357,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         return datos;
     }
+
     public CharSequence[] ObtenerCteTotales(String agente){
         CharSequence[] datos=null;
 
@@ -462,7 +474,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         SQLiteDatabase db=lite.getWritableDatabase();
         String clave="";
 
-        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
+        Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
         if(rs.moveToFirst()){
 
             clave=rs.getString(0);
@@ -490,7 +502,6 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         }catch (Exception e){
 
             String error=e.toString();
-            Log.d("Error al insertar Sesion:",error);
             Toast.makeText(context,"Error al insertar visita",Toast.LENGTH_SHORT).show();
         }
     }//INSERTA EL CLIENTE CON EL QUE SE INICIO VISITA
@@ -568,7 +579,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select id_agente from agentes where clave_agente='"+agente+"'",null);
+        Cursor rs=db.rawQuery("select id_agente from agentes where numero_empleado='"+agente+"'",null);
 
         if(rs.moveToFirst()){
             id=rs.getString(0);
@@ -656,6 +667,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
             Crear_precioFinal precioFinal=new Crear_precioFinal();
             precioFinal.Ejecutar(context);
 
+
             return "";
         }
 
@@ -723,6 +735,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
             }
         }
     }
+
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -895,6 +908,31 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         }
     }
 
+    public String[] ObtenerMenuFuerzas(){
+
+        String agente=ObtenerClavedeAgente();
+
+        if(lite!=null)
+            lite.close();
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select menu from funciones_menu where id_menu in (select id_menu from menu_fuerzas " +
+                "where id_fuerza=(select id_fuerza from agentes where numero_empleado=?))",new String[]{agente});
+
+        if(rs.getCount()<=0)
+            return new String[]{""};
+
+        String[] menu=new String[rs.getCount()];
+        int contador=0;
+
+        while(rs.moveToNext()){
+            menu[contador]=rs.getString(0);
+            contador++;
+        }
+        return menu;
+    }
 
     @Override
     public void onConnected(Bundle bundle) {
@@ -951,11 +989,11 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                 startActivity(new Intent(getBaseContext(), Sincronizar.class)
                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
                 finish();
-            /*break;
+            break;
             case R.id.AltaCte:
                 startActivity(new Intent(getBaseContext(), AltaClientes.class)
                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
-                finish();*/
+                finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -965,18 +1003,29 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_mapa, menu);
+
+
         return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
 
-        int tam=menu.size();
+        int tam = menu.size();
+        String[] menus=ObtenerMenuFuerzas();
+
         for(int i=0;i<tam;i++){
-            String a = menu.getItem(4).getTitle().toString();
-            if(a.equals("Alta de clientes"))
-                menu.getItem(i).setVisible(false);
+
+            String item=menu.getItem(i).getTitle().toString();
+
+            for(int j=0;j<menus.length;j++){
+
+                if(item.equals(menus[j])) {
+                    menu.getItem(i).setVisible(true);
+                }
+            }
         }
+
         return super.onPrepareOptionsMenu(menu);
     }
 

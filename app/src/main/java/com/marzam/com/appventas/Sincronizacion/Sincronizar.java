@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.marzam.com.appventas.Email.Mail;
+import com.marzam.com.appventas.KPI.KPI_General;
 import com.marzam.com.appventas.MainActivity;
 import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
@@ -62,13 +63,14 @@ public class Sincronizar extends Activity {
     static  InputStream stream;
     CSQLite lite;
     TextView txtPedidos;
+    TextView txtClientes;
     envio_pedidoFaltante envioPedidoFaltante;
     String from="Sincronizar";
     String body;
     String subject;
     Mail m;
     String id=null;
-    String mensaje_progres;
+
 
 
     @Override
@@ -78,8 +80,13 @@ public class Sincronizar extends Activity {
         context=this;
 
         CrearDirectorioDownloads();
+
         txtPedidos=(TextView)findViewById(R.id.textView49);
         txtPedidos.setText(""+VerificarPedidosPendientes());
+
+        txtClientes=(TextView)findViewById(R.id.textView87);
+        txtClientes.setText(""+VerificarClientesPendientes());
+
 
         Button btnCerrar=(Button)findViewById(R.id.button5);
         btnCerrar.setOnClickListener(new View.OnClickListener() {
@@ -120,6 +127,21 @@ public class Sincronizar extends Activity {
         lite.close();
         return Cantidad;
     }
+    public int VerificarClientesPendientes(){
+
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getReadableDatabase();
+        int val=0;
+
+        Cursor rs=db.rawQuery("select * from clientesDr where estatus <> '50'",null);
+
+        val=rs.getCount();
+
+        db.close();
+        lt.close();
+
+        return val;
+    }
     public boolean VerificarSesionActiva(){
 
         lite=new CSQLite(context);
@@ -143,27 +165,33 @@ public class Sincronizar extends Activity {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if(!VerificarSesionActiva()) {
+                 if(VerificarClientesPendientes()<=0){
                     if (VerificarPedidosPendientes() <= 0) {
                         if (isOnline()) {
+
 
                             //Estas lineas son del actual AsyncTask, se comentan para probar la nueva sincronización
                             progres = ProgressDialog.show(context, "Sincronizando", "Cargando", true, false);
                             new UpLoadTask().execute("");
 
-
+                            //Sincronizacion Inteligente
                             /*new Verificar_idsPendientes().execute("");*/
 
 
-
                         } else {
-                        Toast.makeText(context, "Verifique su conexión a internet e intente nuevamente", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Verifique su conexión a internet e intente nuevamente", Toast.LENGTH_LONG).show();
                         }
                     } else {
                         Toast.makeText(context, "No se puede completar el cierre. Envíe sus pedidos pendientes", Toast.LENGTH_LONG).show();
-                    }
+                    }//Pedidos pendientes por transmitir
                 }else {
-                        Toast.makeText(context,"Tiene una visita activa.Cierre la visita para poder completar la sincronización",Toast.LENGTH_LONG).show();
+                      Toast.makeText(context, "No se puede completar el cierre. Envíe sus clientes pendientes", Toast.LENGTH_LONG).show();
+                 }//Clientes pendientes por transmitir
                 }
+                else {
+
+                       ShowSesionActiva();
+                }//Sesion activa
             }
         });
         alert.setNegativeButton("No",new DialogInterface.OnClickListener() {
@@ -174,6 +202,28 @@ public class Sincronizar extends Activity {
         });
         AlertDialog alertDialog= alert.create();
         alertDialog.show();
+    }
+    public void ShowSesionActiva(){
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Aviso");
+        alert.setMessage("Visita activa. Cierre primero la sesion para poder continuar con los demas clientes");
+        alert.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                Intent intent = new Intent(context, KPI_General.class);
+                startActivity(intent
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP));
+            }
+        });
+        alert.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+       AlertDialog alertDialogAct=alert.create();
+                   alertDialogAct.show();
     }
     public void CrearDirectorioDownloads(){
 
@@ -306,7 +356,7 @@ public class Sincronizar extends Activity {
 
             }
             if(offset<bytes.length){
-                Log.d("Error al convertir en bytes","Fallo");
+
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -414,7 +464,10 @@ public class Sincronizar extends Activity {
             alert.setTitle("Envio de pedido");
 
             if(progres.isShowing()) {
+
                 txtPedidos.setText("" + VerificarPedidosPendientes());
+                txtClientes.setText(""+VerificarClientesPendientes());
+
                 progres.dismiss();
 
                 alert.setMessage(result.toString());
@@ -438,7 +491,7 @@ public class Sincronizar extends Activity {
         SQLiteDatabase db=lite.getWritableDatabase();
         String clave="";
 
-        Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
+        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
         if(rs.moveToFirst()){
 
             clave=rs.getString(0);

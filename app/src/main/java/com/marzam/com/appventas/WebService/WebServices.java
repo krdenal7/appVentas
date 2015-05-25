@@ -24,10 +24,11 @@ import java.net.Proxy;
 
 public class WebServices {
 
-             //static String ip="http://201.134.159.126/WebService/WebService.asmx";
-               static String ip="http://190.1.4.120/WebService/WebService.asmx";
-             //static String ip="http://201.134.159.126/WebServicePruebas/WebService.asmx";
-             //static String ip="http://201.134.159.126/WSFuerzasExternas/WebService.asmx";
+            //static String ip="http://201.134.159.126/WebService/WebService.asmx";
+              static String ip="http://190.1.4.120/WebService/WebService.asmx";
+            //static String ip="http://201.134.159.126/WebServicePruebas/WebService.asmx";
+            //static String ip="http://201.134.159.126/WSFuerzasExternas/WebService.asmx";
+            //  static String ip="http://marzam.mx/WSFuerzasExternas/WebService.asmx";
 
     String from="WebServices";
     String subject;
@@ -444,6 +445,42 @@ public class WebServices {
 
     }
 
+    public String InsertarCliente(String json,String clave_agente){
+        String SOAP_ACTION="http://tempuri.org/InsertarCliente1";
+        String OPERATION_NAME="InsertarCliente1";
+        String WSDL_TARGET_NAMESPACE="http://tempuri.org/";
+        String SOAP_ADDRESS=ip;
+
+        SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
+
+        // if(!valida_Encabezado(encabezado))
+        //                        return null;
+
+        request.addProperty("json",json);
+        request.addProperty("clave_agente",clave_agente);
+
+        SoapSerializationEnvelope envelope=new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.dotNet=true;
+
+        envelope.setOutputSoapObject(request);
+
+        HttpTransportSE httpTransportSE=new HttpTransportSE(SOAP_ADDRESS);
+        Object response=null;
+
+        try{
+
+            httpTransportSE.call(SOAP_ACTION,envelope);
+            response=envelope.getResponse();
+
+        }catch (Exception e){
+            String a=e.toString();
+            Log.d("WebServiceBakError",a);
+            return null;
+        }
+
+        return response.toString();
+    }
+
     public byte[] ConvertToByte(File file){
         byte[] bytes=null;
         try {
@@ -505,7 +542,6 @@ public class WebServices {
             return null;
         }
     }
-
 
 
     public void sendData(final Object father, String metodo, String... arg) {
