@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -156,7 +157,7 @@ public class pcabecera extends Activity {
         try {
             lite = new CSQLite(context);
             SQLiteDatabase db = lite.getWritableDatabase();
-            Cursor rs = db.rawQuery("select numero_empleado from agentes where Sesion=1", null);
+            Cursor rs = db.rawQuery("select clave_agente from agentes where Sesion=1", null);
             if (rs.moveToFirst()) {
 
                 clave = rs.getString(0);
@@ -176,7 +177,7 @@ public class pcabecera extends Activity {
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select id_agente from agentes where numero_empleado='"+clave_agente+"'",null);
+        Cursor rs=db.rawQuery("select id_agente from agentes where clave_agente='"+clave_agente+"'",null);
 
         if(rs.moveToFirst()){
             id=rs.getString(0);

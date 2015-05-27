@@ -4,9 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
@@ -38,7 +41,21 @@ public class DetallePedidos extends Activity {
 
         LlenasHasMap();
 
-       adapter=new SimpleAdapter(context,data,R.layout.row_simple_detalle,new String[]{"A","B","C"},new int[]{R.id.textView4,R.id.textView5,R.id.textView6});
+        adapter=new SimpleAdapter(context,data,R.layout.row_simple_detalle,new String[]{"A","B","C"},new int[]{R.id.textView4,R.id.textView5,R.id.textView6}){
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+
+                convertView = super.getView(position, convertView, parent);
+
+                if (position % 2 == 0) {
+                    convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                }else {
+                    convertView.setBackgroundColor(Color.parseColor("#F2F2F2"));
+                }
+                //return super.getView(position, convertView, parent);
+                return convertView;
+            }
+        };
        listView=(ListView)findViewById(R.id.listView);
        listView.setAdapter(adapter);
 

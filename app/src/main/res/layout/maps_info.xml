@@ -2,34 +2,85 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="1">
+    android:weightSum="1"
+    android:background="#3B3B3B">
 
-    <TextView
+    <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
-        android:text="@string/visitas"
-        android:id="@+id/textView4"
-        android:background="#ffff8a3c"
-        android:textColor="@android:color/white"
-        android:layout_weight="0.08"
-        android:textSize="18dp"
-        android:textStyle="italic" />
+        android:id="@+id/gridLayout6"
+        android:layout_alignParentTop="true"
+        android:columnCount="4"
+        android:rowCount="1"
+        android:useDefaultMargins="true"
+        android:rowOrderPreserved="false"
+        android:longClickable="false"
+        android:focusableInTouchMode="false"
+        android:focusable="false"
+        android:columnOrderPreserved="false"
+        android:clickable="false"
+        android:layout_alignParentStart="false"
+        android:layout_gravity="left|center"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
+            android:text="@string/visitas"
+            android:id="@+id/textView4"
+            android:textColor="@android:color/white"
+            android:layout_weight="0.08"
+            android:textStyle="bold"
+            android:layout_gravity="left" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
+            android:text="0/12"
+            android:id="@+id/textView9"
+            android:textColor="@android:color/white"
+            android:layout_weight="0.08"
+            android:textStyle="normal"
+            android:layout_marginRight="30dp"
+            android:layout_gravity="left" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/por_visitar"
+            android:id="@+id/textView25"
+            android:textColor="@android:color/white"
+            android:layout_weight="0.08"
+            android:textStyle="bold"
+            android:layout_gravity="right"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
+            android:text="12/12"
+            android:id="@+id/textView78"
+            android:textColor="@android:color/white"
+            android:layout_weight="0.08"
+            android:textStyle="normal" />
+    </GridLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
-        android:layout_weight="0.08">
+        android:layout_weight="0.08"
+        android:background="#3b3b3b">
 
         <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/map"
+            xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+            android:layout_height="match_parent" android:id="@+id/map"
             tools:context="com.marzam.com.appventas.MapsActivity"
             android:name="com.google.android.gms.maps.SupportMapFragment" />
-
     </RelativeLayout>
 
 </LinearLayout>

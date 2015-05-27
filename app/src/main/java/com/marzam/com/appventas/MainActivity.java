@@ -26,6 +26,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -92,6 +94,7 @@ public class  MainActivity extends Activity {
     TextView txtUsuario;
     String txt="datos.txt";
     Bundle bundle;
+    TextView txtNumber;
     ProgressDialog progressApk;
     private static String file_url = "http://190.1.4.120/ActualizacionAndroid";
 
@@ -99,16 +102,23 @@ public class  MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.login);
-        setTitle("Ventas");
+        setTitle("Fuerza de ventas");
         context=this;
 
         CrearDirectorioDownloads();
-        txtUsuario=(TextView)findViewById(R.id.textViewTitle);
+
+        txtUsuario=(TextView)findViewById(R.id.txtName);
+        txtNumber=(TextView)findViewById(R.id.txtNumber);
+
         locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
         ShowEnableGPS();//Muestra el alert en caso de que el GPS del dispositivo se encuentre desactivado
 
-        ObtenerArchivos2();
+        //ObtenerArchivos2();
 
         if(VerificarActualizacion())
                     Show_New_Version();
@@ -227,12 +237,12 @@ public class  MainActivity extends Activity {
             AlertDialog.Builder alert=new AlertDialog.Builder(context);
             alert.setTitle("Aviso");
             alert.setMessage("Desea activar el GPS");
-            alert.setPositiveButton("SI",new DialogInterface.OnClickListener() {
+            alert.setPositiveButton("SI", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
 
-                    Intent settingIntent=new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    settingIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                    Intent settingIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    settingIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                     startActivity(settingIntent);
 
 
@@ -244,6 +254,8 @@ public class  MainActivity extends Activity {
 
                 }
             });
+
+            alert.setCancelable(false);
             AlertDialog alertDialog=alert.create();
             alertDialog.show();
         }
@@ -258,30 +270,31 @@ public class  MainActivity extends Activity {
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Ingrese su numero de agente");
         alert.setView(view);
-        alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+        alert.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
-                String agente=((EditText)view.findViewById(R.id.editText2)).getText().toString();
+                String agente = ((EditText) view.findViewById(R.id.editText2)).getText().toString();
 
-                if(!ExistsBD()) {
+                if (!ExistsBD()) {
                     new Task_DownBD().execute(agente);
                     pd = ProgressDialog.show(context, "Obteniendo información de rutas", "Cargando", true, false);
-                }else{
+                } else {
                     ActualizarSesionAgente(agente);
                     MostrarDatos_Agente();
-                    EliminarRegistrationId(context,"","");
+                    EliminarRegistrationId(context, "", "");
                 }
 
             }
         });
-        alert.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
+        /*alert.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
 
             }
-        });
+        });*/
+        alert.setCancelable(false);
         AlertDialog alertDialog=alert.create();
         alertDialog.show();
 
@@ -519,6 +532,7 @@ try {
         }
 
     }//Pruebas
+
     public boolean ExistsBD(){
 
         File file=new File("/data/data/com.marzam.com.appventas/databases/db.db");
@@ -530,6 +544,7 @@ try {
         }
 
     }  //Verifica si existe la base de Datos
+
     public void MostrarDatos_Agente(){
 
     lite = new CSQLite(context);
@@ -540,13 +555,15 @@ try {
 
     if (rs.moveToFirst()) {
         usuario = rs.getString(0) + "\n" + rs.getString(1);
-        txtUsuario.setText(usuario);
+        txtUsuario.setText(rs.getString(1));
+        txtNumber.setText(rs.getString(0));
         nombre_agente = rs.getString(1);
     } else {
         Show_IngresarUsuario();
     }
 
     } //Si existe la base de datos y esta seleccionado el usuario lo mostrara en la pantalla
+
     public void ActualizarSesionAgente(String clave){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
@@ -557,6 +574,7 @@ try {
         db.close();
         lite.close();
     }
+
     public void  unStreamZip(byte[] data){
 
 
@@ -636,6 +654,7 @@ try {
             }
         }
     }
+
     private class Task_RestaurarBD extends  AsyncTask<String,Void,Object>{
 
 
@@ -876,6 +895,7 @@ try {
             return false;
         }
     }
+
     public void AgregarColumnProductos(){
 
         lite=new CSQLite(context);
@@ -1062,6 +1082,7 @@ try {
         String err="";
         CopiarArchivos2(files);
     }
+
     public void CopiarArchivos2(File[] files){
         byte[] buffer=new byte[1024];
         int length;
@@ -1113,6 +1134,7 @@ try {
         }
 
     }
+
     public Boolean existTxt(String fileName){
 
           for(String tmp:fileList()){

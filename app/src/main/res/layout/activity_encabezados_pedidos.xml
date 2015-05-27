@@ -2,7 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.marzam.com.appventas.EstatusPedidos.Encabezados_pedidos">
+    tools:context="com.marzam.com.appventas.EstatusPedidos.Encabezados_pedidos"
+    android:background="#3b3b3b">
 
 
     <ListView

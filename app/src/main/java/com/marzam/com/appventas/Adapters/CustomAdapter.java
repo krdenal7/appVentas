@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.AsyncTask;
+import android.text.Html;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,85 +66,85 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
         this.modelitems=resource;
     }
 
-
     @Override
     public View getView(final int position, View convertView,ViewGroup parent){
 
 
 
-try {
-        /*Obtiene el contexto de la actividad y la pasa al convertView*/
+        try {
+                /*Obtiene el contexto de la actividad y la pasa al convertView*/
 
-    LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-    convertView = inflater.inflate(R.layout.row, parent, false);
-
-
-        /*Botones*/
-
-        /*Botones*/
-
-    int valor = modelitems[position].getCantidad();
+            LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+            convertView = inflater.inflate(R.layout.row, parent, false);
 
 
-    TextView name = (TextView) convertView.findViewById(R.id.textView12);
-    // cb = (CheckBox)convertView.findViewById(R.id.checkBoxRow);
+                /*Botones*/
 
-    Cantidad = (TextView) convertView.findViewById(R.id.textView29);
-    Cantidad.setText("Cantidad:" + valor);//Envia la cantidad Inicial del producto
+                /*Botones*/
 
-    Precio = (TextView) convertView.findViewById(R.id.textView28);
-    Precio.setPaintFlags(Precio.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-    Precio.setText("Precio Lista: $" + modelitems[position].getPrecio());
+            int valor = modelitems[position].getCantidad();
 
 
-    Precio_neto = (TextView) convertView.findViewById(R.id.textView58);
-    Precio_neto.setText("Precio Final: $" + modelitems[position].getPrecio_neto());
+            TextView name = (TextView) convertView.findViewById(R.id.textView12);
+            // cb = (CheckBox)convertView.findViewById(R.id.checkBoxRow);
 
-    Clasificacion = (TextView) convertView.findViewById(R.id.textViewSubtitle);
-    Clasificacion.setText("Clasificación: " + modelitems[position].getClasificacion());
+            Cantidad = (TextView) convertView.findViewById(R.id.textView29);
+            Cantidad.setText( valor+"" );//Envia la cantidad Inicial del producto
 
-    Oferta = (TextView) convertView.findViewById(R.id.textView59);
-    Oferta.setText("Oferta: " + modelitems[position].getOferta() + "%");
-
-    existencias = (TextView) convertView.findViewById(R.id.textView72);
-    existencias.setText("Existencia: " + modelitems[position].getExistencia());
+            Precio = (TextView) convertView.findViewById(R.id.textView28);
+            //Precio.setPaintFlags(Precio.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            Precio.setText("$" + modelitems[position].getPrecio());
 
 
-    name.setText(modelitems[position].getName());//Asigna el nombre a los Texview
-    //cb.setClickable(false);
-    if (modelitems[position].getValue() == 1) {
-        //  cb.setChecked(true);
-        convertView.setBackgroundColor(Color.parseColor("#89BBEE"));
-    } else {
-        convertView.setBackgroundColor(Color.TRANSPARENT);
-        //  cb.setChecked(false);
-    }
+            Precio_neto = (TextView) convertView.findViewById(R.id.textView58);
+            Precio_neto.setText("$" + modelitems[position].getPrecio_neto());
+
+            Clasificacion = (TextView) convertView.findViewById(R.id.textViewSubtitle);
+            Clasificacion.setText(modelitems[position].getClasificacion());
+
+            Oferta = (TextView) convertView.findViewById(R.id.textView59);
+            Oferta.setText(modelitems[position].getOferta() + "%");
+
+            existencias = (TextView) convertView.findViewById(R.id.textView72);
+            existencias.setText(modelitems[position].getExistencia());
 
 
-    convertView.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
+            name.setText(modelitems[position].getName());//Asigna el nombre a los Texview
+            //cb.setClickable(false);
+            /*else {
+                convertView.setBackgroundColor(Color.TRANSPARENT);
+                //  cb.setChecked(false);
+            }*/
 
-            ShowDialog(position, view);
 
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    ShowDialog(position, view);
+
+                }
+            });
+
+            if (position % 2 == 0) {
+                convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            }else {
+                convertView.setBackgroundColor(Color.parseColor("#F2F2F2"));
+            }
+
+            if (modelitems[position].getValue() == 1) {
+                //  cb.setChecked(true);
+                convertView.setBackgroundColor(Color.parseColor("#89BBEE"));
+
+            }
+
+        }catch (Exception e){
+            subject="getView";
+            body="Diseño list: "+ e.toString();
+            new sendEmail().execute("");
         }
-    });
-
-
-        /*Se agrega el evento de los botones*/
-
-
-}catch (Exception e){
-    subject="getView";
-    body="Diseño list: "+ e.toString();
-    new sendEmail().execute("");
-}
-
-
-
         return convertView;
     }
-
 
     public void ShowDialog( int position , final View view){
 
@@ -155,7 +156,7 @@ try {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
         alertDialogBuilder.setTitle( "Seleccione una cantidad");
         alertDialogBuilder.setView(botones);
-        alertDialogBuilder.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
+        alertDialogBuilder.setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"),new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog,int id) {
 
@@ -169,8 +170,10 @@ try {
         alertDialog = alertDialogBuilder.create();
         alertDialog.show();
 
-
+        Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
     }
+
     public void ShowDialog_picker(final int posicion, final View view){
 
 
@@ -207,12 +210,11 @@ try {
                 imm.showSoftInput(txtCantidad, InputMethodManager.SHOW_IMPLICIT);
             }
         });
+
         alertDialog_picker.show();
     }
 
-
-
-    public int AgregarProducto(String ean,int cantidad,int isChecked,View view){
+    public int AgregarProducto(String ean,int cantidad,int isChecked,View view,int posicion){
 
         try {
             lite = new CSQLite(context);
@@ -232,18 +234,21 @@ try {
 
                 LlenarModelItems();
                 view.setBackgroundColor(Color.parseColor("#89BBEE"));
-                cant.setText("Cantidad: " + (cantidad + pzas));
+                cant.setText(""+(cantidad + pzas));
 
                 db.close();
                 lite.close();
                 return (cantidad + pzas);
 
             } else {
-                view.setBackgroundColor(Color.TRANSPARENT);
                 db.execSQL("update productos set  Cantidad=" + cantidad + ",isCheck=0 where codigo='" + ean + "'");
                 LlenarModelItems();
-                view.setBackgroundColor(Color.TRANSPARENT);
-                cant.setText("Cantidad: " + cantidad);
+                if (posicion % 2 == 0) {
+                    view.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                }else {
+                    view.setBackgroundColor(Color.parseColor("#F2F2F2"));
+                }
+                cant.setText(""+cantidad);
 
                 db.close();
                 lite.close();
@@ -257,11 +262,12 @@ try {
         }
 
     }
+
     public void Agregar_Producto(View view,int cantidad,int position){
 
 
      try {
-         int pzas = AgregarProducto(modelitems[position].getEan(), cantidad, 1, view);
+         int pzas = AgregarProducto(modelitems[position].getEan(), cantidad, 1, view,position);
 
          if (cantidad != 0) {
              modelitems[position].value = 1;
@@ -277,6 +283,7 @@ try {
      }
 
    }
+
     public void LlenarModelItems(){
 
         lite=new CSQLite(context);
@@ -312,7 +319,6 @@ try {
         lite.close();
     }
 
-
     public String[] ObtenerInfoProductos(int posicion){
         String[] info=new String[3];
         String query="select descripcion,precio_final,Cantidad from productos where codigo='"+modelitems[posicion].getEan()+"'";
@@ -337,6 +343,7 @@ try {
 
         return info;
     }
+
     public void Evento_Botones(View viewBoton, final View content, final int posicion){
 
 

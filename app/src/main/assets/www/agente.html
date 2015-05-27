@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -150,7 +150,7 @@ function graficar(ritmo,pres,venta,numinter)
 					}],
 					}],
 					"arrows": [{
-						"color": "gray",
+						"color": "#FFFFFF",
 						"innerRadius": "1%",
 						"nailRadius": 3,
 						"radius": "100%"
@@ -161,7 +161,7 @@ function graficar(ritmo,pres,venta,numinter)
 						});
 						chart.arrows[0].setValue(venta);
 						chart.arrows[1].setValue(ritmo);
-						}
+}
 
 </script>
 <script>
@@ -212,16 +212,22 @@ function Load(){
 		var var2=parseFloat(ritmo);
 		var var3=parseFloat(presupuesto);
 
+		/*if(!nombre)
+		    nombre = "Luis";
+		if(!var2)
+		    var2 = "44";
+		if(!var3)
+		    var3 = "33";
+		if(!var1)
+		    var1 = "44";*/
 
-
-		
 		agente(nombre.toString());
 		graficar(var2,var3,var1,5);
 
 	}
 </script>
 </head>
-<body class="ui-mobile-viewport ui-overlay-a" onLoad="Load();">
+<body class="ui-mobile-viewport ui-overlay-a" onLoad="Load();" >
 <div data-role="page" class="jqm-demos ui-page ui-page-theme-a ui-page-header-fixed ui-page-footer-fixed ui-page-active" id="Ventas" data-title="Ventas" data-url="panel-fixed-page1" tabindex="0" style="padding-top: 44px; padding-bottom: 44px;">
   <div data-role="header" data-position="fixed" role="banner" class="ui-header ui-bar-inherit ui-header-fixed slidedown ui-fixed-hidden">
   <!--  <h1 class="ui-title" role="heading" aria-level="1">Ventas</h1>
@@ -229,11 +235,20 @@ function Load(){
   <!-- /header -->
   <div class="ui-panel-wrapper">
     <div role="main" class="ui-content jqm-content jqm-fullwidth">
-      <div id="inf" style=" width:90%; margin:0px auto; border-radius:12px 12px 0px 0px; font-size:12px;">
-      <span id="nombre"></span> </div>
-      <div style="width:90%;  border-radius:0px 0px 12px 12px; margin:1px auto;">
-        <div id="chartdiv" style="width:90%; height:200px;"></div>
-        <div style="width:100%; margin:0px auto; font-size:12px;">
+        </br>
+        </br>
+      <div id="inf" style=" width: 90%; margin: 0px auto; border-radius: 12px 12px 0px 0px; font-size: 12px; color: #FFFFFF;">
+          <span id="nombre"></span> 
+      </div>
+        </br>
+        </br>
+      <div style="width: 90%; border-radius: 0px 0px 12px 12px; margin: 1px auto; ">
+          <div id="chartdiv" style="width: 90%; height: 200px; margin: 0px auto; top: 50%;">
+
+          </div>
+        <div style="width: 100%; margin: 0px auto; font-size: 12px; color: #FFFFFF;">
+            </br>
+            </br>
           <table>
             <thead>
               <tr>
@@ -246,10 +261,10 @@ function Load(){
                 <td>Presupuesto</td><td><span id="precol" style="color:green;">█</span> <span id="presupuesto"></span></td>
               </tr>
              <tr>
-                 <td>Vendido </td> <td><span id="vencol" style="color:silver;">█</span><span id="vendido"></span></td>
+                 <td>Vendido </td> <td><span id="vencol" style="color:silver;">█</span> <span id="vendido"></span></td>
              </tr>
             <tr>
-                <td>Ritmo </td> <td><span id="ritcol" style="color:blue;">█</span><span id="ritmo"></span></td>
+                <td>Ritmo </td> <td><span id="ritcol" style="color:blue;">█</span> <span id="ritmo"></span></td>
             </tr>
             </tbody>
             <tfoot>

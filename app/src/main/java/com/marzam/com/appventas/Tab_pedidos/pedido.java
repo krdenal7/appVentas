@@ -6,12 +6,14 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TabHost;
+import android.widget.TextView;
 
 import com.marzam.com.appventas.Gesture.Dib_firma;
 import com.marzam.com.appventas.KPI.KPI_General;
@@ -54,6 +56,13 @@ try {
     tabHost.addTab(spec2);
     tabHost.addTab(spec3);
     tabHost.setCurrentTab(1);
+
+    for(int i=0;i<tabHost.getTabWidget().getChildCount();i++)
+    {
+        TextView tv = (TextView) tabHost.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
+        tv.setTextColor( Color.parseColor("#FFFFFF") );
+    }
+
 
     Intent intent1=new Intent(this,pcatalogo.class);
     startActivity(intent1);

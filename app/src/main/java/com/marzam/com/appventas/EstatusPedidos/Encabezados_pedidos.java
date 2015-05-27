@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -39,6 +41,7 @@ public class Encabezados_pedidos extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_encabezados_pedidos);
         id_cliente=getIntent().getStringExtra("cliente");
+        String name_cliente=getIntent().getStringExtra("clienteNombre");
         setTitle(id_cliente);
         context=this;
 
@@ -50,7 +53,21 @@ public class Encabezados_pedidos extends Activity {
         }
 
         LlenarHasMap(id_cliente);
-        adapter=new SimpleAdapter(context,data,R.layout.row_simple_encabezado,new String[]{"A","B","C","D"},new int[]{R.id.textView5,R.id.textView6,R.id.textView7,R.id.textView8});
+        adapter=new SimpleAdapter(context,data,R.layout.row_simple_encabezado,new String[]{"A","B","C","D"},new int[]{R.id.textView5,R.id.textView6,R.id.textView7,R.id.textView8}){
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+
+                convertView = super.getView(position, convertView, parent);
+
+                if (position % 2 == 0) {
+                    convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                }else {
+                    convertView.setBackgroundColor(Color.parseColor("#F2F2F2"));
+                }
+                //return super.getView(position, convertView, parent);
+                return convertView;
+            }
+        };
         list=(ListView)findViewById(R.id.listEncabezado);
         list.setAdapter(adapter);
 

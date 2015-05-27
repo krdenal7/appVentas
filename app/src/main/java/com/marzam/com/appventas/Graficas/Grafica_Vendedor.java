@@ -38,6 +38,7 @@ public class Grafica_Vendedor extends Activity {
 
 
         webView=(WebView)findViewById(R.id.webView);
+        webView.setScrollContainer(false);
         WebView();
 
 

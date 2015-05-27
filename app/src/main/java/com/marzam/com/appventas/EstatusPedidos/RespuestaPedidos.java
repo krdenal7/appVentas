@@ -5,11 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -49,7 +51,21 @@ public class RespuestaPedidos extends Activity {
         context=this;
 
          LlenarHasMap(Consultar_Agente_Activo());
-         simpleAdapter=new SimpleAdapter(context,data,R.layout.row_respuestas_principal,new String[]{"A","B"},new int[]{R.id.textViewTitle,R.id.textViewSubtitle});
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.row_respuestas_principal,new String[]{"A","B"},new int[]{R.id.txtName,R.id.textViewSubtitle}){
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+
+                convertView = super.getView(position, convertView, parent);
+
+                if (position % 2 == 0) {
+                    convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                }else {
+                    convertView.setBackgroundColor(Color.parseColor("#F2F2F2"));
+                }
+                //return super.getView(position, convertView, parent);
+                return convertView;
+            }
+        };
 
         listView=(ListView)findViewById(R.id.listEncabezado);
         listView.setAdapter(simpleAdapter);
@@ -62,6 +78,7 @@ public class RespuestaPedidos extends Activity {
 
                 Intent intent=new Intent(context,Encabezados_pedidos.class);
                        intent.putExtra("cliente",data.get(i).get("B").toString());
+                       intent.putExtra("clienteNombre",data.get(i).get("A").toString());
                        startActivity(intent);
 
             }

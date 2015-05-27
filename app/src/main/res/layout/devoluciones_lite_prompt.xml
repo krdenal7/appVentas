@@ -69,9 +69,10 @@
             android:hint="0"
             android:autoText="false"
             android:focusable="true"
-            android:layout_alignTop="@+id/idDevLitePromptProductAmount"
+            android:layout_below="@+id/idDevLitePromptProduct"
             android:layout_toRightOf="@+id/idDevLitePromptProductAmount"
-            android:layout_toEndOf="@+id/idDevLitePromptProductAmount" />
+            android:layout_toEndOf="@+id/idDevLitePromptProductAmount"
+            android:layout_marginTop="7dp" />
 
         <LinearLayout
             android:orientation="horizontal"

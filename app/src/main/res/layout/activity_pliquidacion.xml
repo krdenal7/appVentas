@@ -5,168 +5,198 @@
     android:gravity="center_horizontal"
     android:textAlignment="center">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Subtotal:"
-        android:id="@+id/textView13"
-        style="@android:style/TextAppearance.DeviceDefault.Small"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="$0.00"
-        android:id="@+id/textView14"
-        style="@android:style/TextAppearance.DeviceDefault.Small"
-        android:layout_alignParentTop="true"
-        android:layout_alignRight="@+id/textView16"
-        android:layout_alignEnd="@+id/textView16" />
+        <GridLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/gridLayout4"
+            android:layout_alignParentTop="true"
+            android:columnCount="2"
+            android:rowCount="6"
+            android:useDefaultMargins="true"
+            android:rowOrderPreserved="false"
+            android:longClickable="false"
+            android:focusableInTouchMode="false"
+            android:focusable="false"
+            android:columnOrderPreserved="false"
+            android:clickable="false"
+            android:layout_alignParentStart="false"
+            android:layout_margin="10dp"
+            android:layout_below="@+id/textView26" >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="IVA:"
-        android:id="@+id/textView15"
-        android:layout_toStartOf="@+id/textView14"
-        android:layout_marginTop="10dp"
-        style="@android:style/TextAppearance.DeviceDefault.Small"
-        android:layout_below="@+id/textView13"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Subtotal:"
+                android:id="@+id/textView13"
+                style="@android:style/TextAppearance.DeviceDefault.Small"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:textColor="#FFFFFF" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="16 %"
-        android:id="@+id/textView16"
-        android:layout_alignBottom="@+id/textView15"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        style="@android:style/TextAppearance.DeviceDefault.Small" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="$0.00"
+                android:id="@+id/textView14"
+                style="@android:style/TextAppearance.DeviceDefault.Small"
+                android:layout_alignParentTop="true"
+                android:layout_alignRight="@+id/textView16"
+                android:layout_alignEnd="@+id/textView16"
+                android:textColor="#FFFFFF" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="IEPS:"
-        android:id="@+id/textView17"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/textView15"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        style="@android:style/TextAppearance.DeviceDefault.Small" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="IVA:"
+                android:id="@+id/textView15"
+                android:layout_toStartOf="@+id/textView14"
+                style="@android:style/TextAppearance.DeviceDefault.Small"
+                android:layout_below="@+id/textView13"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:textColor="#FFFFFF" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="0 %"
-        android:id="@+id/textView18"
-        android:layout_alignBottom="@+id/textView17"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        style="@android:style/TextAppearance.DeviceDefault.Small" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="16 %"
+                android:id="@+id/textView16"
+                android:layout_alignBottom="@+id/textView15"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                style="@android:style/TextAppearance.DeviceDefault.Small"
+                android:textColor="#FFFFFF" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Descuentos:"
-        android:id="@+id/textView19"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/textView17"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        style="@android:style/TextAppearance.DeviceDefault.Small" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="IEPS:"
+                android:id="@+id/textView17"
+                android:layout_below="@+id/textView15"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                style="@android:style/TextAppearance.DeviceDefault.Small"
+                android:textColor="#FFFFFF" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="$0.00"
-        android:id="@+id/textView20"
-        android:layout_alignBottom="@+id/textView19"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        style="@android:style/TextAppearance.DeviceDefault.Small" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="0 %"
+                android:id="@+id/textView18"
+                android:layout_alignBottom="@+id/textView17"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                style="@android:style/TextAppearance.DeviceDefault.Small"
+                android:textColor="#FFFFFF" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Total:"
-        android:id="@+id/textView21"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/textView19"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        style="@android:style/TextAppearance.DeviceDefault.Small" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Descuentos:"
+                android:id="@+id/textView19"
+                android:layout_below="@+id/textView17"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                style="@android:style/TextAppearance.DeviceDefault.Small"
+                android:textColor="#FFFFFF" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="$3,000.00"
-        android:id="@+id/textView22"
-        android:layout_alignBottom="@+id/textView21"
-        android:layout_alignRight="@+id/textView20"
-        android:layout_alignEnd="@+id/textView20"
-        style="@android:style/TextAppearance.DeviceDefault.Small" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="$0.00"
+                android:id="@+id/textView20"
+                android:layout_alignBottom="@+id/textView19"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                style="@android:style/TextAppearance.DeviceDefault.Small"
+                android:textColor="#FFFFFF" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Cantidad de productos:"
-        android:id="@+id/textView23"
-        style="@android:style/TextAppearance.DeviceDefault.Small"
-        android:layout_below="@+id/textView21"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="10dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Total:"
+                android:id="@+id/textView21"
+                android:layout_below="@+id/textView19"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                style="@android:style/TextAppearance.DeviceDefault.Small"
+                android:textColor="#FFFFFF" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="10"
-        android:id="@+id/textView24"
-        android:layout_alignBottom="@+id/textView23"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        style="@android:style/TextAppearance.DeviceDefault.Small" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="$3,000.00"
+                android:id="@+id/textView22"
+                android:layout_alignBottom="@+id/textView21"
+                android:layout_alignRight="@+id/textView20"
+                android:layout_alignEnd="@+id/textView20"
+                style="@android:style/TextAppearance.DeviceDefault.Small"
+                android:textColor="#FFFFFF" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Firma"
-        android:id="@+id/textView26"
-        android:layout_below="@+id/textView23"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="10dp"
-        android:layout_alignRight="@+id/textView24"
-        android:layout_alignEnd="@+id/textView24"
-        android:gravity="center_vertical|clip_horizontal"
-        android:textColor="@android:color/white"
-        android:background="#ffff571e" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Cantidad de productos:"
+                android:id="@+id/textView23"
+                style="@android:style/TextAppearance.DeviceDefault.Small"
+                android:layout_below="@+id/textView21"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:textColor="#FFFFFF" />
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/imageView3"
-        android:layout_below="@+id/textView26"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/textView24"
-        android:layout_alignEnd="@+id/textView24" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="10"
+                android:id="@+id/textView24"
+                android:layout_alignBottom="@+id/textView23"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                style="@android:style/TextAppearance.DeviceDefault.Small"
+                android:textColor="#FFFFFF" />
+        </GridLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Firma"
+            android:id="@+id/textView26"
+            android:gravity="center_vertical|clip_horizontal"
+            android:textColor="@android:color/white"
+            android:background="#ffff571e"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_above="@+id/gtextView26"/>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/imageView3"
+            android:layout_below="@+id/textView26"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignEnd="@+id/textView24"
+            android:background="#AAFFFFFF" />
+    </LinearLayout>
 
 </RelativeLayout>

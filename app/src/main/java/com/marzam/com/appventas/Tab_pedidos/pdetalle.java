@@ -8,9 +8,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.Html;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -18,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -79,7 +82,21 @@ public class pdetalle extends Activity {
 
         Productos();
         lista=(ListView)findViewById(R.id.listEncabezado);
-        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64});
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64}){
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+
+                convertView = super.getView(position, convertView, parent);
+
+                if (position % 2 == 0) {
+                    convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                }else {
+                    convertView.setBackgroundColor(Color.parseColor("#F2F2F2"));
+                }
+                //return super.getView(position, convertView, parent);
+                return convertView;
+            }
+        };
         lista.setAdapter(simpleAdapter);
         NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
         DecimalFormat dec=(DecimalFormat)nf;
@@ -108,7 +125,21 @@ public class pdetalle extends Activity {
                         lista.setAdapter(simpleAdapter);
                 }else {
 
-                        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64});
+                    simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64}){
+                        @Override
+                        public View getView(int position, View convertView, ViewGroup parent) {
+
+                            convertView = super.getView(position, convertView, parent);
+
+                            if (position % 2 == 0) {
+                                convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                            }else {
+                                convertView.setBackgroundColor(Color.parseColor("#F2F2F2"));
+                            }
+                            //return super.getView(position, convertView, parent);
+                            return convertView;
+                        }
+                    };
                         lista.setAdapter(simpleAdapter);
 
                 }
@@ -124,7 +155,21 @@ public class pdetalle extends Activity {
             @Override
             public void onClick(View view) {
                 txtBuscar.setText("");
-                simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64});
+                simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64}){
+                    @Override
+                    public View getView(int position, View convertView, ViewGroup parent) {
+
+                        convertView = super.getView(position, convertView, parent);
+
+                        if (position % 2 == 0) {
+                            convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                        }else {
+                            convertView.setBackgroundColor(Color.parseColor("#F2F2F2"));
+                        }
+                        //return super.getView(position, convertView, parent);
+                        return convertView;
+                    }
+                };
                 lista.setAdapter(simpleAdapter);
             }
         });
@@ -147,12 +192,12 @@ public class pdetalle extends Activity {
         alertDialogBuilder.setTitle( "Seleccione una cantidad");
         alertDialogBuilder.setView(viewButton);
         alertDialogBuilder.setCancelable(false);
-        alertDialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+        alertDialogBuilder.setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int id) {
 
 
-               Actualizar();
+                Actualizar();
 
             }
 
@@ -163,6 +208,8 @@ public class pdetalle extends Activity {
         alertDialog = alertDialogBuilder.create();
         alertDialog.show();
 
+        Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
 
     }
 
@@ -186,6 +233,7 @@ public class pdetalle extends Activity {
         AlertDialog alertDialog=alert.create();
         alertDialog.show();
     }
+
     public void ShowDialog_picker(final String codigo){
 
         final EditText txtCantidad=new EditText(context);
@@ -228,8 +276,6 @@ public class pdetalle extends Activity {
 
     }
 
-
-
     public void Productos(){
 
 
@@ -249,8 +295,8 @@ public class pdetalle extends Activity {
         int cont=rs.getCount();
         while (rs.moveToNext()){
             producto_row.put("A",rs.getString(0));
-            producto_row.put("B","Precio: $"+rs.getString(1));
-            producto_row.put("C","Cantidad: "+rs.getString(2));
+            producto_row.put("B","$"+rs.getString(1));
+            producto_row.put("C",""+rs.getString(2));
             producto_row.put("D","codigo: "+rs.getString(3));
             data.add(producto_row);
             producto_row=new HashMap<String, String>();
@@ -283,6 +329,7 @@ public class pdetalle extends Activity {
 
         return codigo;
     }
+
     public String[] ObtenerInfoProductos(String ean){
         String[] info=new String[3];
 
@@ -511,7 +558,21 @@ public class pdetalle extends Activity {
         monto=0.00;
         Productos();
         lista=(ListView)findViewById(R.id.listEncabezado);
-        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64});
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64}){
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+
+                convertView = super.getView(position, convertView, parent);
+
+                if (position % 2 == 0) {
+                    convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                }else {
+                    convertView.setBackgroundColor(Color.parseColor("#F2F2F2"));
+                }
+                //return super.getView(position, convertView, parent);
+                return convertView;
+            }
+        };
         lista.setAdapter(simpleAdapter);
         NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
         DecimalFormat dec=(DecimalFormat)nf;

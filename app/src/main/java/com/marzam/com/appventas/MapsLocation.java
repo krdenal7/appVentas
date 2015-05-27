@@ -92,7 +92,8 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     static final int REQUEST_TAKE_PHOTO = 1;
 
     CSQLite lite;
-    TextView txtCte;
+    TextView txtVisitados;
+    TextView txtPendientes;
     GPSHelper gpsHelper;
 
     private static final LocationRequest REQUEST = LocationRequest.create()
@@ -108,7 +109,10 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         setTitle("Mapa");
         context=this;
         CrearTabla();
-        txtCte=(TextView)findViewById(R.id.textView4);
+
+        txtVisitados=(TextView)findViewById(R.id.textView9);
+        txtPendientes=(TextView)findViewById(R.id.textView78);
+
         ObtenerCtesHoy(ObtenerAgenteActivo());
         ObtenerClientesVisitados();
 
@@ -119,11 +123,12 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     }
 
 
-    public void ShowCteH(){
+    public void ShowCteH()
+    {
 
         final CharSequence[] list=ObtenerCtesHoy(ObtenerAgenteActivo());
 
-        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        AlertDialog.Builder alert=new AlertDialog.Builder(context, AlertDialog.THEME_DEVICE_DEFAULT_DARK);
         alert.setTitle("Clientes de hoy");
         alert.setItems(list, new DialogInterface.OnClickListener() {
             @Override
@@ -141,11 +146,12 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         alertDialogH.show();
 
     }
+
     public void ShowCteT(){
         final CharSequence[] list=ObtenerCteTotales(ObtenerAgenteActivo());
 
 
-        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        AlertDialog.Builder alert=new AlertDialog.Builder(context, AlertDialog.THEME_DEVICE_DEFAULT_DARK);
         alert.setTitle("Clientes");
         alert.setItems(list,new DialogInterface.OnClickListener() {
             @Override
@@ -160,6 +166,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         alertDialogT.show();
 
     }
+
     public void ShowBuscarCte(){
 
         final EditText textView=new EditText(context);
@@ -286,6 +293,25 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         SQLiteDatabase db=lite.getWritableDatabase();
 
         db.execSQL("CREATE TABLE IF NOT EXISTS RelacionClientes(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,id_largo varchar(50),id_corto varchar(50))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS clientesDr( " +
+                " [id_cliente] [varchar](10) , " +
+                " [nombre] [varchar](40) , " +
+                " [rfc] [varchar](15) , " +
+                " [correo] [varchar](50) , " +
+                " [telefono] [nvarchar](15) , " +
+                " [cp] [nvarchar](10) , " +
+                " [colonia] [varchar](50) , " +
+                " [calle] [varchar](30) , " +
+                " [calle1] [varchar](30) , " +
+                " [calle2] [varchar](30) , " +
+                " [referencias] [varchar](500) , " +
+                " [no_exterior] [int] , " +
+                " [delegacion] [varchar](50) , " +
+                " [estado] [varchar](30) , " +
+                " [id_almacen] [varchar](5) , " +
+                " [ruta] [varchar](30) , " +
+                " [no_interior] [int] , " +
+                " [estatus][varchar](30))");
 
         db.close();
         lite.close();
@@ -453,6 +479,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
            return resp;
     } //Verifica si ya se encuentra iniciada una visita con algún cliente //Principal
+
     public boolean Verificar_ClienteExiste(String cliente,String numero_emp){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
@@ -569,7 +596,8 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
             }
         }
 
-        txtCte.setText("Visitados:"+visitados+"/"+total+"   Por visitar:"+(total-visitados)+"/"+total+"");
+        txtVisitados.setText( visitados+"/"+total );
+        txtPendientes.setText( (total-visitados)+"/"+total );
 
     }//HACE EL CALCULO PARA MOSTRAR EN LA PANTALLA LOS CLIENTES QUE HAN SIDO VISITADOS Y LOS FALTANTES
 

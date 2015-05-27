@@ -11,8 +11,7 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@+id/idBtnFinishReturnProduct">
+            android:layout_height="match_parent">
 
             <ImageView
                 android:layout_width="match_parent"
@@ -34,7 +33,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:id="@+id/conteinerTabs">
+                android:id="@+id/conteinerTabs"
+                android:background="#3B3B3B">
 
                 <TabWidget
                     android:id="@android:id/tabs"
@@ -165,12 +165,13 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:id="@+id/idSetDevLiteCaptIconSearch"
-                                            android:src="@drawable/lupa"
+                                            android:src="@drawable/bar_code"
                                             android:background="#00000000"
                                             android:paddingLeft="3dp"
                                             android:layout_alignParentTop="true"
                                             android:layout_alignParentLeft="true"
-                                            android:layout_alignParentStart="true" />
+                                            android:layout_alignParentStart="true"
+                                            android:paddingTop="3dp" />
 
                                         <ImageButton
                                             android:layout_width="wrap_content"
@@ -215,7 +216,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:id="@+id/idSetDevLiteCaptProductList"
-                                android:background="#000000"
+                                android:background="#3B3B3B"
                                 android:scrollingCache="false"
                                 android:cacheColorHint="@android:color/white"
 
@@ -472,16 +473,16 @@
 
 
                                 <Button
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
+                                    android:layout_width="150dp"
+                                    android:layout_height="50dp"
                                     android:text="@string/txtDevLiteConfAddPackage"
                                     android:id="@+id/idBtnDevLiteConfAddPackage"
                                     android:layout_gravity="center_horizontal"
-                                    android:background="@color/colorMarzam"
                                     android:textColor="#FFFFFF"
                                     android:paddingLeft="20dp"
                                     android:paddingRight="20dp"
-                                    android:layout_marginTop="30dp" />
+                                    android:layout_marginTop="30dp"
+                                    android:background="@drawable/bluebutton" />
 
                             </LinearLayout>
                         </ScrollView>
@@ -493,21 +494,15 @@
 
         <Button
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:text="@string/txtBtnFinishReturnProduct"
             android:id="@+id/idBtnFinishReturnProduct"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:background="@color/colorMarzam"
+            android:background="@drawable/bluebutton"
             android:textSize="15sp"
             android:textColor="#FFFFFF" />
 
     </RelativeLayout>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button8" />
 
 </LinearLayout>

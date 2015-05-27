@@ -1,21 +1,27 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.marzam.com.appventas.Tab_pedidos.pcatalogo">
+    android:layout_height="match_parent"
+    tools:context="com.marzam.com.appventas.Tab_pedidos.pcatalogo"
+    android:background="#3b3b3b"
+    android:paddingTop="15dp">
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/editText4"
-        android:hint="Buscar:"
         android:layout_toStartOf="@+id/imageButton2"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:focusable="true" />
+        android:focusable="true"
+        android:hint="Buscar"
+        android:background="@drawable/background_txtfile"
+        android:paddingLeft="5dp"
+        android:paddingRight="40dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_alignParentRight="true"
+        android:singleLine="true" />
 
     <ListView
         android:layout_width="wrap_content"
@@ -29,10 +35,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/imageButton2"
-        android:layout_alignBottom="@+id/editText4"
+        android:src="@drawable/exis"
+        android:background="@android:color/transparent"
+        android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:src="@android:drawable/ic_notification_clear_all"
-        android:background="@android:color/transparent" />
+        android:layout_marginRight="10dp" />
 
 </RelativeLayout>

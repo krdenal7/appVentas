@@ -84,5 +84,7 @@
     <string name="txtDevLiteCaptSearchByMarzamCode">Buscar por codigo marzam</string>
     <string name="txtDevLiteCaptSearchByBarCode">Buscar por código de barras</string>
     <string name="title_activity_direccion">Dirección</string>
+    <string name="por_visitar">Por visitar:</string>
+
 
 </resources>

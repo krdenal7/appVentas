@@ -67,6 +67,7 @@ public class KPI_General extends Activity {
         estatus.setText(estatus_cliente);
 
         webViews=(WebView)findViewById(R.id.webView2);
+        webViews.setScrollContainer(false);
         WebView();
 
 
@@ -155,6 +156,7 @@ public class KPI_General extends Activity {
 
         return id;
     }
+
     public String Obtener_Nombre(){
 
         lite=new CSQLite(context);
@@ -177,6 +179,7 @@ public class KPI_General extends Activity {
 
         return cliente;
     }
+
     public String ObtenerClavedeAgente(){
 
         lite=new CSQLite(context);
@@ -192,6 +195,7 @@ public class KPI_General extends Activity {
 
         return clave;
     }
+
     public String ObtenerId_cliente(){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
@@ -228,6 +232,7 @@ public class KPI_General extends Activity {
 
         return json;
     }
+
     public void Extraer_json(String json){
 
         String estatus="20";
@@ -368,8 +373,8 @@ public class KPI_General extends Activity {
         Cursor rs=db.rawQuery("select menu from funciones_menu where id_menu in (select id_menu from menu_fuerzas " +
                 "where id_fuerza=(select id_fuerza from agentes where numero_empleado=?))",new String[]{agente});
 
-         if(rs.getCount()<=0)
-                 return new String[]{""};
+        if(rs.getCount()<=0)
+            return new String[]{""};
 
         String[] menu=new String[rs.getCount()];
         int contador=0;

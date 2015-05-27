@@ -58,6 +58,19 @@ public class Crear_precioFinal {
     boolean bandera2=false;
     boolean bandera3=false;
 
+    boolean isBandera1=false;
+    boolean isBandera2=false;
+    boolean isBandera3=false;
+
+    Thread UpdateH1=null;
+    Thread UpdateH2=null;
+    Thread UpdateH3=null;
+
+
+    Thread th1;
+    Thread th2;
+    Thread th3;
+    Thread thPrincipal;
 
 
     public boolean Ejecutar(Context context){
@@ -70,15 +83,120 @@ public class Crear_precioFinal {
 
         /*6-.*/Llenar_precioFinal_precio();
 
+        th1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+         /*1-.*/Obtener_Prodcutos_Descliente();
+         /*2-.*/Generar_PrecioFinal_Descliente();
+                Crear_precioFinal.this.bandera1 = true;
+                Log.e("Dentro del hilo 1","Termino");
+            }
+        });
+        th1.start();
 
-        final Thread thPrincipal = new Thread(new Runnable() {
+        th2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+         /*3-.*///data.clear();
+        /*4-.*/Obtener_Productos_DescMenor();
+        /*5-.*/Generar_PrecioFinal_DescMenor();
+               Crear_precioFinal.this.bandera2 = true;
+                Log.e("Dentro del hilo 2","Termino");
+
+            }
+        });
+        th2.start();
+
+        th3 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+        /*6-.*/Obtener_Productos_SoloOferta();
+        /*7-.*/Generar_PrecioFinal_SoloOferta();
+               Crear_precioFinal.this.bandera3 = true;
+               Log.e("Dentro del hilo 3","Termino");
+
+            }
+        });
+        th3.start();
+
+
+        UpdateH1=new Thread(new Runnable() {
             @Override
             public void run() {
 
-                while(!Crear_precioFinal.this.bandera1
-                        ||!Crear_precioFinal.this.bandera2
-                        ||!Crear_precioFinal.this.bandera3) {
+                UpdateOfertas1();
+                InsertPrecioFinal1();
+                Crear_precioFinal.this.isBandera1=true;
+                Log.e("Dentro del hilo 1.1","Termino");
+
+            }
+        });
+
+        UpdateH2=new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                UpdateOfertas2();
+                InsertPrecioFinal2();
+                Crear_precioFinal.this.isBandera2=true;
+                Log.e("Dentro del hilo 2.2","Termino");
+
+            }
+        });
+
+        UpdateH3=new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                UpdateOfertas3();
+                InsertPrecioFinal3();
+                Crear_precioFinal.this.isBandera3=true;
+                Log.e("Dentro del hilo 3.3","Termino");
+
+            }
+        });
+
+
+        thPrincipal = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+        while (!Crear_precioFinal.this.isBandera1
+                        || !Crear_precioFinal.this.isBandera2
+                        || !Crear_precioFinal.this.isBandera3) {
+
+            /*while(!Crear_precioFinal.this.bandera1
+                          ||!Crear_precioFinal.this.bandera2
+                          ||!Crear_precioFinal.this.bandera3) {*/
+
+                    if (!th1.isAlive()) {
+                        if (!UpdateH1.isAlive() && !UpdateH2.isAlive() &&!UpdateH3.isAlive()&&
+                                  Crear_precioFinal.this.isBandera1 == false) {
+                            UpdateH1.start();
+                            Log.e("HiloPrincila","Inicia el El hilo 1.1");
+
+                      }//Hay algun hilo ejecutandose
+                    }//Se termino el hilo 1
+
+
+                if (!th2.isAlive()) {
+                    if (!UpdateH1.isAlive() && !UpdateH2.isAlive() &&!UpdateH3.isAlive()&&
+                            Crear_precioFinal.this.isBandera2 == false) {
+                        UpdateH2.start();
+                        Log.e("HiloPrincila","Inicia el El hilo 2.2");
+                    }
                 }
+
+
+                if (!th3.isAlive()) {
+                    if (!UpdateH1.isAlive() && !UpdateH2.isAlive() &&!UpdateH3.isAlive()&&
+                            Crear_precioFinal.this.isBandera3 == false) {
+                        UpdateH3.start();
+                        Log.e("HiloPrincila","Inicia el El hilo 3.3");
+                    }
+                }
+                //}//While secundario*/
+              }//While principal
 
                 resp[0] =true;
                 String a="";
@@ -87,64 +205,37 @@ public class Crear_precioFinal {
         thPrincipal.start();
 
 
-        Thread th1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-         /*1-.*/Obtener_Prodcutos_Descliente();
-         /*2-.*/Generar_PrecioFinal_Descliente();
-                Crear_precioFinal.this.bandera1 = true;
-
-            }
-        });
-        th1.start();
-
-        //hilo 2
-
-        Thread th2 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-         /*3-.*///data.clear();
-        /*4-.*/Obtener_Productos_DescMenor();
-        /*5-.*/Generar_PrecioFinal_DescMenor();
-               Crear_precioFinal.this.bandera2 = true;
-
-            }
-        });
-             th2.start();
-        Thread th3 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-        /*6-.*/Obtener_Productos_SoloOferta();
-        /*7-.*/Generar_PrecioFinal_SoloOferta();
-               Crear_precioFinal.this.bandera3 = true;
-
-            }
-        });
-        th3.start();
-
         while (!resp[0]){
 
+       /*Se estara ejecutando mientras todos los
+       hilos no terminen*/
         }
-        if(resp[0]==true){
+       /*if(resp[0]==true){
 
                 if(lite1!=null)
-                lite1.close();if(lite2!=null)
-                lite2.close(); if(lite3!=null)
+                lite1.close();
+                if(lite2!=null)
+                lite2.close();
+                if(lite3!=null)
                 lite3.close();
 
-            UpdateOfertas();
-            InsertPrecioFinal();
-        }
+            UpdateOfertas2();
+            UpdateOfertas3();
+            InsertPrecioFinal2();
+            InsertPrecioFinal3();
+
+
+        }*/
         return true;
     }
 
-   public void Llenar_precioFinal_precio(){
+    public void Llenar_precioFinal_precio(){
 
      CSQLite lite=new CSQLite(context);
      SQLiteDatabase db=lite.getWritableDatabase();
        ContentValues values=new ContentValues();
        values.put("isCheck", 0);
-       values.put("Cantidad",0);
+       values.put("Cantidad", 0);
        values.put("precio_final","");
        db.update("productos", values, null, null);
 
@@ -189,7 +280,7 @@ public class Crear_precioFinal {
 
    }//Llena los arreglos segun con el tipo de clasificacion fiscal
 
-   public Double Obtener_DescuentoDelCliente(String id_cliente){
+    public Double Obtener_DescuentoDelCliente(String id_cliente){
 
        CSQLite lite=new CSQLite(context);
        SQLiteDatabase db=lite.getWritableDatabase();
@@ -217,7 +308,7 @@ public class Crear_precioFinal {
        return descuento;
    }//Obtiene el descuento comercial de cliente
 
-   public void Obtener_Prodcutos_Descliente(){
+    public void Obtener_Prodcutos_Descliente(){
 
        lite1=new CSQLite(context);
        SQLiteDatabase db=lite1.getWritableDatabase();
@@ -250,7 +341,8 @@ public class Crear_precioFinal {
 
 
     }//Llena una lista con los productos a los cuales se les aplica el descuento directamente
-   public void Obtener_Productos_DescMenor(){
+
+    public void Obtener_Productos_DescMenor(){
        lite2=new CSQLite(context);
        SQLiteDatabase db=lite2.getReadableDatabase();
 
@@ -274,13 +366,14 @@ public class Crear_precioFinal {
        }
       db.close();
    }//Llena una lista con los productos a los cuales se les aplica el descuento menor
-   public void Obtener_Productos_SoloOferta(){
+
+    public void Obtener_Productos_SoloOferta(){
        lite3=new CSQLite(context);
        SQLiteDatabase db=lite3.getReadableDatabase();
 
        Cursor rs=null;
 
-       String query="select codigo,precio,iva,ieps  from productos where precio_final=''";
+       String query="select codigo,precio,iva,ieps  from productos where clasificacion_fiscal in "+where(clasificacion_No_aplica);
 
        rs=db.rawQuery(query,null);
        data3=new ArrayList<HashMap<String, ?>>();
@@ -298,7 +391,8 @@ public class Crear_precioFinal {
        //db.close();
 
    }
-   public String Obtener_idCliente(){
+
+    public String Obtener_idCliente(){
          CSQLite lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
         Cursor rs=db.rawQuery("select id_cliente from sesion_cliente where Sesion=1",null);
@@ -313,7 +407,6 @@ public class Crear_precioFinal {
 
         return cliente;
     }
-
     //1
    public void Generar_PrecioFinal_Descliente(){
 
@@ -580,96 +673,22 @@ try {
      }
     }//Clasificación N,Na,F,O,....,etc.
 
-   public boolean UpdateOfertas(){
-
-       ArrayList listSQL=new ArrayList();
-       //Array 1
-       int contador=0;
-
-
-       for(int i=0;i<arrayOf1.length;i++){
-           String total=arrayOf1[i][0];
-           String codigo=arrayOf1[i][1];
-           String query="update productos set precio_oferta='" + total + "' where codigo='"+codigo+"';";
-           listSQL.add(query);
-           contador++;
-
-           if(contador==tamInsert) {
-
-               Transacciones(listSQL);
-               contador=0;
-           }
-
-       }
-       if(contador>0){
-               Transacciones(listSQL);
-       }
-       listSQL.clear();
-       contador=0;
-       //Array 2
-
-
-       for(int i=0;i<arrayOf2.length;i++){
-           String total=arrayOf2[i][0];
-           String codigo=arrayOf2[i][1];
-           String query="update productos set precio_oferta='" + total + "' where codigo='"+codigo+"';";
-           listSQL.add(query);
-           contador++;
-
-           if(contador==tamInsert) {
-
-               Transacciones(listSQL);
-               contador=0;
-           }
-
-       }
-       if(contador>0){
-           Transacciones(listSQL);
-       }
-
-       listSQL.clear();
-       contador=0;
-       //Array 3
-
-
-       for(int i=0;i<arrayOf3.length;i++){
-           String total=arrayOf3[i][0];
-           String codigo=arrayOf3[i][1];
-           String query="update productos set precio_oferta='" + total + "' where codigo='"+codigo+"';";
-           listSQL.add(query);
-           contador++;
-
-           if(contador==tamInsert) {
-
-               Transacciones(listSQL);
-               contador=0;
-           }
-
-       }
-       if(contador>0){
-           Transacciones(listSQL);
-       }
-
-       listSQL.clear();
-
-       return  true;
-   }
-
-    public boolean InsertPrecioFinal(){
+    public void UpdateOfertas1(){
 
         ArrayList listSQL=new ArrayList();
         //Array 1
         int contador=0;
 
+
         for(int i=0;i<arrayOf1.length;i++){
             String total=arrayOf1[i][0];
             String codigo=arrayOf1[i][1];
-            String query="update productos set precio_final='"+ total + "' where codigo='" + codigo + "';";
+            String query="update productos set precio_oferta='" + total + "' where codigo='"+codigo+"';";
             listSQL.add(query);
-
             contador++;
 
             if(contador==tamInsert) {
+
                 Transacciones(listSQL);
                 contador=0;
             }
@@ -678,21 +697,23 @@ try {
         if(contador>0){
             Transacciones(listSQL);
         }
-
-
-        //Array 2
         listSQL.clear();
-        contador=0;
+    }
+
+    public void UpdateOfertas2(){
+        ArrayList listSQL=new ArrayList();
+        //Array 1
+        int contador=0;
 
         for(int i=0;i<arrayOf2.length;i++){
             String total=arrayOf2[i][0];
             String codigo=arrayOf2[i][1];
-            String query="update productos set precio_final='"+ total + "' where codigo='" + codigo + "';";
+            String query="update productos set precio_oferta='" + total + "' where codigo='"+codigo+"';";
             listSQL.add(query);
-
             contador++;
 
             if(contador==tamInsert) {
+
                 Transacciones(listSQL);
                 contador=0;
             }
@@ -702,19 +723,24 @@ try {
             Transacciones(listSQL);
         }
 
-        //Array 3
         listSQL.clear();
-        contador=0;
+
+    }
+
+    public void UpdateOfertas3(){
+        ArrayList listSQL=new ArrayList();
+        //Array 1
+        int contador=0;
 
         for(int i=0;i<arrayOf3.length;i++){
             String total=arrayOf3[i][0];
             String codigo=arrayOf3[i][1];
-            String query="update productos set precio_final='"+ total + "' where codigo='" + codigo + "';";
+            String query="update productos set precio_oferta='" + total + "' where codigo='"+codigo+"';";
             listSQL.add(query);
-
             contador++;
 
             if(contador==tamInsert) {
+
                 Transacciones(listSQL);
                 contador=0;
             }
@@ -724,25 +750,113 @@ try {
             Transacciones(listSQL);
         }
 
+        listSQL.clear();
 
-
-        return  true;
     }
 
-    public void Transacciones(ArrayList list){
+   public void InsertPrecioFinal1(){
+       ArrayList listSQL=new ArrayList();
+       //Array 1
+       int contador=0;
 
-           CSQLite lite=new CSQLite(context);
-           SQLiteDatabase db=lite.getWritableDatabase();
+       for(int i=0;i<arrayOf1.length;i++){
+           String total=arrayOf1[i][0];
+           String codigo=arrayOf1[i][1];
+           String query="update productos set precio_final='"+ total + "' where codigo='" + codigo + "';";
+           listSQL.add(query);
+
+           contador++;
+
+           if(contador==tamInsert) {
+               Transacciones(listSQL);
+               contador=0;
+           }
+
+       }
+       if(contador>0){
+           Transacciones(listSQL);
+       }
+
+
+       //Array 2
+       listSQL.clear();
+
+   }
+
+   public void InsertPrecioFinal2(){
+       ArrayList listSQL=new ArrayList();
+       //Array 1
+       int contador=0;
+
+       for(int i=0;i<arrayOf2.length;i++){
+           String total=arrayOf2[i][0];
+           String codigo=arrayOf2[i][1];
+           String query="update productos set precio_final='"+ total + "' where codigo='" + codigo + "';";
+           listSQL.add(query);
+
+           contador++;
+
+           if(contador==tamInsert) {
+               Transacciones(listSQL);
+               contador=0;
+           }
+
+       }
+       if(contador>0){
+           Transacciones(listSQL);
+       }
+
+       //Array 3
+       listSQL.clear();
+
+   }
+
+   public void InsertPrecioFinal3(){
+       ArrayList listSQL=new ArrayList();
+       //Array 1
+       int contador=0;
+
+       for(int i=0;i<arrayOf3.length;i++){
+           String total=arrayOf3[i][0];
+           String codigo=arrayOf3[i][1];
+           String query="update productos set precio_final='"+ total + "' where codigo='" + codigo + "';";
+           listSQL.add(query);
+
+           contador++;
+
+           if(contador==tamInsert) {
+               Transacciones(listSQL);
+               contador=0;
+           }
+
+       }
+       if(contador>0){
+           Transacciones(listSQL);
+       }
+
+       listSQL.clear();
+
+   }
+
+   public void Transacciones(ArrayList list){
+
+        try {
+            CSQLite lite = new CSQLite(context);
+            SQLiteDatabase db = lite.getWritableDatabase();
 
             db.beginTransaction();
 
-            for(int i=0;i<list.size();i++){
+            for (int i = 0; i < list.size(); i++) {
                 db.execSQL(String.valueOf(list.get(i)));
             }
             db.setTransactionSuccessful();
             db.endTransaction();
             db.close();
             list.clear();
+        }catch (Exception e){
+            String error=e.toString();
+            e.printStackTrace();
+        }
     }
 
    public String where(String[] dat){
@@ -771,7 +885,7 @@ try {
         return formatteDate;
     }
 
-    public String Obtener_NoEmpleado(){
+   public String Obtener_NoEmpleado(){
         CSQLite lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
         String clave="";
@@ -791,8 +905,7 @@ try {
         return clave;
     }
 
-
-    public class sendEmail extends AsyncTask<String,Void,Object> {
+   public class sendEmail extends AsyncTask<String,Void,Object> {
 
         @Override
         protected Object doInBackground(String... strings) {
@@ -816,5 +929,6 @@ try {
             return null;
         }
     }
+
 
 }
