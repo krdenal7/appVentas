@@ -20,13 +20,14 @@
         android:focusable="false"
         android:columnOrderPreserved="false"
         android:clickable="false"
-        android:layout_alignParentStart="false">
+        android:layout_alignParentStart="false"
+        tools:ignore="RtlSymmetry">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Cobranza"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+            android:text="Cobranza:"
             android:id="@+id/textView42"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
@@ -36,7 +37,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
             android:text="0"
             android:id="@+id/textView43"
             android:layout_alignParentTop="true"
@@ -47,8 +48,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Devoluciones"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+            android:text="Devoluciones:"
             android:id="@+id/textView44"
             android:layout_below="@+id/textView42"
             android:layout_alignParentLeft="true"
@@ -58,7 +59,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
             android:text="0"
             android:id="@+id/textView45"
             android:layout_alignBottom="@+id/textView44"
@@ -69,8 +70,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Notas de Venta"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+            android:text="Notas de Venta:"
             android:id="@+id/textView46"
             android:layout_below="@+id/textView44"
             android:layout_alignParentLeft="true"
@@ -80,7 +81,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
             android:text="0"
             android:id="@+id/textView47"
             android:layout_alignBottom="@+id/textView46"
@@ -91,7 +92,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
             android:text="Pedidos:"
             android:id="@+id/textView48"
             android:layout_below="@+id/textView46"
@@ -102,7 +103,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
             android:text="0"
             android:id="@+id/textView49"
             android:layout_alignBottom="@+id/textView48"
@@ -113,7 +114,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
             android:text="Clientes:"
             android:id="@+id/textView86"
             android:layout_row="4"
@@ -123,7 +124,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
             android:text="0"
             android:id="@+id/textView87"
             android:layout_row="4"
@@ -132,18 +133,17 @@
     </GridLayout>
 
     <Button
-        android:layout_width="150dp"
+        android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="Enviar"
         android:id="@+id/button4"
-        android:layout_marginBottom="74dp"
-        android:layout_above="@+id/button5"
-        android:layout_centerHorizontal="true"
         android:paddingLeft="50dp"
         android:paddingRight="50dp"
         android:background="@drawable/bluebutton"
         android:gravity="center"
-        android:textColor="#FFFFFF" />
+        android:textColor="#FFFFFF"
+        android:layout_above="@+id/button5"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="match_parent"

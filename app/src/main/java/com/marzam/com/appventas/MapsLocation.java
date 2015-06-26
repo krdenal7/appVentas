@@ -1,6 +1,5 @@
 package com.marzam.com.appventas;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -17,21 +16,18 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.text.InputType;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -84,12 +80,12 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     AlertDialog alertDialogAct;
     String[] clientesH;
     String[] clientesT;
-    String CteAct="";
     ProgressDialog progressDialog;
     Marker customMarker;
     String id_visita;
     String mCurrentPhotoPath;
     static final int REQUEST_TAKE_PHOTO = 1;
+    private PowerManager.WakeLock wl;
 
     CSQLite lite;
     TextView txtVisitados;
@@ -128,7 +124,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         final CharSequence[] list=ObtenerCtesHoy(ObtenerAgenteActivo());
 
-        AlertDialog.Builder alert=new AlertDialog.Builder(context, AlertDialog.THEME_DEVICE_DEFAULT_DARK);
+        AlertDialog.Builder alert=new AlertDialog.Builder(context,AlertDialog.THEME_DEVICE_DEFAULT_DARK);
         alert.setTitle("Clientes de hoy");
         alert.setItems(list, new DialogInterface.OnClickListener() {
             @Override
@@ -472,7 +468,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
             InsertarSesion(cliente);
             RegistrarVisitas(cliente);
             progressDialog = ProgressDialog.show(context, "Generando precios netos", "Cargando", true, false);
-            new UpLoadVisitas().execute("");
+            new UpLoadVisitas().execute(cliente);
 
         }
 
@@ -532,7 +528,6 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
             Toast.makeText(context,"Error al insertar visita",Toast.LENGTH_SHORT).show();
         }
     }//INSERTA EL CLIENTE CON EL QUE SE INICIO VISITA
-
 
     public void RegistrarVisitas(String cliente){
         lite=new CSQLite(context);
@@ -617,6 +612,27 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         return id;
     }
 
+    public boolean VerificarEstatusCteDr(String id_cte){
+
+        CSQLite lite1=new CSQLite(context);
+        SQLiteDatabase db=lite1.getReadableDatabase();
+
+        Cursor rs=db.rawQuery("select * from clientesDr where id_cliente=?",new String[]{id_cte});
+
+        if(rs.getCount()<=0){
+            return true;
+        }
+        else{
+            rs.close();
+            rs=db.rawQuery("select * from clientesDr where id_cliente=? and estatus = 50",new String[]{id_cte});
+            if(rs.getCount()>0){
+                return true;
+            }else {
+                return false;
+            }
+        }
+    }
+
     private String jsonVisitas(){
 
         lite=new CSQLite(context);
@@ -690,13 +706,22 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     private class UpLoadVisitas extends AsyncTask<String,Void,Object> {
 
         @Override
+        protected void onPreExecute(){
+
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "Ventas");
+            wl.acquire();
+
+        }
+
+        @Override
         protected Object doInBackground(String... strings) {
 
             Crear_precioFinal precioFinal=new Crear_precioFinal();
             precioFinal.Ejecutar(context);
 
 
-            return "";
+            return strings[0];
         }
 
         @Override
@@ -705,10 +730,12 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     if (progressDialog.isShowing()) {
         progressDialog.dismiss();
         progressDialog=ProgressDialog.show(context,"Registrando Visita","Enviando",true,false);
-        new Task_EnviarVisita().execute("");
+        new Task_EnviarVisita().execute(result.toString());
 
     }
     }
+
+
     }
 
     private class Task_EnviarVisita extends AsyncTask<String,Void,Object> {
@@ -722,11 +749,15 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         protected Object doInBackground(String... strings) {
 
             WebServices web=new WebServices();
-            String json=jsonVisitas();
 
-            String resp= web.SincronizarVisitas(json);
-            if(resp!=null)
-                ActualizarStatusVisita(resp);
+            if(VerificarEstatusCteDr(strings[0])) {
+
+                String json = jsonVisitas();
+                String resp = web.SincronizarVisitas(json);
+                if (resp != null)
+                    ActualizarStatusVisita(resp);
+
+            }
 
             return "";
         }
@@ -738,11 +769,14 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                 progressDialog.dismiss();
                 Intent intent = new Intent(context, KPI_General.class);
                 startActivity(intent);
+
+                if(wl.isHeld())
+                      wl.release();
+
             }
         }
 
     }
-
 
     public void Inicia_camera(){
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -781,13 +815,10 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         return image;
     }
 
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
     }
-
 
     public String[][] ObtenerCoordenadas(){
 
@@ -815,7 +846,6 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         return datos;
     }
-
 
     @Override
     protected void onResume() {
@@ -1057,7 +1087,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         return super.onPrepareOptionsMenu(menu);
     }
 
-        @Override
+    @Override
     public boolean onKeyDown(int keyCode,KeyEvent event){
 
 
@@ -1097,7 +1127,6 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     }
 
-
     private String getDate(){
 
         Calendar cal = new GregorianCalendar();
@@ -1107,6 +1136,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         return formatteDate;
     }
+
     private String Fecha(){
         Calendar cal = new GregorianCalendar();
         Date dt = cal.getTime();
@@ -1181,7 +1211,6 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         return where;
     }
-
 
     public static Bitmap createDrawableFromView(Context context,View view){
 

@@ -64,6 +64,7 @@ public class Sincronizar extends Activity {
     CSQLite lite;
     TextView txtPedidos;
     TextView txtClientes;
+    TextView txtDevoluciones;
     envio_pedidoFaltante envioPedidoFaltante;
     String from="Sincronizar";
     String body;
@@ -86,6 +87,9 @@ public class Sincronizar extends Activity {
 
         txtClientes=(TextView)findViewById(R.id.textView87);
         txtClientes.setText(""+VerificarClientesPendientes());
+
+        txtDevoluciones=(TextView)findViewById(R.id.textView45);
+        txtDevoluciones.setText(""+VerificarDevolucionesPendiente());
 
 
         Button btnCerrar=(Button)findViewById(R.id.button5);
@@ -127,6 +131,7 @@ public class Sincronizar extends Activity {
         lite.close();
         return Cantidad;
     }
+
     public int VerificarClientesPendientes(){
 
         CSQLite lt=new CSQLite(context);
@@ -142,6 +147,24 @@ public class Sincronizar extends Activity {
 
         return val;
     }
+
+    public int VerificarDevolucionesPendiente(){
+
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getReadableDatabase();
+        int val=0;
+
+        Cursor rs=db.rawQuery("select * from DEV_Encabezado where status='10'",null);
+
+        val=rs.getCount();
+
+        db.close();
+        lt.close();
+
+
+        return val;
+    }
+
     public boolean VerificarSesionActiva(){
 
         lite=new CSQLite(context);
@@ -160,32 +183,36 @@ public class Sincronizar extends Activity {
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Aviso");
-        alert.setMessage("Desea hacer el cierre de día?");
+        alert.setMessage("¿Desea sincronizar?");
         alert.setPositiveButton("Si", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if(!VerificarSesionActiva()) {
                  if(VerificarClientesPendientes()<=0){
                     if (VerificarPedidosPendientes() <= 0) {
-                        if (isOnline()) {
+                        if(VerificarDevolucionesPendiente()<=0) {
+                            if (isOnline()) {
 
 
-                            //Estas lineas son del actual AsyncTask, se comentan para probar la nueva sincronización
-                            progres = ProgressDialog.show(context, "Sincronizando", "Cargando", true, false);
-                            new UpLoadTask().execute("");
+                                //Estas lineas son del actual AsyncTask, se comentan para probar la nueva sincronización
+                                progres = ProgressDialog.show(context, "Sincronizando", "Cargando", true, false);
+                                new UpLoadTask().execute("");
 
-                            //Sincronizacion Inteligente
-                            /*new Verificar_idsPendientes().execute("");*/
+                                //Sincronizacion Inteligente
+                                /*new Verificar_idsPendientes().execute("");*/
 
 
-                        } else {
-                            Toast.makeText(context, "Verifique su conexión a internet e intente nuevamente", Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(context, "Verifique su conexión a internet e intente nuevamente", Toast.LENGTH_LONG).show();
+                            }
+                        }else {
+                            Toast.makeText(context, "No se puede completar la sincronización. Envíe sus devoluciónes pendientes", Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        Toast.makeText(context, "No se puede completar el cierre. Envíe sus pedidos pendientes", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "No se puede completar la sincronización. Envíe sus pedidos pendientes", Toast.LENGTH_LONG).show();
                     }//Pedidos pendientes por transmitir
                 }else {
-                      Toast.makeText(context, "No se puede completar el cierre. Envíe sus clientes pendientes", Toast.LENGTH_LONG).show();
+                      Toast.makeText(context, "No se puede completar la sincronización. Envíe sus clientes pendientes", Toast.LENGTH_LONG).show();
                  }//Clientes pendientes por transmitir
                 }
                 else {
@@ -203,6 +230,7 @@ public class Sincronizar extends Activity {
         AlertDialog alertDialog= alert.create();
         alertDialog.show();
     }
+
     public void ShowSesionActiva(){
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Aviso");
@@ -225,6 +253,7 @@ public class Sincronizar extends Activity {
        AlertDialog alertDialogAct=alert.create();
                    alertDialogAct.show();
     }
+
     public void CrearDirectorioDownloads(){
 
         try {
@@ -237,6 +266,7 @@ public class Sincronizar extends Activity {
             Log.d("ErrorCrearDir", e.toString());
         }
     }
+
     public void unZipBD(String origen){
 
         try{
@@ -251,6 +281,7 @@ public class Sincronizar extends Activity {
         }
 
     }
+
     public void ZipBD(String origen,String destino){
 
         File urlorigen=new File(origen);
@@ -289,7 +320,7 @@ public class Sincronizar extends Activity {
 
                 JSONObject jsonData=array.getJSONObject(i);
 
-                String id = jsonData.getString("id_Visita");
+                String id = jsonData.getString("id_visita");
                 db.execSQL("update visitas set status_visita='20' where id_visita='" + id + "'");
 
             }
@@ -303,6 +334,7 @@ public class Sincronizar extends Activity {
 
 
     }
+
     public void   ActualizarCierreVisitas(String json){
 
         String estatus="20";
@@ -332,7 +364,6 @@ public class Sincronizar extends Activity {
 
 
     }
-
 
     public static byte[] StreamZip(File file){
 
@@ -366,6 +397,7 @@ public class Sincronizar extends Activity {
 
         return  bytes;
     }
+
     public void  unStreamZip(byte[] data){
 
         String result=directorio+"/db_down.zip";
@@ -382,7 +414,6 @@ public class Sincronizar extends Activity {
         }
 
     }
-
 
     public void CopiarBD(String nombreBack){
 
@@ -419,6 +450,7 @@ public class Sincronizar extends Activity {
         }
 
     }//Crea back de DB descromprime la cargada y la remplaza por la base anterior
+
     public void AgregarColumnProductos(){
 
         lite=new CSQLite(context);
@@ -451,8 +483,13 @@ public class Sincronizar extends Activity {
         @Override
         protected Object doInBackground(String... strings) {
 
-            envioPedidoFaltante=new envio_pedidoFaltante();
-            String resp =envioPedidoFaltante.Enviar(context);
+            String resp;
+            if(isOnline()) {
+                envioPedidoFaltante = new envio_pedidoFaltante();
+                 resp = envioPedidoFaltante.Enviar(context);
+            }else {
+                resp="Verifique su conexión a Internet e intente nuevamente.";
+            }
 
             return resp;
         }
@@ -467,6 +504,7 @@ public class Sincronizar extends Activity {
 
                 txtPedidos.setText("" + VerificarPedidosPendientes());
                 txtClientes.setText(""+VerificarClientesPendientes());
+                txtDevoluciones.setText(""+VerificarDevolucionesPendiente());
 
                 progres.dismiss();
 
@@ -499,6 +537,7 @@ public class Sincronizar extends Activity {
 
         return clave;
     }
+
     private String getDate(){
 
         Calendar cal = new GregorianCalendar();
@@ -508,6 +547,7 @@ public class Sincronizar extends Activity {
 
         return formatteDate;
     }
+
     public String getDate2(){
         Calendar cal = new GregorianCalendar();
         Date dt = cal.getTime();
@@ -609,7 +649,7 @@ public class Sincronizar extends Activity {
             if(progres.isShowing()) {
                 progres.dismiss();
                 if(result==null) {
-        alert.setMessage("Error al realizar cierre de día. Desea intentar nuevamente?");
+        alert.setMessage("Error al sincronizar. Desea intentar nuevamente?");
                     alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -626,7 +666,7 @@ public class Sincronizar extends Activity {
         });
                 }
                 else {
-           alert.setMessage("Se completo el cierre de día correctamente");
+           alert.setMessage("Se completo la sincronización correctamente");
            alert.setPositiveButton("Aceptar",new DialogInterface.OnClickListener() {
                @Override
                public void onClick(DialogInterface dialogInterface, int i) {
@@ -705,6 +745,7 @@ public class Sincronizar extends Activity {
         }
 
     }
+
     private class Task_Json extends  AsyncTask<String,Integer,Object>{
 
         @Override
@@ -1204,6 +1245,7 @@ public class Sincronizar extends Activity {
 
 
     }//Asynck de la sincronización inteligente
+
     private class Task_UpLoadJson extends  AsyncTask<String,Integer,Object>{
 
         @Override
@@ -1316,6 +1358,7 @@ public class Sincronizar extends Activity {
 
 
     } //Asynck de la sincronización inteligente envio de json
+
     private class Task_LimpiarBD extends  AsyncTask<String,Integer,Object>{
 
         @Override
@@ -1416,7 +1459,6 @@ public class Sincronizar extends Activity {
 
     } //Asynck de la sincronización inteligente envio de limpia bd
 
-
     public String jsonVisitas(){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
@@ -1456,6 +1498,7 @@ public class Sincronizar extends Activity {
         return array.length()==0 ? null: array.toString();
 
     }
+
     public String jsonCierreVisitas(){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
@@ -1487,10 +1530,8 @@ public class Sincronizar extends Activity {
 
 
 
-
         return  array.length()==0 ? null: array.toString();
     }
-
 
     @Override
     public void onDestroy(){
@@ -1521,8 +1562,6 @@ public class Sincronizar extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-
-
     public  boolean isOnline(){
 
         ConnectivityManager cm=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -1532,6 +1571,7 @@ public class Sincronizar extends Activity {
         }
         return false;
     }
+
     public void LeerTxt(){
         try {
             InputStreamReader archivo=new InputStreamReader(openFileInput("datos.txt"));
@@ -1548,6 +1588,7 @@ public class Sincronizar extends Activity {
         }
 
     }
+
     public void EscribirTXT(){
 
         try{
@@ -1562,6 +1603,7 @@ public class Sincronizar extends Activity {
         }
 
     }
+
     public void ActualizarBD(String agente){
 
         lite=new CSQLite(context);
@@ -1574,7 +1616,6 @@ public class Sincronizar extends Activity {
 
     }
 
-
     public void ObtenerArchivos(){
 
         File directorio = new File("/data/data/com.marzam.com.appventas/files");
@@ -1583,6 +1624,7 @@ public class Sincronizar extends Activity {
 
         CopiarArchivos(files);
     }
+
     public void CopiarArchivos(File[] files){
         byte[] buffer=new byte[1024];
         int length;

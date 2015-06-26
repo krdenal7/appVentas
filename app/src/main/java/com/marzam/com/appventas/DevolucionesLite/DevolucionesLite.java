@@ -2,9 +2,12 @@ package com.marzam.com.appventas.DevolucionesLite;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -13,7 +16,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -24,14 +26,6 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-
 import com.marzam.com.appventas.DataBase.DataBase;
 import com.marzam.com.appventas.DevolucionesLite.CustomPrompt.CustomPrompt;
 import com.marzam.com.appventas.DevolucionesLite.PrepareSendingData.PrepareSendingData;
@@ -40,6 +34,14 @@ import com.marzam.com.appventas.DevolucionesLite.ProductList.ProductAdapter;
 import com.marzam.com.appventas.DevolucionesLite.ProductList.ProductSumaryAdapter;
 import com.marzam.com.appventas.DevolucionesLite.ProductList.SwipeListViewTouchListener;
 import com.marzam.com.appventas.R;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 public class DevolucionesLite extends Activity {
 
@@ -65,11 +67,13 @@ public class DevolucionesLite extends Activity {
     private TabHost tabHost;
     private String idDevolucionProductOnSamePakage = null;
 
+    public boolean finishActivity = false;
+
     //Captire: ProductList list
     private static Product[] allProducto = null;
 
     //Sumary
-    private static DevolucionesLite thiz;
+    public static DevolucionesLite thiz;
     private ListView productSumaryList;
     private ProductSumaryAdapter adapterListSumary;
     private Product productSumaryData[];
@@ -83,7 +87,7 @@ public class DevolucionesLite extends Activity {
         DevolucionesLite.thiz = this;
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView( R.layout.devoluciones_lite );
-        setTitle( "Devoluciones Lite" );
+        setTitle( "Devoluciones" );
 
         this.db = new DataBase( this );
         initConfiguration();
@@ -144,7 +148,7 @@ public class DevolucionesLite extends Activity {
     private void initTypeDocument() {
         ArrayAdapter<String> listAdapter = new ArrayAdapter<String>( this, android.R.layout.simple_spinner_dropdown_item, getTypeDocument() );
         this.spinnerTypeDocument = ( Spinner ) findViewById( R.id.idSetDevLiteConfDocumentType );
-        this.spinnerTypeDocument.setAdapter( listAdapter );
+        this.spinnerTypeDocument.setAdapter(listAdapter);
 
         this.tvAmountPackages = (TextView)findViewById( R.id.idSetDevLiteConfAmountPackages );
         this.tvFolioDocument = (TextView)findViewById( R.id.idSetDevLiteConfFolioDocument );
@@ -293,7 +297,7 @@ public class DevolucionesLite extends Activity {
         this.adapterList = new ProductAdapter(this, R.layout.devoluciones_lite_product_row, this.productData);
         this.productList.setAdapter(adapterList);
 
-        this.productList.setOnItemClickListener( new AdapterView.OnItemClickListener() {
+        this.productList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String amountPackages = DevolucionesLite.this.tvAmountPackages.getText().toString().trim();
@@ -302,13 +306,13 @@ public class DevolucionesLite extends Activity {
                 String numberReturn = DevolucionesLite.this.tvNumberReturn.getText().toString().trim();
                 String reasonReturn = DevolucionesLite.this.spinnerReasonRefund.getSelectedItem().toString();
 
-                if( (amountPackages.length()>0)&&(tvFolioDocument.length()>0)&&(tvNumberReturn.length()>0) ) {
-                    Product p = ((Product)DevolucionesLite.this.productData[position]);
+                if ((amountPackages.length() > 0) && (tvFolioDocument.length() > 0) && (tvNumberReturn.length() > 0)) {
+                    Product p = ((Product) DevolucionesLite.this.productData[position]);
                     int productWillChange = changeNumberReturnProduct(p);
                     //Producto ya en la lista de resumen
-                    if( productWillChange!=-1 ){
-                        p = ((Product)DevolucionesLite.this.productSumaryData[productWillChange]);
-                        CustomPrompt customPrompt = new CustomPrompt( DevolucionesLite.this );
+                    if (productWillChange != -1) {
+                        p = ((Product) DevolucionesLite.this.productSumaryData[productWillChange]);
+                        CustomPrompt customPrompt = new CustomPrompt(DevolucionesLite.this);
                         customPrompt.show();
                         customPrompt.setTitle("Cambiar cantidad");
                         customPrompt.setProductChangeAmount(p, productWillChange);
@@ -316,17 +320,18 @@ public class DevolucionesLite extends Activity {
                     }
 
                     //Nuevo producto
-                    if( DevolucionesLite.this.idDevolucionProductOnSamePakage==null )
+                    if (DevolucionesLite.this.idDevolucionProductOnSamePakage == null)
                         DevolucionesLite.this.idDevolucionProductOnSamePakage = getIdDevolucion();
-                    Product productAdd = new Product( p.name, p.marzamCode, p.marzamCode, amountPackages, typeDocument, folioDocument, numberReturn,  reasonReturn, DevolucionesLite.this.idDevolucionProductOnSamePakage);
+                    Product productAdd = new Product(p.name, p.marzamCode, p.marzamCode, amountPackages, typeDocument, folioDocument, numberReturn, reasonReturn, DevolucionesLite.this.idDevolucionProductOnSamePakage);
 
-                    CustomPrompt customPrompt = new CustomPrompt( DevolucionesLite.this );
+                    CustomPrompt customPrompt = new CustomPrompt(DevolucionesLite.this);
                     customPrompt.show();
                     customPrompt.setTitle("Introduce una cantidad");
                     customPrompt.setProduct(productAdd, view);
 
                     //DevolucionesLite.this.clearForm();
-                }else DevolucionesLite.this.showAlert("Aviso", "Debes de completar el formulari del apartado de \"BULTOS\"");
+                } else
+                    DevolucionesLite.this.showAlert("Aviso", "Debes de completar el formulario del apartado de \"BULTOS\"");
             }
         });
     }
@@ -340,6 +345,7 @@ public class DevolucionesLite extends Activity {
         this.searchOption.setOnKeyListener( new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
+
                 if(keyCode == EditorInfo.IME_ACTION_SEARCH || keyCode == EditorInfo.IME_ACTION_DONE ||
                    event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
                 {
@@ -362,9 +368,74 @@ public class DevolucionesLite extends Activity {
         iconSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                executeSearchBy();
+                executeSearchByBarCodeScan();
             }
         });
+    }
+
+    /**
+     * Este método inicia el scanner de código de barras, en caso de que el device no cuente con una
+     * app para este propósito, le propone al usuario descargar una aplicación.
+     */
+    private void executeSearchByBarCodeScan(){
+        try{
+            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+            intent.putExtra("SCAN_MODE", "PRODUCT_MODE");
+            startActivityForResult(intent, 0);
+        } catch (ActivityNotFoundException anfe){
+            showDialog("No se encontró ningún scanner", "Descargar un scanner", "Si", "No").show();
+        }
+
+    }
+
+    /**
+     * Este método nuestra un alerta avisando al usuario que no cuenta con una app para scanner códigos de barras.
+     * @param title Titulo de la alerta
+     * @param message Mensaje de la alerta
+     * @param buttonYes Mensaje de confirmación
+     * @param buttonNo Mensaje para cancelar la acción
+     * @return
+     */
+    private AlertDialog showDialog(CharSequence title, CharSequence message, CharSequence buttonYes, CharSequence buttonNo) {
+        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(DevolucionesLite.this);
+        downloadDialog.setTitle(title);
+        downloadDialog.setMessage(message);
+        downloadDialog.setPositiveButton(buttonYes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Uri uri = Uri.parse("market://search?q=pname:" + "com.google.zxing.client.android");
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                try {
+                    DevolucionesLite.this.startActivity(intent);
+                } catch (ActivityNotFoundException anfe) {
+
+                }
+            }
+        });
+        downloadDialog.setNegativeButton(buttonNo, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int i) {
+            }
+        });
+        return downloadDialog.show();
+    }
+
+    /**
+     * Este método juega el papel de un callback. Recibe el resultado de escanear el código de barras.
+     * @param requestCode
+     * @param resultCode
+     * @param intent
+     */
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == 0) {
+            if (resultCode == RESULT_OK) {
+                String contents = intent.getStringExtra("SCAN_RESULT");
+                String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
+
+                DevolucionesLite.this.searchOption.setText( contents );
+                DevolucionesLite.this.searchOption.setSelection(contents.length(), contents.length());
+
+                DevolucionesLite.this.executeSearchBy();
+            }
+        }
     }
 
     /**
@@ -704,6 +775,7 @@ public class DevolucionesLite extends Activity {
         DevolucionesLite.thiz.productSumaryData = null;
         DevolucionesLite.thiz.productSumaryList.setAdapter( null );
         DevolucionesLite.thiz.idDevolucionProductOnSamePakage=null;
+        if( DevolucionesLite.thiz.finishActivity  ) DevolucionesLite.thiz.onBackPressed();
     }
 
     /**
@@ -735,18 +807,21 @@ public class DevolucionesLite extends Activity {
 
     @Override
     public void onBackPressed() {
-        String title = "Confirmación";
-        String message = "Salir de devoluciones";
-        new AlertDialog.Builder(DevolucionesLite.this)
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("Si", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        DevolucionesLite.super.onBackPressed();
-                    }
-                })
-                .setNegativeButton("No", null)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
+        if (DevolucionesLite.thiz.finishActivity) DevolucionesLite.super.onBackPressed();
+        else {
+            String title = "Confirmación";
+            String message = "Salir de devoluciones";
+            new AlertDialog.Builder(DevolucionesLite.this)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            DevolucionesLite.super.onBackPressed();
+                        }
+                    })
+                    .setNegativeButton("No", null)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
     }
 }

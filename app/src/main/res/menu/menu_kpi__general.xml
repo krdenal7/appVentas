@@ -5,7 +5,7 @@
         android:title="Pedidos" android:orderInCategory="100"
         tools:ignore="AppCompatResource" />
     <item android:id="@+id/Devoluciones_lite" android:showAsAction="never"
-        android:title="Devoluciones Lite" android:orderInCategory="100"
+        android:title="Devoluciones" android:orderInCategory="100"
         tools:ignore="AppCompatResource" android:visible="false" />
     <item android:id="@+id/Actualizar" android:showAsAction="never"
         android:title="Actualizar coordenadas" android:orderInCategory="100"

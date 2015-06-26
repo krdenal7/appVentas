@@ -8,15 +8,22 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.Spanned;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -41,6 +48,7 @@ public class pcabecera extends Activity {
     Context context;
     TextView txtFpedido;
     TextView txt_idPedido;
+    EditText txtNoOrden;
     ProgressDialog progress;
     CSQLite lite;
     Spinner spinner;
@@ -48,7 +56,6 @@ public class pcabecera extends Activity {
     String subject;
     String from="pcabecera.java";
     String body;
-
 
 
     @Override
@@ -66,13 +73,17 @@ public class pcabecera extends Activity {
 
         final String[] id_pedido = {Obtener_idpedido2(spinner.getSelectedItem().toString())};
 
-        EscribirTXT(id_pedido[0]);
+        txtNoOrden=(EditText)findViewById(R.id.editText2);
+
+        EscribirTXT(id_pedido[0],txtNoOrden.getText().toString());
 
         txtFpedido=(TextView)findViewById(R.id.textView25);
         txtFpedido.setText(getDate());
 
         txt_idPedido=(TextView)findViewById(R.id.textView9);
         txt_idPedido.setText(LeerTXT());
+
+
 
         lite=new CSQLite(context);
         final SQLiteDatabase db=lite.getWritableDatabase();
@@ -101,7 +112,7 @@ public class pcabecera extends Activity {
                 String tipo_fuerza = spinner.getSelectedItem().toString();
                 db.execSQL("update tipo_fuerza set isCheck='" + tipo_fuerza + "' where id_fuerza='" + finalId_fuerza + "'");
                 id_pedido[0] =Obtener_idpedido2(spinner.getSelectedItem().toString());
-                EscribirTXT(id_pedido[0]);
+                EscribirTXT(id_pedido[0],txtNoOrden.getText().toString());
                 txt_idPedido.setText(LeerTXT());
 
             }
@@ -112,7 +123,50 @@ public class pcabecera extends Activity {
             }
         });
 
+        txtNoOrden.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                InputFilter filter = new InputFilter() {
+                    public CharSequence filter(CharSequence source, int start, int end,
+                                               Spanned dest, int dstart, int dend) {
+                        for (int i = start; i < end; i++) {
+                            if ( !Character.isLetterOrDigit(source.charAt(i))) {
+                                if(!Character.isSpaceChar(source.charAt(i))) {
+                                    return "";
+                                }
+                            }
+                        }
+                        return null;
+                    }
+                };
+
+                editable.setFilters(new InputFilter[]{filter});
+                String pal=editable.toString();
+
+                if(editable.length()>=17){
+                    editable.clear();
+                    for(int i=0;i<16;i++){
+                        editable.append(pal.charAt(i));
+                    }
+                    EscribirTXT(id_pedido[0], editable.toString());
+                }else {
+                    EscribirTXT(id_pedido[0], editable.toString());
+                }
+            }
+        });
+
     }
+
     public void LlenarList(){
         try {
             String no_empleado = ObtenerAgenteActivo();
@@ -152,12 +206,13 @@ public class pcabecera extends Activity {
         }
 
     }
+
     public String ObtenerAgenteActivo(){
         String clave = "";
         try {
             lite = new CSQLite(context);
             SQLiteDatabase db = lite.getWritableDatabase();
-            Cursor rs = db.rawQuery("select clave_agente from agentes where Sesion=1", null);
+            Cursor rs = db.rawQuery("select numero_empleado from agentes where Sesion=1", null);
             if (rs.moveToFirst()) {
 
                 clave = rs.getString(0);
@@ -170,14 +225,15 @@ public class pcabecera extends Activity {
 
         return clave;
     }
+
     public String ObtenerIdAgente(){
 
         String id="";
-        String clave_agente=ObtenerAgenteActivo();
+        String numeroEmp=ObtenerAgenteActivo();
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select id_agente from agentes where clave_agente='"+clave_agente+"'",null);
+        Cursor rs=db.rawQuery("select id_agente from agentes where numero_empleado='"+numeroEmp+"'",null);
 
         if(rs.moveToFirst()){
             id=rs.getString(0);
@@ -186,6 +242,7 @@ public class pcabecera extends Activity {
 
         return id;
     }
+
     public String Obtener_idpedido2(String iniciales){
 
         StringBuilder builder=new StringBuilder();
@@ -224,6 +281,7 @@ public class pcabecera extends Activity {
         }
 
     }
+
     public Boolean existTxt(String fileName){
 
         for(String tmp:fileList()){
@@ -233,12 +291,14 @@ public class pcabecera extends Activity {
 
         return false;
     }
-    public void EscribirTXT(String id_pedido){
+
+    public void EscribirTXT(String id_pedido,String NoOrden){
 
         try{
 
             OutputStreamWriter writer2=new OutputStreamWriter(openFileOutput("Pedidos.txt",Context.MODE_PRIVATE));
-            writer2.write(id_pedido);
+            writer2.write(id_pedido+"\n");
+            writer2.write(NoOrden);
             writer2.close();
             //ObtenerArchivos2();
         }catch (Exception e){
@@ -246,6 +306,7 @@ public class pcabecera extends Activity {
         }
 
     }
+
     public String LeerTXT(){
         String id_pedido="";
 
@@ -290,7 +351,6 @@ e.printStackTrace();
         alertDialog.show();
     }
 
-
     private String getDate(){
 
         Calendar cal = new GregorianCalendar();
@@ -300,6 +360,7 @@ e.printStackTrace();
 
         return formatteDate;
     }
+
     private String Fecha(){
         Calendar cal = new GregorianCalendar();
         Date dt = cal.getTime();
@@ -325,7 +386,6 @@ e.printStackTrace();
 
 
     }
-
 
     private class UpLoadTask extends AsyncTask<String,Void,Object> {
 

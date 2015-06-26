@@ -13,12 +13,14 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.Spanned;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -37,6 +39,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class Direccion extends Activity {
@@ -44,6 +48,7 @@ public class Direccion extends Activity {
     Context context;
     EditText txtColonia;
 
+    EditText txtCP;
     EditText txtCalle;
     EditText txtNoExt;
     EditText txtNoInt;
@@ -72,9 +77,10 @@ public class Direccion extends Activity {
             valores=bundle.getStringArray("valores");
         }
 
+        txtCP=(EditText)findViewById(R.id.editText);
+        txtCP.requestFocus();
         txtColonia=(EditText)findViewById(R.id.autoCompleteTextView);
         txtColonia.setNextFocusDownId(R.id.editText12);
-        txtColonia.requestFocus();
 
         txtCalle=(EditText)findViewById(R.id.editText12);
         txtCalle.setNextFocusDownId(R.id.editText13);
@@ -87,17 +93,214 @@ public class Direccion extends Activity {
         btnGuardar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (ValidarCampos()) {
-                    ShowGuardarCliente();
-                } else {
-                    Toast.makeText(context, "Debe completar los campos marcados con *", Toast.LENGTH_LONG).show();
-                }
+                if (txtCP.length() >= 5){
+                    if (ValidarCampos()) {
+                        if (ValidarColonia(txtColonia.getText().toString())) {
+                            if (ValidarCalle(txtCalle.getText().toString())) {
+
+                                ShowGuardarCliente();
+
+                            } else {
+                                Mensaje("El campo de calle solo permite letras.Favor de verificar").show();
+                            /*Toast.makeText(context, "El campo de calle solo permite letras.Favor de verificar", Toast.LENGTH_SHORT).show();*/
+                            }
+                        } else {
+                            Mensaje("El campo de colonia solo permite letras.Favor de verificar").show();
+                        /*Toast.makeText(context, "El campo de colonia solo permite letras.Favor de verificar", Toast.LENGTH_SHORT).show();*/
+                        }
+                    } else {
+                        Mensaje("Debe completar los campos marcados.").show();
+                        // Toast.makeText(context, "Debe completar los campos marcados con *", Toast.LENGTH_SHORT).show();
+                    }
+            }else{
+                    Mensaje("El código postal debe contener 5 dígitos").show();
+            }
+
             }
         });
 
 
         lat=gps.getLatitude();
         lon=gps.getLongitude();
+
+        try {
+            Double latitud = Double.parseDouble(lat);
+            Double longitud = Double.parseDouble(lon);
+
+            if (latitud == 0 && longitud == 0) {
+                lat = "19.552829";
+                lon = "-99.05254";
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+
+        txtRef.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                InputFilter filter = new InputFilter() {
+                    public CharSequence filter(CharSequence source, int start, int end,
+                                               Spanned dest, int dstart, int dend) {
+                        for (int i = start; i < end; i++) {
+                            if ( !Character.isLetterOrDigit(source.charAt(i))) {
+                                if(!Character.isSpaceChar(source.charAt(i))) {
+                                  String pal=String.valueOf(source.charAt(i));
+                                     if(!pal.equals("\n")) {
+                                         return "";
+                                     }
+                                }
+                            }
+                        }
+                        return null;
+                    }
+                };
+
+                editable.setFilters(new InputFilter[]{filter});
+            }
+        });
+
+        txtCalle.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                InputFilter filter = new InputFilter() {
+                    public CharSequence filter(CharSequence source, int start, int end,
+                                               Spanned dest, int dstart, int dend) {
+                        for (int i = start; i < end; i++) {
+                            if ( !Character.isLetterOrDigit(source.charAt(i))) {
+                                if(!Character.isSpaceChar(source.charAt(i))) {
+                                    return "";
+                                }
+                            }
+                        }
+                        return null;
+                    }
+                };
+
+                editable.setFilters(new InputFilter[]{filter});
+                String pal=editable.toString();
+
+                if(editable.length()>=51){
+                    editable.clear();
+                    for(int i=0;i<50;i++){
+                        editable.append(pal.charAt(i));
+                    }
+                }
+            }
+        });
+
+        txtColonia.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                InputFilter filter = new InputFilter() {
+                    public CharSequence filter(CharSequence source, int start, int end,
+                                               Spanned dest, int dstart, int dend) {
+                        for (int i = start; i < end; i++) {
+                            if ( !Character.isLetterOrDigit(source.charAt(i))) {
+                                if(!Character.isSpaceChar(source.charAt(i))) {
+                                    return "";
+                                }
+                            }
+                        }
+                        return null;
+                    }
+                };
+
+                editable.setFilters(new InputFilter[]{filter});
+            }
+        });
+
+        txtNoExt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                InputFilter filter = new InputFilter() {
+                    public CharSequence filter(CharSequence source, int start, int end,
+                                               Spanned dest, int dstart, int dend) {
+                        for (int i = start; i < end; i++) {
+                            if ( !Character.isLetterOrDigit(source.charAt(i))) {
+                                if(!Character.isSpaceChar(source.charAt(i))) {
+                                    return "";
+                                }
+                            }
+                        }
+                        return null;
+                    }
+                };
+
+                editable.setFilters(new InputFilter[]{filter});
+            }
+        });
+
+        txtNoInt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                InputFilter filter = new InputFilter() {
+                    public CharSequence filter(CharSequence source, int start, int end,
+                                               Spanned dest, int dstart, int dend) {
+                        for (int i = start; i < end; i++) {
+                            if ( !Character.isLetterOrDigit(source.charAt(i))) {
+                                if(!Character.isSpaceChar(source.charAt(i))) {
+                                    return "";
+                                }
+                            }
+                        }
+                        return null;
+                    }
+                };
+
+                editable.setFilters(new InputFilter[]{filter});
+            }
+        });
 
     }
 
@@ -112,6 +315,21 @@ public class Direccion extends Activity {
 
     }
 
+    public AlertDialog Mensaje(String mensaje){
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Aviso");
+        alert.setMessage(mensaje);
+        alert.setIcon(android.R.drawable.ic_dialog_alert);
+        alert.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        AlertDialog alertDialog=alert.create();
+        return  alertDialog;
+    }
+
     public void GuardarClienteDr(String idCte){
 
 
@@ -122,11 +340,11 @@ public class Direccion extends Activity {
 
         ContentValues values=new ContentValues();
         values.put("id_cliente", idCte);
-        values.put("nombre",valores[1]);
-        values.put("rfc", valores[3]);
-        values.put("correo", valores[2]);
-        values.put("telefono", valores[4]);
-        values.put("cp", valores[0]);
+        values.put("nombre",valores[0]);
+        values.put("rfc", valores[2]);
+        values.put("correo", valores[1]);
+        values.put("telefono", valores[3]);
+        values.put("cp", txtCP.getText().toString());
         values.put("colonia",txtColonia.getText().toString());
         values.put("calle", txtCalle.getText().toString());
         values.put("referencias", txtRef.getText().toString());
@@ -158,9 +376,9 @@ public class Direccion extends Activity {
 
         ContentValues values=new ContentValues();
         values.put("id_cliente",idCte);
-        values.put("nombre",valores[1]);
+        values.put("nombre",valores[0]);
         values.put("direccion","");
-        values.put("rfc",valores[3]);
+        values.put("rfc",valores[2]);
         values.put("perfil","1");
         values.put("cliente_padre","");
         values.put("almacen",id_sucursal);
@@ -242,7 +460,9 @@ public class Direccion extends Activity {
             db=lite.getWritableDatabase();
 
          try {
+
              db.insertOrThrow("RelacionClientes", null, values);
+
          }catch (Exception e){
              String s=e.toString();
              Log.e("Err1",e.toString());
@@ -254,6 +474,7 @@ public class Direccion extends Activity {
 
         GuardarClienteDr(builder.toString());
         GuardarClienreSm(builder.toString());
+
         dialog=ProgressDialog.show(context,"Aviso","Cargando registro de cliente",true,false);
         new UpLoadCliente().execute(id_largo);
         //Enviar el usuario
@@ -333,10 +554,12 @@ public class Direccion extends Activity {
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Registro de clientes");
+        alert.setCancelable(false);
         alert.setMessage("¿Desea guardar al cliente?");
         alert.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+
               InsertIdTemporal();
             }
         });
@@ -354,6 +577,12 @@ public class Direccion extends Activity {
     public boolean ValidarCampos(){
 
         Boolean resp=true;
+
+        if(txtCP.getText().toString().equals("")){
+            txtCP.requestFocus();
+            resp=false;
+        }
+
         if(txtCalle.getText().toString().equals("")){
             txtCalle.requestFocus();
             resp=false;
@@ -370,6 +599,20 @@ public class Direccion extends Activity {
 
 
         return resp;
+    }
+
+    public boolean ValidarColonia(String colonia){
+        String PATTERN_EMAIL = "[A-Za-záéíóúñÁÉÍÓÚÑ\\s]*";
+        Pattern pattern = Pattern.compile(PATTERN_EMAIL);
+        Matcher matcher = pattern.matcher(colonia);
+        return matcher.matches();
+    }
+
+    public boolean ValidarCalle(String calle){
+        String PATTERN_EMAIL = "[A-Za-záéíóúñÁÉÍÓÚÑ\\s]*";
+        Pattern pattern = Pattern.compile(PATTERN_EMAIL);
+        Matcher matcher = pattern.matcher(calle);
+        return matcher.matches();
     }
 
     private String Fecha(){
@@ -469,13 +712,20 @@ public class Direccion extends Activity {
                 for (int i = 0; i < tam; i++) {
 
                     JSONObject object = array.getJSONObject(i);
+
                     String id_cliente = object.getString("id_cliente");
                     String cteIbs = object.getString("id_cliente_ibs");
+
                     String id_corto=ObtenerIdCte(id_cliente);
-                    if(!cteIbs.equals("")||!cteIbs.equals(null)){
-                        UpdateStatusCteDr(id_corto,cteIbs,"50");
-                        UpdateCteSm(id_corto,cteIbs);
-                        cta=cteIbs;
+
+                    if(id_cliente!="null") {
+
+                            if(!cteIbs.isEmpty()){
+                            UpdateStatusCteDr(id_corto, cteIbs, "50");
+                            UpdateCteSm(id_corto, cteIbs);
+                            cta = cteIbs;
+                            }
+
                     }
 
                 }
@@ -498,7 +748,7 @@ public class Direccion extends Activity {
         if(!idIBS.equals("")||!idIBS.equals(null))
             values.put("id_cliente",idIBS);
 
-        long res=db.update("clientesDr",values,"id_cliente=?",new String[]{id});
+        long res=db.update("clientesDr", values, "id_cliente=?", new String[]{id});
 
         db.close();
         lite.close();
@@ -592,7 +842,6 @@ public class Direccion extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-
     public class UpLoadCliente extends AsyncTask<String, Void, String> {
 
         @Override
@@ -609,12 +858,18 @@ public class Direccion extends Activity {
 
                 if (val!=null) {
                     if(val!="[]") {
+
                         String cta = ProcesaJson(val);
 
-                        if (cta != "") {
+                        if (!cta.isEmpty()) {
 
                             InsertAgenda(cta);
-                            mensaje = "Cliente agredado correctamente. El número de cuenta es: " + cta;
+                            mensaje = "Cliente agregado correctamente. El número de cuenta es: " + cta;
+                        }
+                        else {
+                            //En caso de que los campos recibidos vengan nullos
+                            InsertAgenda(id_corto);
+                            mensaje=null;
                         }
 
                     }else{
@@ -639,13 +894,14 @@ public class Direccion extends Activity {
         @Override
         protected void onPostExecute(String res){
 
-            String mensaje=res!=null?res.toString():"El cliente se guardo localmente.Verifique su conexión.";
+            String mensaje=res!=null?res.toString():"El cliente se guardo localmente.";
 
             if(dialog.isShowing()) {
                dialog.dismiss();
 
                 AlertDialog.Builder alert = new AlertDialog.Builder(context);
                 alert.setTitle("Registro");
+                alert.setCancelable(false);
                 alert.setMessage(mensaje);
                 alert.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
                     @Override

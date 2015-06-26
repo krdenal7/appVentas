@@ -15,8 +15,9 @@ public class Model {
     String oferta;
     String laboratorio;
     String existencia;
+    boolean devolucion;
 
-    public Model(String name, int value,int cantidad,String precio,String ean,String precio_neto,String clasificacion,String oferta,String laboratorio,String existencia){
+    public Model(String name, int value,int cantidad,String precio,String ean,String precio_neto,String clasificacion,String oferta,String laboratorio,String existencia,boolean devolucion){
         this.name=name;
         this.value=value;
         this.cantidad=cantidad;
@@ -27,6 +28,7 @@ public class Model {
         this.oferta=oferta;
         this.laboratorio=laboratorio;
         this.existencia=existencia;
+        this.devolucion=devolucion;
     }
     public String getName(){ return this.name;}
     public int getValue(){return  this.value;}
@@ -38,5 +40,6 @@ public class Model {
     public String getOferta(){return this.oferta;}
     public String getLaboratorio(){return  this.laboratorio;}
     public String getExistencia(){return  this.existencia;}
+    public boolean getDevolucion(){return  this.devolucion;}
 
 }

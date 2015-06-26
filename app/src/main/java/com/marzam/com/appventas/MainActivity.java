@@ -13,13 +13,16 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.*;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -95,8 +98,9 @@ public class  MainActivity extends Activity {
     String txt="datos.txt";
     Bundle bundle;
     TextView txtNumber;
+    TextView txtVersion;
     ProgressDialog progressApk;
-    private static String file_url = "http://190.1.4.120/ActualizacionAndroid";
+    private static String file_url = "http://201.134.159.126/ActualizacionAndroid";
 
 
     @Override
@@ -104,7 +108,8 @@ public class  MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        /*getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        WindowManager.LayoutParams.FLAG_FULLSCREEN);*/
 
         setContentView(R.layout.login);
         setTitle("Fuerza de ventas");
@@ -114,11 +119,12 @@ public class  MainActivity extends Activity {
 
         txtUsuario=(TextView)findViewById(R.id.txtName);
         txtNumber=(TextView)findViewById(R.id.txtNumber);
+        txtVersion=(TextView)findViewById(R.id.textView);
 
         locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
         ShowEnableGPS();//Muestra el alert en caso de que el GPS del dispositivo se encuentre desactivado
 
-        //ObtenerArchivos2();
+        // ObtenerArchivos2();
 
         if(VerificarActualizacion())
                     Show_New_Version();
@@ -129,11 +135,7 @@ public class  MainActivity extends Activity {
 
             if(bundle.getBoolean("Restaurar"))
             new Task_RestaurarBD().execute("");
-
-
         }
-
-
 
 
        //ObtenerArchivos2();
@@ -185,15 +187,17 @@ public class  MainActivity extends Activity {
 
     public boolean VerificarActualizacion(){
 
-        int version=0;
+        float version=0;
 
         SharedPreferences prefs =
                 getSharedPreferences("Actualizaciones",Context.MODE_PRIVATE);
-                version=prefs.getInt("VersionAp",1);
+                version=prefs.getFloat("VersionAp",1);
 
 
-        int version_pref=version;
-        int version_app=getAppVersion(context);
+        float version_pref=version;
+        float version_app=getAppVersion(context);
+
+        txtVersion.setText("V."+version_app);
 
         if(version_pref!=version_app){
             return true;
@@ -268,17 +272,17 @@ public class  MainActivity extends Activity {
 
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
-        alert.setTitle("Ingrese su numero de agente");
+        alert.setTitle("Ingrese su número de agente");
         alert.setView(view);
-        alert.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+        alert.setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
                 String agente = ((EditText) view.findViewById(R.id.editText2)).getText().toString();
 
                 if (!ExistsBD()) {
-                    new Task_DownBD().execute(agente);
                     pd = ProgressDialog.show(context, "Obteniendo información de rutas", "Cargando", true, false);
+                    new Task_DownBD().execute(agente);
                 } else {
                     ActualizarSesionAgente(agente);
                     MostrarDatos_Agente();
@@ -297,6 +301,8 @@ public class  MainActivity extends Activity {
         alert.setCancelable(false);
         AlertDialog alertDialog=alert.create();
         alertDialog.show();
+        Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
 
 
     }
@@ -351,14 +357,12 @@ try {
 
         return false;
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_activity_main, menu);
         return true;
     }
-
 
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -372,7 +376,6 @@ try {
 
         return super.onOptionsItemSelected(item);
     }
-
     @Override
     public boolean onKeyDown(int keyCode,KeyEvent event){
 
@@ -412,14 +415,12 @@ try {
 
         return super.onKeyDown(keyCode,event);
     }
-
     @Override
     public void onBackPressed(){
 
        IntentHome();
 
     }
-
 
     private void IntentHome(){
         Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -429,7 +430,6 @@ try {
         startActivity(intent);
         finish();
     }
-
 
     private class TareaRegistroGCM extends AsyncTask<String,Integer,String> {
         @Override
@@ -482,7 +482,6 @@ try {
 
     }
 
-
     public String jsonPush(String num_emp,String key,String telefono){
 
         JSONObject object=new JSONObject();
@@ -516,7 +515,6 @@ try {
         super.onPause();
         finish();
     }
-
 
     /*Comprobar Ruta y Base de datos*/
     public void EliminarBD(){
@@ -591,7 +589,6 @@ try {
         }
 
     }
-
 
     private class Task_DownBD extends AsyncTask<String,Void,Object> {
 
@@ -842,7 +839,6 @@ try {
 
     }
 
-
     public void unZipBD(String origen){
 
         try{
@@ -924,7 +920,6 @@ try {
 
     }
 
-
     /*Registro-PUSH*/
     private void PushNotification(){
         //Registro SERVICIO GOOGLE CLOUD
@@ -942,6 +937,7 @@ try {
             Log.i(TAG,"Dispositivo no soportado");
         }
     }
+
     private int getAppVersion(Context context) {
 
         try{
@@ -954,6 +950,7 @@ try {
             throw new RuntimeException("Error al obtener version"+ e);
         }
     }
+
     private void setRegistrationId(Context context, String user, String regId){
         SharedPreferences prefs = getSharedPreferences(
                 MainActivity.class.getSimpleName(),
@@ -970,6 +967,7 @@ try {
 
         editor.commit();
     }
+
     private void EliminarRegistrationId(Context context, String user, String regId){
         SharedPreferences prefs = getSharedPreferences(
                 MainActivity.class.getSimpleName(),
@@ -986,6 +984,7 @@ try {
 
         editor.commit();
     }
+
     private boolean checkPlayServices(){
         int resultCode= GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
 
@@ -999,6 +998,7 @@ try {
         }
         return true;
     }
+
     private String getRegistrationId(Context context){
         final SharedPreferences prefd=getSharedPreferences(
                 MainActivity.class.getSimpleName(),
@@ -1015,9 +1015,6 @@ try {
         return registrationId;
     }
 
-
-
-
     /*Obtener datod del Telefono*/
 
     /*OBTENER DATOS DE USUARIOS*/
@@ -1033,6 +1030,7 @@ try {
         }
         return names;
     }
+
     private String getPhoneNumber(){
         TelephonyManager telephonyManager;
         telephonyManager=(TelephonyManager)
@@ -1040,8 +1038,6 @@ try {
 
         return telephonyManager.getLine1Number();
     }
-
-
 
     /*Comprobar si el dispositivo tiene conexión a Internet*/
 
@@ -1054,7 +1050,6 @@ try {
         }
         return false;
     }
-
 
     public String ObtenerAgenteActivo(){
 
@@ -1072,14 +1067,10 @@ try {
         return clave;
     }
 
-
     public void ObtenerArchivos2(){
 
         File directorio = new File("/data/data/com.marzam.com.appventas/databases/");
         File[] files=directorio.listFiles();
-
-
-        String err="";
         CopiarArchivos2(files);
     }
 
@@ -1107,7 +1098,9 @@ try {
 
 
      myInput.close();
- }catch (Exception e){continue;}
+ }catch (Exception e){
+     continue;
+ }
 
             }
             myOuput.close();
@@ -1118,7 +1111,6 @@ try {
             Log.e("ErrorCopiar:",e.toString());
         }
     }
-
 
     public void CrearTXT(){
 
@@ -1144,7 +1136,6 @@ try {
 
         return false;
     }
-
 
    public void IntentApk(){
 

@@ -34,6 +34,7 @@ public class envio_pedidoFaltante {
     Context context;
     CSQLite lite;
     String[] id_pedidos;
+    String[] id_devoluciones;
     WebServices services;
     File directorio;
     static InputStream stream;
@@ -43,8 +44,8 @@ public class envio_pedidoFaltante {
     String body;
     String from="envio_pedidoFaltante.java";
 
-
     public String Enviar(Context context){
+
         this.context=context;
         String respuesta="";
         File folder = android.os.Environment.getExternalStorageDirectory();
@@ -60,25 +61,46 @@ public class envio_pedidoFaltante {
 
             if(jsonRespuesta != null){
 
-                if(jsonRespuesta!="[]"){
+                     String rs=ProcesaJson(jsonRespuesta);
+                     respuesta=!rs.isEmpty()?rs:"Fallo al envíar información";
 
-                    ProcesaJson(jsonRespuesta);
-                    respuesta=EnvioPedido();
-                }
+                    if(VerificarPedidosPendientes()){
+                        respuesta=EnvioPedido();
+                    }
 
+            }else{
+                    if(VerificarPedidosPendientes()){
+                       respuesta=EnvioPedido();
+                    }
             }
-            else{
-
-                respuesta = "Verifique su conexión a Internet e intente nuevamente.";
-            }
-
         }
+
         else {
-
-            respuesta=EnvioPedido();
-
+            respuesta = EnvioPedido();
         }
 
+            if(VerificarDevolucionesPendiente()>0) {
+                respuesta = EnvioDevoluciones();
+            }
+
+
+            String json=jsonVisitas();
+            if(json!=null)
+                services.SincronizarVisitas(json);
+
+            String jsonCierre=JSonCierreVisitas();
+            String respjson=null;
+
+            if(jsonCierre!=null);
+            respjson= services.CierreVisitas(jsonCierre);
+            if(respjson!=null)
+                Extraer_json(respjson);
+
+
+
+        if(respuesta.isEmpty()){
+            respuesta="Fallo al envíar información";
+        }
 
         return respuesta;
     }
@@ -89,16 +111,11 @@ public class envio_pedidoFaltante {
 
         if (VerificarPedidosPendientes()) { //Verifica si se tienen pedidos pendientes
 
-            String json = jsonVisitas();
-            String visita;
-            visita = json == null ? null : services.SincronizarVisitas(jsonVisitas());
-
-
             if (isOnline() == false)
                  return "Verifique su conexión a Internet e intente nuevamente.";
 
             String cabecero = Objener_JsonCabecero();
-            String detalle = Obtener_Jsondetalle();
+            String detalle  = Obtener_Jsondetalle();
 
 
             String res = services.SincronizarPedidos(cabecero, detalle);
@@ -112,13 +129,117 @@ public class envio_pedidoFaltante {
 
                 return "Pedidos transmitidos correctamente";
 
-        } else {
+        }
+        else {
 
-            respuesta = "No hay información por sincronizar";
+               respuesta = "No hay información por sincronizar";
 
         }
 
+
         return respuesta;
+    }
+
+    public String EnvioDevoluciones(){
+        String respuesta="";
+
+        if (VerificarDevolucionesPendiente()>0) { //Verifica si se tienen pedidos pendientes
+
+              String jsonCabecero=Obtener_JsonCabeceroDev();
+              String jsonDetalle=Obtener_JsonDetalleDev();
+
+            if (isOnline() == false)
+                return "Verifique su conexión a Internet e intente nuevamente.";
+
+            WebServices webServices=new WebServices();
+
+            String resp=webServices.UploadDevolucionesPdtes(jsonCabecero,jsonDetalle);
+
+             if(resp!=null){
+
+                 if(ProcesaJsonDev(resp)){
+                     respuesta= "Devoluciónes transmitidas correctamente.";
+                 }else {
+                     respuesta= "Fallo al transmitir devoluciónes. Favor de verificar su conexión";
+                 }
+
+             }else{
+                 respuesta= "Fallo al transmitir devoluciónes. Favor de verificar su conexión";
+            }
+
+        }else {
+            respuesta= "No hay información por sincronizar";
+        }
+
+        return respuesta;
+    }
+
+    public int VerificarClientesPendientes(){
+
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getReadableDatabase();
+        int val=0;
+
+        Cursor rs=db.rawQuery("select * from clientesDr where estatus == '10'", null);
+
+        val=rs.getCount();
+
+        db.close();
+        lt.close();
+
+        return val;
+    }
+
+    public boolean VerificarPedidosPendientes(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select id_pedido from encabezado_pedido where id_estatus=10",null);
+
+        if(rs.getCount()>0){
+
+            id_pedidos=new String[rs.getCount()];
+            int cont=0;
+            while (rs.moveToNext()){
+                id_pedidos[cont]=rs.getString(0);
+                cont++;
+            }
+            db.close();
+            lite.close();
+            return true;
+        }
+        else {
+
+            db.close();
+            lite.close();
+            return false;
+        }
+
+
+    }
+
+    public int VerificarDevolucionesPendiente(){
+
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getReadableDatabase();
+        int val;
+
+        Cursor rs=db.rawQuery("select id_devolucion from DEV_Encabezado where status='10'",null);
+        val=rs.getCount();
+
+        id_devoluciones=new String[val];
+        int contador=0;
+
+        while (rs.moveToNext()){
+            id_devoluciones[contador]=rs.getString(0);
+            contador++;
+        }
+
+        db.close();
+        lt.close();
+
+        return val;
     }
 
     public String JSonClientes(){
@@ -164,7 +285,7 @@ public class envio_pedidoFaltante {
 
     public String ProcesaJson(String json){
 
-        String cta="";
+        String resp="";
 
         try {
 
@@ -181,13 +302,15 @@ public class envio_pedidoFaltante {
 
                     String id_corto=ObtenerIdCteCorto(id_cliente);
 
-                    if(!cteIbs.equals("")||!cteIbs.equals(null)){
-
-                        UpdateStatusCteDr(id_corto,cteIbs,"50");
-                        UpdateCteSm(id_corto,cteIbs);
-                        UpdateEncabezadoPedido(cteIbs,id_corto);
-                        UpdateAgendaPedido(cteIbs,id_corto);
-
+                    if(!id_cliente.isEmpty()) {
+                        if (!cteIbs.isEmpty()) {
+                               UpdateStatusCteDr(id_corto, cteIbs, "50");
+                               UpdateCteSm(id_corto, cteIbs);
+                               UpdateEncabezadoPedido(cteIbs, id_corto);
+                               UpdateVisitas(cteIbs,id_corto);
+                               UpdateAgendaPedido(cteIbs, id_corto);
+                               resp="Clientes registrados exitosamente.";
+                        }
                     }
 
                 }
@@ -197,7 +320,77 @@ public class envio_pedidoFaltante {
             e.printStackTrace();
         }
 
-        return  cta;
+        return  resp;
+    }
+
+    public boolean ProcesaJsonDev(String json){
+
+       boolean res=false;
+
+        try {
+
+
+            CSQLite lt=new CSQLite(context);
+            SQLiteDatabase db=lt.getWritableDatabase();
+            JSONArray array=new JSONArray(json);
+
+            for (int i=0;i<array.length();i++){
+
+                JSONObject obj=array.getJSONObject(i);
+                String id=obj.getString("id_devolucion");
+                String status=obj.getString("status");
+
+                ContentValues values=new ContentValues();
+                values.put("status",status);
+
+                if(db!=null)
+                    if(!db.isOpen())
+                        db=lt.getWritableDatabase();
+
+                int up=db.update("DEV_Encabezado",values,"id_devolucion=?",new String[]{id});
+
+                if(up>0)
+                    res=true;
+
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return res;
+
+    }
+
+    public void Extraer_json(String json){
+
+        String estatus="20";
+        String id_visita="";
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+
+        try {
+
+            JSONArray array=new JSONArray(json);
+
+            for(int i=0;i<array.length();i++){
+
+                JSONObject object=new JSONObject(array.getJSONObject(i).toString());
+                estatus=object.get("estatus_visita").toString();
+                id_visita=object.get("id_visita").toString();
+                db.execSQL("update visitas set status_visita='"+estatus+"' where id_visita='"+id_visita+"'");
+
+            }
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     public void UpdateStatusCteDr(String id,String idIBS,String estatus){
@@ -255,6 +448,39 @@ public class envio_pedidoFaltante {
 
     }
 
+    public void UpdateVisitas(String newCliente,String oldCliente){
+        CSQLite lite1=new CSQLite(context);
+        SQLiteDatabase db=lite1.getWritableDatabase();
+
+        ContentValues values=new ContentValues();
+        values.put("id_cliente",newCliente);
+
+
+        for (int j=0;j<4;j++) {
+
+            int i = db.update("visitas", values, "id_cliente=?", new String[]{oldCliente});
+
+            if(i>0) {
+                break;
+            }
+            else {
+
+                lite1=new CSQLite(context);
+                db=lite1.getWritableDatabase();
+
+                if(j==3){
+                    try {
+                        from = "envio_pedido";
+                        subject="UpdateEncabezadoPedido";
+                        body="Cliente nuevo: "+newCliente+"\n Cliente tem: "+ oldCliente +"\n BD: "+db.isOpen();
+                        new sendEmail().execute("");
+                    }catch (Exception e){ }}
+                continue;
+            } }
+        db.close();
+        lite1.close();
+    }
+
     public void UpdateEncabezadoPedido(String newCliente,String oldCliente){
         CSQLite lite1=new CSQLite(context);
         SQLiteDatabase db=lite1.getWritableDatabase();
@@ -262,7 +488,22 @@ public class envio_pedidoFaltante {
         ContentValues values=new ContentValues();
         values.put("id_cliente",newCliente);
 
-        db.update("encabezado_pedido", values, "id_cliente=?", new String[]{oldCliente});
+        for (int j=0;j<4;j++) {
+
+            int i = db.update("encabezado_pedido", values, "id_cliente=?", new String[]{oldCliente});
+
+            if(i>0) {
+                break;
+            }
+            else {
+
+                lite1=new CSQLite(context);
+                db=lite1.getWritableDatabase();
+
+                continue;
+
+            }
+        }
 
         db.close();
         lite1.close();
@@ -308,22 +549,6 @@ public class envio_pedidoFaltante {
         return idCte;
     }
 
-    public int VerificarClientesPendientes(){
-
-        CSQLite lt=new CSQLite(context);
-        SQLiteDatabase db=lt.getReadableDatabase();
-        int val=0;
-
-        Cursor rs=db.rawQuery("select * from clientesDr where estatus <> '50'", null);
-
-        val=rs.getCount();
-
-        db.close();
-        lt.close();
-
-        return val;
-    }
-
     public String jsonVisitas(){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
@@ -335,17 +560,22 @@ public class envio_pedidoFaltante {
         while (rs.moveToNext()){
 
             try {
-                object.put("numero_empleado",rs.getString(0));
-                object.put("id_cliente",rs.getString(1));
-                object.put("latitud",rs.getString(2));
-                object.put("longitud",rs.getString(3));
-                object.put("fecha_visita",rs.getString(4).replace(":","|"));
-                object.put("fecha_registro",rs.getString(5).replace(":","|"));
-                String id_visita=rs.getString(6);
-                object.put("id_visita",id_visita);
 
-                array.put(object);
-                object=new JSONObject();
+                String id_cliente=rs.getString(1);
+
+                if(VerificarEstatusCteDr(id_cliente)) {
+
+                    object.put("numero_empleado", rs.getString(0));
+                    object.put("id_cliente", rs.getString(1));
+                    object.put("latitud", rs.getString(2));
+                    object.put("longitud", rs.getString(3));
+                    object.put("fecha_visita", rs.getString(4).replace(":", "|"));
+                    object.put("fecha_registro", rs.getString(5).replace(":", "|"));
+                    String id_visita = rs.getString(6);
+                    object.put("id_visita", id_visita);
+                    array.put(object);
+                    object = new JSONObject();
+                }
 
 
             } catch (JSONException e) {
@@ -495,37 +725,6 @@ public class envio_pedidoFaltante {
 
     }
 
-    public boolean VerificarPedidosPendientes(){
-
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
-
-
-
-        Cursor rs=db.rawQuery("select id_pedido from encabezado_pedido where id_estatus=10",null);
-
-        if(rs.getCount()>0){
-
-            id_pedidos=new String[rs.getCount()];
-            int cont=0;
-            while (rs.moveToNext()){
-             id_pedidos[cont]=rs.getString(0);
-             cont++;
-            }
-            db.close();
-            lite.close();
-            return true;
-        }
-        else {
-
-            db.close();
-            lite.close();
-            return false;
-        }
-
-
-    }
-
     public String Objener_JsonCabecero(){
 
         lite=new CSQLite(context);
@@ -623,6 +822,135 @@ public class envio_pedidoFaltante {
 
         return array.toString();
     }
+
+    public String Obtener_JsonCabeceroDev(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs;
+
+        JSONArray array=new JSONArray();
+        JSONObject object;
+
+        for(int i=0;i<id_devoluciones.length;i++) {
+
+            rs= db.rawQuery("select sucursal,folio_hh,cliente,folio_dev_agente,tipo_documento,empleado, " +
+                             "folio_documento_agente,fecha_creacion,fecha_creacion_txt,status,bultos,id_devolucion from DEV_Encabezado where id_devolucion='"+id_devoluciones[i]+"'",null);
+
+            while (rs.moveToNext()) {
+
+                try {
+
+                    object=new JSONObject();
+                    object.put("sucursal", rs.getString(0));
+                    object.put("folio_hh", rs.getString(1));
+                    object.put("cliente", rs.getString(2));
+                    object.put("folio_dev_agente", rs.getString(3));
+                    object.put("tipo_documento", rs.getString(4));
+                    object.put("empleado", rs.getString(5));
+                    object.put("folio_documento_agente", rs.getString(6));
+                    object.put("fecha_creacion", rs.getString(7));
+                    object.put("fecha_creacion_txt", rs.getString(8));
+                    object.put("status", rs.getString(9));
+                    object.put("bultos",rs.getString(10));
+                    object.put("id_devolucion", rs.getString(11));
+                    array.put(object);
+
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return array.length()<=0?"":array.toString();
+    }
+
+    public String Obtener_JsonDetalleDev(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        Cursor rs;
+        JSONObject json;
+        JSONArray array=new JSONArray();
+
+        for(int i=0;i<id_devoluciones.length;i++) {
+
+            rs= db.rawQuery("select sucursal,folio_hh,codigo,motivo,cantidad,folio_dev_agente,id_devolucion from DEV_Detalle where id_devolucion='"+id_devoluciones[i]+"'",null);
+
+            while (rs.moveToNext()) {
+
+                json=new JSONObject();
+                try {
+                    json.put("sucursal", rs.getString(0));
+                    json.put("folio_hh", rs.getString(1));
+                    json.put("codigo", rs.getString(2));
+                    json.put("motivo", rs.getString(3));
+                    json.put("cantidad", rs.getString(4));
+                    json.put("folio_dev_agente", rs.getString(5));
+                    json.put("id_devolucion", rs.getString(6));
+                    array.put(json);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }}}
+
+
+        return  array.length()<=0?"":array.toString();
+    }
+
+    public String JSonCierreVisitas(){
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getReadableDatabase();
+
+        JSONArray array=new JSONArray();
+        JSONObject object;
+
+        Cursor rs=db.rawQuery("select id_visita,fecha_cierre,id_cliente from visitas where status_visita='10'",null);
+
+        while (rs.moveToNext()){
+            try{
+
+                String fecha_cierre=rs.getString(1);
+                String id_cliente=rs.getString(2);
+
+                if(VerificarEstatusCteDr(id_cliente)) {
+                    if (!fecha_cierre.isEmpty()) {
+                        object = new JSONObject();
+                        object.put("id_visita", rs.getString(0));
+                        object.put("fecha_cierre", fecha_cierre == null ? "" : fecha_cierre.replace(":", "|"));
+                        object.put("estatus_visita", "20");
+                        array.put(object);
+                    }
+                }
+
+            }catch (Exception e){
+                return null;
+            }
+        }
+
+        return array.length()==0?null:array.toString();
+    }
+
+    public boolean VerificarEstatusCteDr(String id_cte){
+
+        CSQLite lite1=new CSQLite(context);
+        SQLiteDatabase db=lite1.getReadableDatabase();
+
+        Cursor rs=db.rawQuery("select * from clientesDr where id_cliente=?",new String[]{id_cte});
+
+        if(rs.getCount()<=0){
+            return true;
+        }
+        else{
+            rs.close();
+            rs=db.rawQuery("select * from clientesDr where id_cliente=? and estatus = 50",new String[]{id_cte});
+            if(rs.getCount()>0){
+                return true;
+            }else {
+                return false;
+            }
+        }
+    }
+
 
     public String getDate(){
 

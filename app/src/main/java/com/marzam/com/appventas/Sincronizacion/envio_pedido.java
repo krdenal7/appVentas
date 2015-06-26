@@ -71,33 +71,31 @@ public class envio_pedido {
         if(Verificar_productos()) {
 
             if (Insertar_Cabecero())
-                Insertar_Detalle();
-
-                String json=jsonVisitas();
-                String visita;
-
-                visita = json==null ? null:webServices.SincronizarVisitas(jsonVisitas());
-
-                 if(visita != null)
-                      ActualizarStatusVisita(visita);
+                   Insertar_Detalle();
 
 
             if(VerificarClientesPendientes()>0) {
 
-                String jsonClientesDr = JSonClientes();
-                String clave_agente = ObtenerAgenteActivo();
+                EnvioClientesDr();
 
-                String jsonRespuesta = webServices.InsertarCliente(jsonClientesDr, clave_agente);
+            }//Clientes Dr pendientes
 
-                if (jsonRespuesta != null) {
+            String json=jsonVisitas();
+            String visita;
 
-                    if (jsonRespuesta != "[]") {
-                        ProcesaJson(jsonRespuesta);
-                    }
-                }
+            visita = json==null ? null:webServices.SincronizarVisitas(jsonVisitas());
 
-            }
+            if(visita != null)
+                    ActualizarStatusVisita(visita);
 
+            String jsonCierre=JSonCierreVisitas();
+            String respCierre=null;
+
+            if(jsonCierre!=null)
+                respCierre=webServices.CierreVisitas(respCierre);
+
+            if(respCierre!=null)
+                Extraer_json(respCierre);
 
 
 
@@ -128,6 +126,21 @@ public class envio_pedido {
             return "No hay productos para agregar";
         }
     }  //Metodo principal
+
+    public void EnvioClientesDr(){
+
+        String jsonClientesDr = JSonClientes();
+        String clave_agente = ObtenerAgenteActivo();
+
+        String jsonRespuesta = webServices.InsertarCliente(jsonClientesDr, clave_agente);
+
+        if (jsonRespuesta != null) {
+            if (jsonRespuesta != "[]") {
+                ProcesaJson(jsonRespuesta);
+            }
+        }
+
+    }
 
     public int VerificarClientesPendientes(){
 
@@ -290,6 +303,7 @@ public class envio_pedido {
 
            id_pedido=br.readLine();
 
+
        }catch (Exception e){
            from="envio_pedido";
            subject="LeerTXT";
@@ -298,6 +312,37 @@ public class envio_pedido {
        }
 
        return  id_pedido;
+   }
+
+   public String NoOrden(){
+
+       String NoOrden="";
+       try{
+
+           InputStreamReader archivo=new InputStreamReader(((Activity)context).openFileInput("Pedidos.txt"));
+           BufferedReader br=new BufferedReader(archivo);
+
+           String line="";
+           int contador=0;
+
+           while((line=br.readLine())!=null){
+
+              if(contador==1)
+                  NoOrden=line;
+
+               contador++;
+           }
+
+
+       }catch (Exception e){
+           from="envio_pedido";
+           subject="LeerTXT";
+           body="Agente:"+ObtenerAgenteActivo()+"\nError: "+e.toString();
+           new sendEmail().execute("");
+       }
+
+
+       return NoOrden;
    }
 
    public String Obtener_idCliente(){
@@ -342,7 +387,7 @@ public class envio_pedido {
       return cliente;
   }
 
-    public boolean VerificarEstatusCteDr(String id_cte){
+  public boolean VerificarEstatusCteDr(String id_cte){
 
         CSQLite lite1=new CSQLite(context);
         SQLiteDatabase db=lite1.getReadableDatabase();
@@ -641,13 +686,16 @@ try {
 
                     String id_corto=ObtenerIdCteCorto(id_cliente);
 
-                    if(!cteIbs.equals("")||!cteIbs.equals(null)){
+                    if(id_cliente!="null") {
+                        if (!cteIbs.isEmpty()) {
 
-                        UpdateStatusCteDr(id_corto,cteIbs,"50");
-                        UpdateCteSm(id_corto,cteIbs);
-                        UpdateEncabezadoPedido(cteIbs,id_corto);
-                        UpdateAgendaPedido(cteIbs,id_corto);
+                            UpdateStatusCteDr(id_corto, cteIbs, "50");
+                            UpdateCteSm(id_corto, cteIbs);
+                            UpdateEncabezadoPedido(cteIbs, id_corto);
+                            UpdateVisitas(cteIbs,id_corto);
+                            UpdateAgendaPedido(cteIbs, id_corto);
 
+                        }
                     }
 
                 }
@@ -716,19 +764,69 @@ try {
     }
 
     public void UpdateEncabezadoPedido(String newCliente,String oldCliente){
+
         CSQLite lite1=new CSQLite(context);
         SQLiteDatabase db=lite1.getWritableDatabase();
 
         ContentValues values=new ContentValues();
         values.put("id_cliente",newCliente);
 
-        db.update("encabezado_pedido", values, "id_cliente=?", new String[]{oldCliente});
 
+         for (int j=0;j<4;j++) {
+
+             int i = db.update("encabezado_pedido", values, "id_cliente=?", new String[]{oldCliente});
+
+             if(i>0) {
+                 break;
+             }
+             else {
+                 lite1=new CSQLite(context);
+                 db=lite1.getWritableDatabase();
+                 if(j==3){
+                     try {
+                         from = "envio_pedido";
+                         subject="UpdateEncabezadoPedido";
+                         body="Cliente nuevo: "+newCliente+"\n Cliente tem: "+ oldCliente +"\n BD: "+db.isOpen();
+                         new sendEmail().execute("");
+                     }catch (Exception e){}  }continue;}}
         db.close();
         lite1.close();
     }
 
-  public  boolean  Insertar_Cabecero(){
+    public void UpdateVisitas(String newCliente,String oldCliente){
+        CSQLite lite1=new CSQLite(context);
+        SQLiteDatabase db=lite1.getWritableDatabase();
+
+        ContentValues values=new ContentValues();
+        values.put("id_cliente",newCliente);
+
+
+        for (int j=0;j<4;j++) {
+
+            int i = db.update("visitas", values, "id_cliente=?", new String[]{oldCliente});
+
+            if(i>0) {
+                break;
+            }
+            else {
+
+                lite1=new CSQLite(context);
+                db=lite1.getWritableDatabase();
+
+                if(j==3){
+                    try {
+                        from = "envio_pedido";
+                        subject="UpdateEncabezadoPedido";
+                        body="Cliente nuevo: "+newCliente+"\n Cliente tem: "+ oldCliente +"\n BD: "+db.isOpen();
+                        new sendEmail().execute("");
+                    }catch (Exception e){ }}
+                continue;
+            } }
+        db.close();
+        lite1.close();
+    }
+
+    public  boolean Insertar_Cabecero(){
       this.context=context;
 
       Obtener_Valores();
@@ -746,7 +844,7 @@ try {
                     fec = getDates();
       cabecero[8] = fec;
       cabecero[9] = "10";
-      cabecero[10] = "";
+      cabecero[10] = NoOrden();
       cabecero[11] = Obtener_firma(cabecero[1]);
       cabecero[12] = Obtener_Idvisita();
 
@@ -769,7 +867,7 @@ try {
 
   }//completo
 
-  public  void     Insertar_Detalle(){
+    public  void    Insertar_Detalle(){
 
      lite=new CSQLite(context);
      SQLiteDatabase db=lite.getWritableDatabase();
@@ -823,7 +921,7 @@ try {
 
   }//completo
 
-  public Boolean Verificar_productos(){
+    public Boolean Verificar_productos(){
 
       lite=new CSQLite(context);
       SQLiteDatabase db=lite.getWritableDatabase();
@@ -835,7 +933,7 @@ try {
           return false;
   }//Verifica si hay productos para agregar al detalle
 
-  public String LimpiarBD_Insertados(){
+    public String LimpiarBD_Insertados(){
 
       String resp="";
 
@@ -872,9 +970,10 @@ try {
 
 
 while (rs.moveToNext()) {
+
     try {
 
-        json.put("id_pedido", rs.getString(0).equals("")?id_pedido:rs.getString(0));
+        json.put("id_pedido", rs.getString(0).equals("") ? id_pedido : rs.getString(0));
         json.put("id_cliente", rs.getString(1).equals("")?Obtener_idCliente():rs.getString(1));
         json.put("numero_empleado", rs.getString(2).equals("")?Obtener_NoEmpleado():rs.getString(2));
         json.put("clave_agente", rs.getString(3).equals("")?ObtenerAgenteActivo():rs.getString(3));
@@ -968,22 +1067,24 @@ try {
         while (rs.moveToNext()){
 
             try {
+                String id_cliente=rs.getString(1);
+
+                if(VerificarEstatusCteDr(id_cliente)) {
+                    object.put("numero_empleado", rs.getString(0));
+                    object.put("id_cliente", id_cliente);
+                    object.put("latitud", rs.getString(2));
+                    object.put("longitud", rs.getString(3));
+                    String fechavisita = rs.getString(4);
+                    object.put("fecha_visita", fechavisita != null ? fechavisita.replaceAll(":", "|") : "01-01-2014 00|00|00");
+                    String fecharegistro = rs.getString(5);
+                    object.put("fecha_registro", fecharegistro != null ? fecharegistro.replaceAll(":", "|") : "01-01-2014 00|00|00");
+                    String id_visita = rs.getString(6);
+                    object.put("id_visita", id_visita);
 
 
-
-                object.put("numero_empleado",rs.getString(0));
-                object.put("id_cliente",rs.getString(1));
-                object.put("latitud",rs.getString(2));
-                object.put("longitud",rs.getString(3));
-                String fechavisita=rs.getString(4);
-                object.put("fecha_visita",fechavisita!=null ? fechavisita.replaceAll(":","|"):"01-01-2014 00|00|00");
-                String fecharegistro=rs.getString(5);
-                object.put("fecha_registro", fecharegistro!=null ? fecharegistro.replaceAll(":","|"):"01-01-2014 00|00|00");
-                String id_visita=rs.getString(6);
-                object.put("id_visita",id_visita);
-
-                array.put(object);
-                object=new JSONObject();
+                    array.put(object);
+                    object = new JSONObject();
+                }
 
 
             } catch (JSONException e) {
@@ -1039,6 +1140,69 @@ try {
             }
         }
         return  array.toString();
+    }
+
+    public String JSonCierreVisitas(){
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getReadableDatabase();
+
+        JSONArray array=new JSONArray();
+        JSONObject object;
+
+        Cursor rs=db.rawQuery("select id_visita,fecha_cierre,id_cliente from visitas where status_visita='10'",null);
+
+        while (rs.moveToNext()){
+            try{
+
+                String fecha_cierre=rs.getString(1);
+                String id_cliente=rs.getString(2);
+
+                if(VerificarEstatusCteDr(id_cliente)) {
+                    if (!fecha_cierre.isEmpty()) {
+                        object = new JSONObject();
+                        object.put("id_visita", rs.getString(0));
+                        object.put("fecha_cierre", fecha_cierre == null ? "" : fecha_cierre.replace(":", "|"));
+                        object.put("estatus_visita", "20");
+                        array.put(object);
+                    }
+                }
+
+            }catch (Exception e){
+                return null;
+            }
+        }
+
+        return array.length()==0?null:array.toString();
+    }
+
+    public void Extraer_json(String json){
+
+        String estatus="20";
+        String id_visita="";
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+
+        try {
+
+            JSONArray array=new JSONArray(json);
+
+            for(int i=0;i<array.length();i++){
+
+                JSONObject object=new JSONObject(array.getJSONObject(i).toString());
+                estatus=object.get("estatus_visita").toString();
+                id_visita=object.get("id_visita").toString();
+                db.execSQL("update visitas set status_visita='"+estatus+"' where id_visita='"+id_visita+"'");
+
+            }
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     public static byte[] StreamArchivo(File file){
@@ -1106,8 +1270,6 @@ try {
         return formatteDate;
     }//retorna la fecha en formato yyyyMMdd
 
-
-
     /*Enviar Pedido por WebService*/
     public  boolean isOnline(){
 
@@ -1119,9 +1281,7 @@ try {
         return false;
     }
 
-
-
-   public class sendEmail extends AsyncTask<String,Void,Object>{
+    public class sendEmail extends AsyncTask<String,Void,Object>{
 
        @Override
        protected Object doInBackground(String... strings) {

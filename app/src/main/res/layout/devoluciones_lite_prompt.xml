@@ -72,7 +72,8 @@
             android:layout_below="@+id/idDevLitePromptProduct"
             android:layout_toRightOf="@+id/idDevLitePromptProductAmount"
             android:layout_toEndOf="@+id/idDevLitePromptProductAmount"
-            android:layout_marginTop="7dp" />
+            android:layout_marginTop="7dp"
+            android:maxLength="4"/>
 
         <LinearLayout
             android:orientation="horizontal"

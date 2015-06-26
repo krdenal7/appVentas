@@ -24,16 +24,18 @@ import java.net.Proxy;
 
 public class WebServices {
 
-            //static String ip="http://201.134.159.126/WebService/WebService.asmx";//
-              static String ip="http://190.1.4.120/WebService/WebService.asmx";
-            //static String ip="http://201.134.159.126/WebServicePruebas/WebService.asmx";
-            //static String ip="http://201.134.159.126/WSFuerzasExternas/WebService.asmx";
-            //static String ip="http://marzam.mx/WSFuerzasExternas/WebService.asmx";
+                 //static String ip="http://201.134.159.126/WebService/WebService.asmx";//
+                //static String ip="http://190.1.4.120/WebService/WebService.asmx";
+                //static String ip="http://190.1.4.129/WebServicePruebas/WebService.asmx";
+                 static String ip="http://201.134.159.126/WebServicePruebas/WebService.asmx";
+                //static String ip="http://201.134.159.126/WSFuerzasExternas/WebService.asmx";
+                //static String ip="http://marzam.mx/WSFuerzasExternas/WebService.asmx";
 
     String from="WebServices";
     String subject;
     String body;
     Mail m;
+
 
     public Object Upload_BD(String zip,String nombre){
 
@@ -445,6 +447,41 @@ public class WebServices {
 
     }
 
+    public String UploadDevolucionesPdtes(String cabecero,String detalle){
+
+        String SOAP_ACTION="http://tempuri.org/TransmiteDevoluciones";
+        String OPERATION_NAME="TransmiteDevoluciones";
+        String WSDL_TARGET_NAMESPACE="http://tempuri.org/";
+        String SOAP_ADDRESS=ip;
+
+        SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
+        request.addProperty("jencabezado",cabecero);
+        request.addProperty("jdetalle",detalle);
+
+
+        SoapSerializationEnvelope envelope=new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.dotNet=true;
+
+        envelope.setOutputSoapObject(request);
+
+        HttpTransportSE httpTransportSE=new HttpTransportSE(SOAP_ADDRESS);
+        Object response=null;
+
+        try{
+
+            httpTransportSE.call(SOAP_ACTION,envelope);
+            response=envelope.getResponse();
+
+        }catch (Exception e){
+            String a=e.toString();
+            Log.d("WebServiceBakError",a);
+            return null;
+        }
+
+        return response.toString();
+
+    }
+
     public String InsertarCliente(String json,String clave_agente){
         String SOAP_ACTION="http://tempuri.org/InsertarCliente1";
         String OPERATION_NAME="InsertarCliente1";
@@ -542,7 +579,6 @@ public class WebServices {
             return null;
         }
     }
-
 
     public void sendData(final Object father, String metodo, String... arg) {
         final String SOAP_ACTION = "http://tempuri.org/" + metodo;

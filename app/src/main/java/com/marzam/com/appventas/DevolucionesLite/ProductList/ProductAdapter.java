@@ -10,7 +10,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.marzam.com.appventas.DevolucionesLite.DevolucionesLite;
 import com.marzam.com.appventas.R;
 
 /**

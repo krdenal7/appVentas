@@ -105,13 +105,13 @@ public class KPI_General extends Activity {
         alertDialog.show();
     }
 
-    public void CerrarVisita(String agente){
+    public void CerrarVisita(){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
         db.execSQL("update sesion_cliente set Sesion=2,Fecha_cierre='"+getDate()+"' where id=(select Max(id) from sesion_cliente)");
-        db.execSQL("update visitas set fecha_cierre='"+Date+"' where id_visita=(select max(id_visita) from visitas)");
-       // UpdateConsecutivo_visitas(agente);
+        String query="update visitas set fecha_cierre='"+getDateCierre()+"' where id_visita=(select max(id_visita) from visitas)";
+        db.execSQL(query);
         UpdateProductos();
 
         db.close();
@@ -141,6 +141,18 @@ public class KPI_General extends Activity {
 
         return formatteDate;
     }
+    private String getDateCierre(){
+
+        Calendar cal = new GregorianCalendar();
+        Date dt = cal.getTime();
+        SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formatteDate=df.format(dt.getTime());
+
+        return formatteDate;
+    }
+
+
+
 
     public String Obtener_Idvisita(){
 
@@ -404,16 +416,16 @@ public class KPI_General extends Activity {
                  respuesta = services.CierreVisitas(json);
 
                 if (respuesta != null)
-                    Extraer_json(respuesta);
+                             Extraer_json(respuesta);
             }
+
             return respuesta;
         }
         @Override
         protected void onPostExecute(Object res){
 
             if(progress.isShowing()) {
-                String agente = ObtenerClavedeAgente();
-                CerrarVisita(agente);
+                CerrarVisita();
                 progress.dismiss();
                 startActivity(new Intent(context,MapsLocation.class)
                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_CLEAR_TOP));

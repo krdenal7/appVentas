@@ -1,9 +1,5 @@
 package com.marzam.com.appventas.DevolucionesLite.ProductList;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -15,6 +11,10 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class SwipeListViewTouchListener implements View.OnTouchListener {
 	// Cached ViewConfiguration and system-wide constant values

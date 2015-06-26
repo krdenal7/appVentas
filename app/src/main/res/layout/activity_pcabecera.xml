@@ -1,5 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="fill_parent"
     tools:context="com.marzam.com.appventas.Tab_pedidos.pcabecera"
     android:weightSum="1"
@@ -11,7 +12,7 @@
         android:id="@+id/gridLayout3"
         android:layout_alignParentTop="true"
         android:columnCount="2"
-        android:rowCount="6"
+        android:rowCount="8"
         android:useDefaultMargins="true"
         android:rowOrderPreserved="false"
         android:longClickable="false"
@@ -20,7 +21,9 @@
         android:columnOrderPreserved="false"
         android:clickable="false"
         android:layout_alignParentStart="false"
-        android:layout_margin="10dp">
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -33,7 +36,9 @@
             android:layout_alignParentStart="true"
             style="@android:style/TextAppearance.DeviceDefault.Small"
             android:textColor="#FFFFFF"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_row="0"
+            android:layout_column="0" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -46,7 +51,9 @@
             android:layout_alignParentEnd="true"
             style="@android:style/TextAppearance.DeviceDefault.Small"
             android:textColor="#FFFFFF"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_row="0"
+            android:layout_column="1" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -59,7 +66,9 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:textColor="#FFFFFF"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_row="1"
+            android:layout_column="0" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -71,26 +80,32 @@
             android:layout_alignRight="@+id/textView9"
             style="@android:style/TextAppearance.DeviceDefault.Small"
             android:textColor="#FFFFFF"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_row="1"
+            android:layout_column="1" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/tipo_pedido"
+            android:text="Tipo de orden:"
             android:id="@+id/textView8"
             style="@android:style/TextAppearance.DeviceDefault.Small"
             android:layout_below="@+id/textView7"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:textColor="#FFFFFF"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_row="2"
+            android:layout_column="0" />
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_gravity="right" >
+            android:layout_gravity="right"
+            android:layout_row="2"
+            android:layout_column="1">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -126,21 +141,50 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Licitación:"
+            android:text="No. Orden:"
             android:id="@+id/textView6"
             style="@android:style/TextAppearance.DeviceDefault.Small"
             android:layout_below="@+id/spinner"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:textColor="#FFFFFF"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_row="3"
+            android:layout_column="0" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:id="@+id/textView76"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_row="3"
+            android:layout_column="1" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText2"
+            android:layout_row="3"
+            android:layout_column="1"
+            android:background="@drawable/background_txtfile"
+            android:maxWidth="19dp"
+            android:singleLine="true"
+            android:paddingLeft="4dp"
+            tools:ignore="RtlSymmetry"
+            android:maxLength="16" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText"
+            android:layout_row="4"
+            android:layout_column="1"
+            android:background="@drawable/background_txtfile"
+            android:singleLine="true"
+            android:paddingLeft="4dp"
+            android:maxWidth="19dp"
+            tools:ignore="RtlSymmetry" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -153,14 +197,18 @@
             android:layout_alignParentStart="true"
             style="@android:style/TextAppearance.DeviceDefault.Small"
             android:textColor="#FFFFFF"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_row="5"
+            android:layout_column="0" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:id="@+id/textView77"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_row="7"
+            android:layout_column="1" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -173,7 +221,43 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:textColor="#FFFFFF"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_row="4"
+            android:layout_column="0" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText4"
+            android:layout_row="5"
+            android:layout_column="1"
+            android:background="@drawable/background_txtfile"
+            android:singleLine="true"
+            android:paddingLeft="4dp"
+            android:maxWidth="19dp"
+            tools:ignore="RtlSymmetry" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText5"
+            android:layout_row="6"
+            android:layout_column="1"
+            android:background="@drawable/background_txtfile"
+            android:singleLine="true"
+            android:paddingLeft="4dp"
+            android:maxWidth="19dp"
+            tools:ignore="RtlSymmetry" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Licitación:"
+            android:id="@+id/textView4"
+            android:layout_row="6"
+            android:layout_column="0"
+            android:textColor="#ffffff" />
 
     </GridLayout>
 

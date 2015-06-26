@@ -42,7 +42,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/ic_launcher_old"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:theme="@style/Theme.Theme_marzam"
@@ -167,6 +167,7 @@
             />
         <activity
             android:name=".DevolucionesLite.DevolucionesLite"
+            android:windowSoftInputMode="stateHidden|adjustPan"
             android:label="@string/title_activity_detalle_pedidos"
             android:screenOrientation="portrait" >
         </activity>

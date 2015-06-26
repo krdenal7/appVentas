@@ -1,6 +1,5 @@
 package com.marzam.com.appventas.PushNotifications;
 
-import android.app.Activity;
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -27,10 +26,6 @@ import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by SAMSUMG on 15/11/2014.
@@ -125,7 +120,7 @@ public class GCMIntentService extends IntentService{
 
         if(com[0].equals("07")){
 
-            RegPreferencias(com.length==2?Integer.parseInt(com[1]):1);
+            RegPreferencias(com.length==2?Float.parseFloat(com[1]):1);
 
         }
 
@@ -200,11 +195,27 @@ public class GCMIntentService extends IntentService{
         return clave;
     }
 
-    public void RegPreferencias(int version){
+    private String ObtenerClaveAgenteActivo(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        String clave="";
+
+        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
+        if(rs.moveToFirst()){
+
+            clave=rs.getString(0);
+        }
+
+
+        return clave;
+    }
+
+    public void RegPreferencias(float version){
         SharedPreferences prefs =
                 getSharedPreferences("Actualizaciones",Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt("VersionAp", version);
+        editor.putFloat("VersionAp", version);
         editor.commit();
     }
 
@@ -371,7 +382,7 @@ public class GCMIntentService extends IntentService{
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra("Restaurar",true);
-            intent.putExtra("Agente",ObtenerAgenteActivo());
+            intent.putExtra("Agente",ObtenerClaveAgenteActivo());
             getApplication().startActivity(intent);
 
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Aplicación de Ventas</string>
+    <string name="app_name">Ventas</string>
     <string name="Mapa">Mapa</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -65,7 +65,7 @@
     <string name="txtDevLiteCaptShortName">Nombre corto</string>
     <string name="txtDevLiteCaptCodeMarzam">Código Marzam</string>
     <string name="txtDevLiteCaptBarcode">Código de barras</string>
-    <string name="txtDevLiteCaptProductSelect">Selecciona el poducto</string>
+    <string name="txtDevLiteCaptProductSelect">Productos:</string>
     <string name="txtDevLitePromptProduct">Producto:</string>
     <string name="txtDevLitePromptProductAmount">Cantidad:</string>
     <string name="txtDevLitePromptAdd1">+1</string>
@@ -77,7 +77,7 @@
     <string name="txtCodeProduct">Código producto:</string>
     <string name="txtReasonDocument">Documento de devolución:</string>
     <string name="txtReasonReturn">Motivo devolución:</string>
-    <string name="txtBtnFinishReturnProduct">Enviar la devoluciones</string>
+    <string name="txtBtnFinishReturnProduct">Enviar</string>
     <string name="txtDevLitePromptReset0">0</string>
     <string name="txtDevLiteConfAddPackage">Agregar bulto</string>
     <string name="txtDevLiteCaptSearchByName">Buscar por nombre</string>
@@ -85,6 +85,7 @@
     <string name="txtDevLiteCaptSearchByBarCode">Buscar por código de barras</string>
     <string name="title_activity_direccion">Dirección</string>
     <string name="por_visitar">Por visitar:</string>
+    <string name="txtDevLiteCaptSearch">Buscar producto</string>
 
 
 </resources>

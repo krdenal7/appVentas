@@ -42,7 +42,7 @@ public class Encabezados_pedidos extends Activity {
         setContentView(R.layout.activity_encabezados_pedidos);
         id_cliente=getIntent().getStringExtra("cliente");
         String name_cliente=getIntent().getStringExtra("clienteNombre");
-        setTitle(id_cliente);
+        setTitle(name_cliente);
         context=this;
 
 
@@ -81,7 +81,6 @@ public class Encabezados_pedidos extends Activity {
         });
 
     }
-
 
     public void LlenarHasMap(String id){
           try{

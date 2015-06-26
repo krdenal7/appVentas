@@ -9,12 +9,14 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Html;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,13 +25,16 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,35 +44,40 @@ import com.marzam.com.appventas.Email.Mail;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 
+import java.sql.ResultSet;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.util.Locale;
+import java.util.Objects;
 
 
 public class pcatalogo extends Activity {
 
     Context context;
 
+
     ListView lproductos;
     EditText EditBuscar;
     Model[] modelItems;
     CustomAdapter adapter1;
-    NumberPicker picker;
     HashMap<String,String> producto_row;
     static ArrayList<HashMap<String,?>>data=null;
     SimpleAdapter simpleAdapter;
     CSQLite lite;
 
     AlertDialog alertDialog;
-    AlertDialog alertDialog_picker;
 
     Button boton1;
     Button boton2;
     Button boton3;
     Button boton4;
     Button boton5;
-    Button boton6;
     ProgressDialog dialogList;
+    ProgressDialog dialogList1;
+
+    Spinner spFiltro;
 
 
     Mail m;
@@ -77,6 +87,8 @@ public class pcatalogo extends Activity {
 
     TextView cantidadTextView;
 
+    private String codigoList;
+    private EditText txt3Cant;
 
 
     @Override
@@ -85,18 +97,20 @@ public class pcatalogo extends Activity {
         setContentView(R.layout.activity_catalogo);
         context=this;
 
-        setTitle("Catálogo");
+         setTitle("Catálogo");
 
          EditBuscar=(EditText)findViewById(R.id.editText4);
          EditBuscar.requestFocus();
          getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
          lproductos=(ListView)findViewById(R.id.listView2);
 
+         spFiltro=(Spinner)findViewById(R.id.spinner2);
+         ArrayAdapter arrayAdapter=new ArrayAdapter
+         (context,android.R.layout.simple_list_item_1,new String[]{"Todo","Solo ofertas"});
+         spFiltro.setAdapter(arrayAdapter);
 
-        new UpdateList().execute("");
-        dialogList=ProgressDialog.show(context,"Catálogo","Generando..",true,false);
 
-        LlenarModelItems();
+        LlenarModelItems(false);
         adapter1=new CustomAdapter(this,modelItems);
         lproductos.setAdapter(adapter1);
 
@@ -116,15 +130,16 @@ public class pcatalogo extends Activity {
                     if (charSequence.length() >= 2) {
 
                         pcatalogo.this.simpleAdapter.getFilter().filter(charSequence);
-                        Filter cont = simpleAdapter.getFilter();
-
-                        //if (cont != null) {
                         lproductos.setAdapter(simpleAdapter);
+                        simpleAdapter.notifyDataSetChanged();
 
-                        //  }
                     } else {
-                        LLenarList();
-                        LlenarModelItems();
+                        //LLenarList();
+                        boolean fil=false;
+                        if(spFiltro.getSelectedItemPosition()==1)
+                            fil=true;
+
+                        LlenarModelItems(fil);
                         adapter1 = new CustomAdapter(context, modelItems);
                         lproductos.setAdapter(adapter1);
                     }
@@ -145,8 +160,8 @@ public class pcatalogo extends Activity {
             @Override
             public void onClick(View view) {
 
-                if( EditBuscar.getText().length()>0 ) {
-                    LlenarModelItems();
+                if (EditBuscar.getText().length() > 0) {
+                    LlenarModelItems(false);
                     EditBuscar.setText("");
                     adapter1 = new CustomAdapter(context, modelItems);
                     lproductos.setAdapter(adapter1);
@@ -158,6 +173,7 @@ public class pcatalogo extends Activity {
         lproductos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
                 cantidadTextView = (TextView) view.findViewById(R.id.textView29);
                 ShowDialog(i);
 
@@ -174,6 +190,29 @@ public class pcatalogo extends Activity {
                 return false;
             }
         });
+
+        spFiltro.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+                    EditBuscar.setText("");
+                    new TaskFiltro().execute("");
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+
+            }
+        });
+
+
+         new UpdateList().execute("");
+         dialogList=ProgressDialog.show(context,"Catálogo","Generando..",true,false);
+
+
+
     }
 
     public void ShowDialog(final int posicion){
@@ -195,11 +234,11 @@ public class pcatalogo extends Activity {
             public void onClick(DialogInterface dialog, int id) {
 
 
-                //LlenarModelItems();
-                //adapter1=new CustomAdapter(context,modelItems);
-                //lproductos.setAdapter(adapter1);
-                //EditBuscar.setText("");
-                //new UpdateList().execute("");
+                int cantidad = new Integer("0"+pcatalogo.this.txt3Cant.getText());
+                int isCheqket = 0;
+                if(cantidad>0) isCheqket = 1;
+
+                AgregarProducto(pcatalogo.this.codigoList, cantidad, isCheqket);
 
             }
 
@@ -214,57 +253,15 @@ public class pcatalogo extends Activity {
 
     }
 
-    public void ShowDialog_picker(final String codigo){
-
-
-        final EditText txtCantidad=new EditText(context);
-        txtCantidad.setHint("cantidad");
-        txtCantidad.setInputType(InputType.TYPE_CLASS_NUMBER);
-
-        AlertDialog.Builder alert1=new AlertDialog.Builder(context);
-        alert1.setTitle("Seleccione una cantidad");
-        alert1.setView(txtCantidad);
-        alert1.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-                int cantidad=Integer.parseInt(txtCantidad.getText().toString());
-                AgregarProducto(codigo,0,1);
-
-                if(cantidad!=0)
-                AgregarProducto(codigo,cantidad,1);
-
-                else
-                AgregarProducto(codigo,0,0);
-
-            }
-        });
-        alert1.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-            }
-        });
-
-        alertDialog_picker=alert1.create();
-        alertDialog_picker.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialogInterface) {
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(txtCantidad, InputMethodManager.SHOW_IMPLICIT);
-            }
-        });
-        alertDialog_picker.show();
-
-
-
-    }
-
-    public void LlenarHasmap(){
+    public void LlenarHasmap(boolean filtro){
 
         if(lite!=null)
             lite.close();
 
+        NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
+        DecimalFormat dec=(DecimalFormat)nf;
+        dec.setMaximumFractionDigits(2);
+        dec.setMinimumFractionDigits(2);
 
 
         for(int i=0;i<4;i++) {
@@ -272,8 +269,14 @@ public class pcatalogo extends Activity {
             SQLiteDatabase db=lite.getWritableDatabase();
             Cursor rs = null;
 
-            String query = "select distinct descripcion,precio,p.Cantidad,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad from productos as p left join " +
-                    " ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo ";
+            String where="";
+
+            if(filtro==true)
+                where="where o.descuento > 0";
+
+             String query=String.format("select distinct descripcion,precio,p.Cantidad,p.codigo,precio_final,clasificacion_fiscal,o.descuento, " +
+                    "p.laboratorio, e.cantidad,devolucion,isCheck from productos as p left join " +
+                     " ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo %s",where);
 
             try {
 
@@ -284,16 +287,20 @@ public class pcatalogo extends Activity {
                 while (rs.moveToNext()) {
 
                     String oferta = (rs.getString(6) == null) ? "0" : rs.getString(6);
+                    double precio=Double.parseDouble(rs.getString(1));
+                    double preciof=Double.parseDouble(rs.getString(4));
 
                     producto_row.put("A", rs.getString(0));
-                    producto_row.put("B", "$"+rs.getString(1));
+                    producto_row.put("B", "$"+dec.format(precio));
                     producto_row.put("C", rs.getString(2)+"");
                     producto_row.put("D", rs.getString(3)+"");
-                    producto_row.put("E", "$"+rs.getString(4));
+                    producto_row.put("E", "$"+dec.format(preciof));
                     producto_row.put("F", rs.getString(5)+"");
                     producto_row.put("G", oferta+ "%");
                     producto_row.put("H", rs.getString(7)+"");
-                    producto_row.put("I", rs.getString(8)+"");
+                    producto_row.put("I", rs.getString(8)!=null?rs.getString(8):"0");
+                    producto_row.put("J",rs.getString(9));
+                    producto_row.put("K",rs.getString(10));
                     data.add(producto_row);
                     producto_row = new HashMap<String, String>();
                 }
@@ -309,7 +316,7 @@ public class pcatalogo extends Activity {
 
     }//Con email
 
-    public void LlenarModelItems(){
+    public void LlenarModelItems(boolean filtro){
 
         if(lite!=null)
             lite.close();
@@ -321,8 +328,15 @@ public class pcatalogo extends Activity {
 
           try {
 
-              rs = db.rawQuery("select distinct descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad " +
-                      "from productos as p left join ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo limit 1000 ", null);
+              String where="";
+
+              if(filtro==true)
+                  where="where o.descuento > 0";
+
+              String query=String.format("select distinct descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad ,devolucion " +
+                      "from productos as p left join ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo %s limit 1000 ",where);
+
+              rs = db.rawQuery(query, null);
 
               modelItems = new Model[rs.getCount()];
 
@@ -340,7 +354,17 @@ public class pcatalogo extends Activity {
                       oferta = of;
                   }
 
-                  modelItems[cont] = new Model(rs.getString(0), rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6), oferta, rs.getString(8), rs.getString(9));
+                  String valDev=rs.getString(10).toUpperCase();
+                  boolean dev=false;
+
+                  if(valDev.equals("S"))
+                      dev=true;
+                  if(valDev.equals("Y"))
+                      dev=true;
+                  if(valDev.isEmpty())
+                      dev=true;
+
+                  modelItems[cont] = new Model(rs.getString(0), rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6), oferta, rs.getString(8), rs.getString(9),dev);
                   cont++;
               }
 
@@ -403,16 +427,17 @@ public class pcatalogo extends Activity {
 
     public void Eventos_Button(View view, final String  codigo){
 
+        pcatalogo.this.codigoList = codigo;
         boton1=(Button)view.findViewById(R.id.button12);
         boton2=(Button)view.findViewById(R.id.button13);
         boton3=(Button)view.findViewById(R.id.button14);
         boton4=(Button)view.findViewById(R.id.button15);
         boton5=(Button)view.findViewById(R.id.button16);
-        boton6=(Button)view.findViewById(R.id.button17);
 
         TextView txt1=(TextView)view.findViewById(R.id.textView50);
         TextView txt2=(TextView)view.findViewById(R.id.textView52);
-        final TextView txt3=(TextView)view.findViewById(R.id.textView54);
+        final EditText txt3=(EditText)view.findViewById(R.id.editText6);
+        pcatalogo.this.txt3Cant = txt3;
 
         final String[] info=ObtenerInfoProductos(codigo);
 
@@ -420,6 +445,7 @@ public class pcatalogo extends Activity {
             txt1.setText(info[0]);
             txt2.setText(info[1]);
             txt3.setText(info[2]);
+            txt3.setSelection(txt3.getText().length(), txt3.getText().length());
         }catch (Exception e){
             subject="pcatalogo.java-Eventos_Button";
             body="Agente: "+ObtenerAgenteActivo()+"\nError al consultar arreglo info[]: "+ e.toString();
@@ -433,10 +459,10 @@ public class pcatalogo extends Activity {
                 @Override
                 public void onClick(View view) {
 
-                    AgregarProducto(codigo, 0, 0);
+                    //AgregarProducto(codigo, 0, 0);
                     cont[0] = 0;
                     txt3.setText("0");
-
+                    txt3.setSelection(txt3.getText().length(), txt3.getText().length());
 
                 }
             });
@@ -444,9 +470,10 @@ public class pcatalogo extends Activity {
                 @Override
                 public void onClick(View view) {
 
-                    AgregarProducto(codigo, 1, 1);
+                    //AgregarProducto(codigo, 1, 1);
                     int val = Integer.parseInt(info[2]);
-                    txt3.setText("" + ((val + cont[0]) + 1));
+                    txt3.setText(((new Integer("0"+txt3.getText())).intValue() + 1)+"");
+                    txt3.setSelection(txt3.getText().length(), txt3.getText().length());
                     cont[0]++;
 
                 }
@@ -455,9 +482,10 @@ public class pcatalogo extends Activity {
                 @Override
                 public void onClick(View view) {
 
-                    AgregarProducto(codigo, 2, 1);
+                    //AgregarProducto(codigo, 2, 1);
                     int val = Integer.parseInt(info[2]);
-                    txt3.setText("" + ((val + cont[0]) + 2));
+                    txt3.setText(((new Integer("0"+txt3.getText())).intValue() + 2)+"");
+                    txt3.setSelection(txt3.getText().length(), txt3.getText().length());
                     cont[0] += 2;
                 }
             });
@@ -465,9 +493,10 @@ public class pcatalogo extends Activity {
                 @Override
                 public void onClick(View view) {
 
-                    AgregarProducto(codigo, 5, 1);
+                    //AgregarProducto(codigo, 5, 1);
                     int val = Integer.parseInt(info[2]);
-                    txt3.setText("" + ((val + cont[0]) + 5));
+                    txt3.setText(((new Integer("0"+txt3.getText())).intValue() + 5)+"");
+                    txt3.setSelection(txt3.getText().length(), txt3.getText().length());
                     cont[0] += 5;
 
                 }
@@ -476,18 +505,11 @@ public class pcatalogo extends Activity {
                 @Override
                 public void onClick(View view) {
 
-                    AgregarProducto(codigo, 10, 1);
+                    // AgregarProducto(codigo, 10, 1);
                     int val = Integer.parseInt(info[2]);
-                    txt3.setText("" + ((val + cont[0]) + 10));
+                    txt3.setText(((new Integer("0"+txt3.getText())).intValue() + 10)+"");
+                    txt3.setSelection(txt3.getText().length(), txt3.getText().length());
                     cont[0] += 10;
-                }
-            });
-            boton6.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    alertDialog.dismiss();
-                    ShowDialog_picker(codigo);
                 }
             });
         }catch (Exception e){
@@ -510,14 +532,7 @@ public class pcatalogo extends Activity {
             if (cantidad != 0) {
                 Cursor rs = db.rawQuery(query1, null);
 
-                if (rs.moveToFirst()) {
-
-                    pzas = rs.getInt(0);
-
-                }
-
                 query2 = "update productos set  Cantidad=" + (cantidad + pzas) + ",isCheck=" + isChecked + " where codigo='" + ean + "'";
-
                 db.execSQL(query2);
 
 
@@ -530,7 +545,10 @@ public class pcatalogo extends Activity {
                 db.close();
                 lite.close();
             }
+
             cantidadTextView.setText( (cantidad + pzas)+"" );
+
+
         }catch (Exception e){
             subject="pcatalogo.java-AgregarProducto";
             body="Agente: "+ObtenerAgenteActivo()+"\nConsulta1: "+ query1+"\nConsulta2: "+query2+"\nError: "+e.toString();
@@ -540,30 +558,85 @@ public class pcatalogo extends Activity {
 
     public void LLenarList(){
 
-        LlenarHasmap();//llena el arreglo para el simpleAdapter
-        simpleAdapter=new SimpleAdapter(context,data,R.layout.row, new String[]{"A","B","E","G","C","F","H","I","D"},new int[]{R.id.textView12,R.id.textView28,R.id.textView58,R.id.textView59,R.id.textView29,R.id.textViewSubtitle,R.id.textView74,R.id.textView72,R.id.textView75}){
+        boolean fil=false;
+        if(spFiltro.getSelectedItemPosition()==1)
+            fil=true;
+
+        LlenarHasmap(fil);//llena el arreglo para el simpleAdapter
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.row, new String[]
+                {"A","B","E","G","C","F","H","I","D"},new int[]{
+                R.id.textView12,R.id.textView28,R.id.textView58,R.id.textView59,R.id.textView29,R.id.textViewSubtitle,
+                R.id.textView74,R.id.textView72,R.id.textView75})
+        {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
 
-                convertView = super.getView(position, convertView, parent);
+                 convertView = super.getView(position, convertView, parent);
+                 HashMap<String,?> val= (HashMap<String, ?>) simpleAdapter.getItem(position);
+                 String dev=val.get("J").toString();
+                 String codigo=val.get("D").toString();
 
-                if (position % 2 == 0) {
-                    convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
-                }else {
-                    convertView.setBackgroundColor(Color.parseColor("#F2F2F2"));
-                }
+                 ImageView imgDev=(ImageView)convertView.findViewById(R.id.imageDev);
+                 TextView  txtCant=(TextView)convertView.findViewById(R.id.textView29);
+                 TextView  txtPrecio=(TextView)convertView.findViewById(R.id.textView28);
+                 txtPrecio.setPaintFlags(txtPrecio.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
-               /* int cantidad=Integer.parseInt(data.get(position).get("C").toString());
-                String descripcion=data.get(position).get("A").toString();
+                  boolean res=false;
+                  int cant=GetValor(codigo);
 
-                if(cantidad>0){
+                  if(dev.equals("S"))
+                    res=true;
+                  if(dev.equals("Y"))
+                    res=true;
+                  if(dev.isEmpty())
+                    res=true;
 
-                    convertView.setBackgroundColor(Color.parseColor("#89BBEE"));
-                }*/
+                  if(res==true){
+
+                   imgDev.setImageResource(R.drawable.img);
+
+                  }
+                  else {
+
+                  imgDev.setImageResource(0);
+
+                   }
+
+                 if(cant<=0){
+                     txtCant.setText(0+ "");
+                     if (position % 2 == 0) {
+                         convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                         simpleAdapter.notifyDataSetChanged();
+                     }else {
+                         convertView.setBackgroundColor(Color.parseColor("#F2F2F2"));
+                         simpleAdapter.notifyDataSetChanged();
+                     }
+                 }else {
+                          txtCant.setText(cant + "");
+                          convertView.setBackgroundColor(Color.parseColor("#89BBEE"));
+                          simpleAdapter.notifyDataSetChanged();
+                 }
+
+
+
 
                 return convertView;
             }
         };
+
+    }
+
+    public int GetValor(String codigo){
+        int val=0;
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getReadableDatabase();
+        Cursor rs=db.rawQuery("select Cantidad from productos where codigo=?",new String[]{codigo});
+
+        if(rs.moveToFirst()){
+            val=rs.getInt(0);
+        }
+
+        return val;
     }
 
     public String ObtenerAgenteActivo(){
@@ -590,7 +663,7 @@ public class pcatalogo extends Activity {
         @Override
         protected Object doInBackground(String... strings) {
 
-            LLenarList();
+           // LLenarList();
 
             return "";
         }
@@ -598,10 +671,60 @@ public class pcatalogo extends Activity {
         @Override
         protected void onPostExecute(Object result){
 
+      /*if(dialogList.isShowing()){
+           dialogList.dismiss();
+      }
+*/
 
-                if(dialogList.isShowing()){
-                    dialogList.dismiss();
-                }
+        }
+    }
+
+    private class TaskFiltro extends  AsyncTask<String,Void,Object>{
+
+        @Override
+        protected void onPreExecute(){
+
+            if(dialogList==null || !dialogList.isShowing())
+               dialogList = ProgressDialog.show(pcatalogo.this, "Catálogo", "Generando..", true, false);
+
+        }
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+
+            int val=spFiltro.getSelectedItemPosition();
+
+             if(val==0){
+
+                 LLenarList();
+                 LlenarModelItems(false);
+
+                 adapter1=new CustomAdapter(context,modelItems);
+
+
+             }else {
+
+                 if(val==1) {
+                     LLenarList();
+                     LlenarModelItems(true);
+                     adapter1 = new CustomAdapter(context, modelItems);
+
+                 }
+
+             }
+
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object obj){
+
+            if(dialogList.isShowing()){
+                dialogList.dismiss();
+                lproductos.setAdapter(adapter1);
+            }
 
         }
     }
@@ -659,10 +782,15 @@ public class pcatalogo extends Activity {
     protected void onResume(){
         super.onResume();
 
-       LlenarModelItems();
+        boolean fil=false;
+        if(spFiltro.getSelectedItemPosition()==1)
+            fil=true;
+
+       LlenarModelItems(fil);
        adapter1=new CustomAdapter(this,modelItems);
        lproductos.setAdapter(adapter1);
 
     }
+
 
 }

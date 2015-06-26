@@ -3,15 +3,17 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/devoluciones_lite"
-    android:background="#FFFFFF">
+    android:background="#3B3B3B">
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="fill_parent"
+        android:background="#3B3B3B">
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="#3B3B3B">
 
             <ImageView
                 android:layout_width="match_parent"
@@ -27,7 +29,8 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_above="@+id/idBtnFinishReturnProduct"
-            android:layout_alignParentTop="true">
+            android:layout_alignParentTop="true"
+            android:background="#3B3B3B">
 
             <LinearLayout
                 android:layout_width="fill_parent"
@@ -47,7 +50,8 @@
                     android:id="@android:id/tabcontent"
                     android:layout_width="fill_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginBottom="3dp">
+                    android:layout_marginBottom="3dp"
+                    android:background="#3B3B3B">
 
                     <LinearLayout
                         android:id="@+id/Captura"
@@ -199,7 +203,10 @@
                                             android:layout_alignTop="@+id/imageView7"
                                             android:gravity="center_vertical"
                                             android:layout_marginLeft="40dp"
-                                            android:layout_alignParentBottom="true" />
+                                            android:layout_alignParentBottom="true"
+                                            android:imeOptions="actionSearch"
+                                            android:hint="@string/txtDevLiteCaptSearch"
+                                        />
 
                                     </RelativeLayout>
 
@@ -259,7 +266,8 @@
                         android:id="@+id/Configuracion"
                         android:layout_width="fill_parent"
                         android:layout_height="match_parent"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:background="#3B3B3B">
 
                         <ScrollView
                             android:layout_width="match_parent"

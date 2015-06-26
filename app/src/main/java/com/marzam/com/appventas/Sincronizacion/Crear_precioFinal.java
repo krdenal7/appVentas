@@ -5,13 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
-
 import android.util.Log;
 import android.widget.Toast;
+
 import com.marzam.com.appventas.Email.Mail;
 import com.marzam.com.appventas.SQLite.CSQLite;
 
-import java.lang.reflect.Array;
+import java.io.File;
+import java.io.FileFilter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,6 +20,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 /**
  * Created by SAMSUMG on 08/12/2014.
@@ -66,24 +68,43 @@ public class Crear_precioFinal {
     Thread UpdateH2=null;
     Thread UpdateH3=null;
 
-
     Thread th1;
     Thread th2;
     Thread th3;
     Thread thPrincipal;
 
+    static  int CPUs=1;
 
     public boolean Ejecutar(Context context){
         this.context=context;
-        final boolean[] resp = {false};
+
 
         Extraer_Casificacion();
-
+        CPUs=getNumCores();
         /*Pasos*/
 
-        /*6-.*/Llenar_precioFinal_precio();
+ /*6-.*/Llenar_precioFinal_precio();
 
-        th1 = new Thread(new Runnable() {
+        if(CPUs<=2){
+            ProcesoSinHilos();
+        }
+        else {
+            CPUs=CPUs-1;
+            ProcesoConHilos();
+        }
+
+
+
+        return true;
+    }
+
+    public boolean ProcesoConHilos(){
+        final boolean[] resp = {false};
+
+        final ThreadGroup group=new ThreadGroup("Hilos");
+
+
+        th1 = new Thread(group,new Runnable() {
             @Override
             public void run() {
          /*1-.*/Obtener_Prodcutos_Descliente();
@@ -92,35 +113,35 @@ public class Crear_precioFinal {
                 Log.e("Dentro del hilo 1","Termino");
             }
         });
-        th1.start();
 
-        th2 = new Thread(new Runnable() {
+
+        th2 = new Thread(group,new Runnable() {
             @Override
             public void run() {
          /*3-.*///data.clear();
         /*4-.*/Obtener_Productos_DescMenor();
         /*5-.*/Generar_PrecioFinal_DescMenor();
-               Crear_precioFinal.this.bandera2 = true;
+                Crear_precioFinal.this.bandera2 = true;
                 Log.e("Dentro del hilo 2","Termino");
 
             }
         });
-        th2.start();
 
-        th3 = new Thread(new Runnable() {
+
+        th3 = new Thread(group,new Runnable() {
             @Override
             public void run() {
         /*6-.*/Obtener_Productos_SoloOferta();
         /*7-.*/Generar_PrecioFinal_SoloOferta();
-               Crear_precioFinal.this.bandera3 = true;
-               Log.e("Dentro del hilo 3","Termino");
+                Crear_precioFinal.this.bandera3 = true;
+                Log.e("Dentro del hilo 3","Termino");
 
             }
         });
-        th3.start();
 
 
-        UpdateH1=new Thread(new Runnable() {
+
+        UpdateH1=new Thread(group,new Runnable() {
             @Override
             public void run() {
 
@@ -132,7 +153,7 @@ public class Crear_precioFinal {
             }
         });
 
-        UpdateH2=new Thread(new Runnable() {
+        UpdateH2=new Thread(group,new Runnable() {
             @Override
             public void run() {
 
@@ -144,7 +165,7 @@ public class Crear_precioFinal {
             }
         });
 
-        UpdateH3=new Thread(new Runnable() {
+        UpdateH3=new Thread(group,new Runnable() {
             @Override
             public void run() {
 
@@ -156,47 +177,85 @@ public class Crear_precioFinal {
             }
         });
 
+        int hilos_res=CPUs-group.activeCount();
 
         thPrincipal = new Thread(new Runnable() {
             @Override
             public void run() {
 
-        while (!Crear_precioFinal.this.isBandera1
+                while (!Crear_precioFinal.this.isBandera1
                         || !Crear_precioFinal.this.isBandera2
                         || !Crear_precioFinal.this.isBandera3) {
 
-            /*while(!Crear_precioFinal.this.bandera1
-                          ||!Crear_precioFinal.this.bandera2
-                          ||!Crear_precioFinal.this.bandera3) {*/
+                      //Validacion de hilos dependiendo los nucleos del telefono
+
+                        //hilos_res Verifica cuantos hilos hay disponibles
+                        int hilos_res=CPUs-group.activeCount();
+
+                                if(!th1.isAlive()&&!th2.isAlive()&&!th3.isAlive()) {
+                                    if (Crear_precioFinal.this.bandera1 == false &&
+                                            Crear_precioFinal.this.bandera2 == false &&
+                                            Crear_precioFinal.this.bandera3 == false) {
+
+                                        if(hilos_res>=1){
+                                            th1.start();
+                                            hilos_res=hilos_res-1;
+                                            Log.e("GroupHilo 1","="+hilos_res);
+                                        }
+                                        if(hilos_res>=1){
+                                            th2.start();
+                                            hilos_res=hilos_res-1;
+                                            Log.e("GroupHilo 2","="+hilos_res);
+                                        }
+                                        if(hilos_res>=1){
+                                            th3.start();
+                                            hilos_res=hilos_res-1;
+                                            Log.e("GroupHilo 3","="+hilos_res);
+                                        }
+
+                                    }
+                                }
 
                     if (!th1.isAlive()) {
                         if (!UpdateH1.isAlive() && !UpdateH2.isAlive() &&!UpdateH3.isAlive()&&
-                                  Crear_precioFinal.this.isBandera1 == false) {
-                            UpdateH1.start();
-                            Log.e("HiloPrincila","Inicia el El hilo 1.1");
+                                Crear_precioFinal.this.isBandera1 == false) {
 
-                      }//Hay algun hilo ejecutandose
+                            if(hilos_res>=1){
+                            UpdateH1.start();
+                            hilos_res=hilos_res-1;
+                            Log.e("HiloPrincipal","Inicia el El hilo 1.1 "+hilos_res);
+                            }
+
+                        }//Hay algun hilo ejecutandose
                     }//Se termino el hilo 1
 
 
-                if (!th2.isAlive()) {
-                    if (!UpdateH1.isAlive() && !UpdateH2.isAlive() &&!UpdateH3.isAlive()&&
-                            Crear_precioFinal.this.isBandera2 == false) {
-                        UpdateH2.start();
-                        Log.e("HiloPrincila","Inicia el El hilo 2.2");
+                    if (!th2.isAlive()) {
+                        if (!UpdateH1.isAlive() && !UpdateH2.isAlive() &&!UpdateH3.isAlive()&&
+                                Crear_precioFinal.this.isBandera2 == false) {
+
+                            if(hilos_res>=1) {
+                                UpdateH2.start();
+                                hilos_res=hilos_res-1;
+                                Log.e("HiloPrincipal", "Inicia el El hilo 2.2 "+hilos_res);
+                            }
+                        }
                     }
-                }
 
 
-                if (!th3.isAlive()) {
-                    if (!UpdateH1.isAlive() && !UpdateH2.isAlive() &&!UpdateH3.isAlive()&&
-                            Crear_precioFinal.this.isBandera3 == false) {
-                        UpdateH3.start();
-                        Log.e("HiloPrincila","Inicia el El hilo 3.3");
+                    if (!th3.isAlive()) {
+                        if (!UpdateH1.isAlive() && !UpdateH2.isAlive() &&!UpdateH3.isAlive()&&
+                                Crear_precioFinal.this.isBandera3 == false) {
+
+                            if(hilos_res>=1) {
+                                UpdateH3.start();
+                                hilos_res=hilos_res-1;
+                                Log.e("HiloPrincipal", "Inicia el El hilo 3.3 "+hilos_res);
+                            }
+
+                        }
                     }
-                }
-                //}//While secundario*/
-              }//While principal
+                }//While principal
 
                 resp[0] =true;
                 String a="";
@@ -205,28 +264,61 @@ public class Crear_precioFinal {
         thPrincipal.start();
 
 
-        while (!resp[0]){
-
-       /*Se estara ejecutando mientras todos los
-       hilos no terminen*/
+        while (!resp[0]) {
+            //Este while se ejecuta hasta que todos los hilos terminen
         }
-       /*if(resp[0]==true){
 
-                if(lite1!=null)
-                lite1.close();
-                if(lite2!=null)
-                lite2.close();
-                if(lite3!=null)
-                lite3.close();
-
-            UpdateOfertas2();
-            UpdateOfertas3();
-            InsertPrecioFinal2();
-            InsertPrecioFinal3();
-
-
-        }*/
         return true;
+    }
+
+    public boolean ProcesoSinHilos(){
+
+         /*1-.*/Obtener_Prodcutos_Descliente();
+         /*2-.*/Generar_PrecioFinal_Descliente();
+        /*4-.*/Obtener_Productos_DescMenor();
+        /*5-.*/Generar_PrecioFinal_DescMenor();
+        /*6-.*/Obtener_Productos_SoloOferta();
+        /*7-.*/Generar_PrecioFinal_SoloOferta();
+
+        //Insercciones
+
+        UpdateOfertas1();
+        InsertPrecioFinal1();
+
+        UpdateOfertas2();
+        InsertPrecioFinal2();
+
+        UpdateOfertas3();
+        InsertPrecioFinal3();
+
+
+        return true;
+    }
+
+    private int getNumCores() {
+
+        class CpuFilter implements FileFilter {
+            @Override
+            public boolean accept(File pathname) {
+
+                if(Pattern.matches("cpu[0-9]+", pathname.getName())) {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        try {
+            // Obtiene del directorio la infromación de los Nucleos que tiene el equipo
+            File dir = new File("/sys/devices/system/cpu/");
+            //Filtra la lista de los archivos que se encuentran en la carpeta
+            File[] files = dir.listFiles(new CpuFilter());
+            //retorna el número de procesadores
+            return files.length;
+        } catch(Exception e) {
+            //Si entra aqui es por que solo tiene un nucleo
+            return 1;
+        }
     }
 
     public void Llenar_precioFinal_precio(){
@@ -759,9 +851,9 @@ try {
        //Array 1
        int contador=0;
 
-       for(int i=0;i<arrayOf1.length;i++){
-           String total=arrayOf1[i][0];
-           String codigo=arrayOf1[i][1];
+       for(int i=0;i<arrayFin1.length;i++){
+           String total=arrayFin1[i][0];
+           String codigo=arrayFin1[i][1];
            String query="update productos set precio_final='"+ total + "' where codigo='" + codigo + "';";
            listSQL.add(query);
 
@@ -788,9 +880,9 @@ try {
        //Array 1
        int contador=0;
 
-       for(int i=0;i<arrayOf2.length;i++){
-           String total=arrayOf2[i][0];
-           String codigo=arrayOf2[i][1];
+       for(int i=0;i<arrayFin2.length;i++){
+           String total=arrayFin2[i][0];
+           String codigo=arrayFin2[i][1];
            String query="update productos set precio_final='"+ total + "' where codigo='" + codigo + "';";
            listSQL.add(query);
 
@@ -816,9 +908,9 @@ try {
        //Array 1
        int contador=0;
 
-       for(int i=0;i<arrayOf3.length;i++){
-           String total=arrayOf3[i][0];
-           String codigo=arrayOf3[i][1];
+       for(int i=0;i<arrayFin3.length;i++){
+           String total=arrayFin3[i][0];
+           String codigo=arrayFin3[i][1];
            String query="update productos set precio_final='"+ total + "' where codigo='" + codigo + "';";
            listSQL.add(query);
 

@@ -19,12 +19,18 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import com.marzam.com.appventas.Email.Mail;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
+import com.marzam.com.appventas.Tab_pedidos.pcatalogo;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 
 /**
@@ -48,7 +54,6 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     Button boton3;
     Button boton4;
     Button boton5;
-    Button boton6;
 
    AlertDialog alertDialog;
    AlertDialog alertDialog_picker;
@@ -58,6 +63,12 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     String body;
     Mail m;
 
+    private View contentList;
+    private int posicionList;
+    private EditText txt3Cant;
+    private ImageView imgDev;
+
+    private View convertV;
 
 
     public CustomAdapter(Context context, Model[] resource) {
@@ -73,9 +84,14 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
         try {
                 /*Obtiene el contexto de la actividad y la pasa al convertView*/
-
+            convertV = convertView;
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
             convertView = inflater.inflate(R.layout.row, parent, false);
+
+            NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
+            DecimalFormat dec=(DecimalFormat)nf;
+            dec.setMaximumFractionDigits(2);
+            dec.setMinimumFractionDigits(2);
 
 
                 /*Botones*/
@@ -92,12 +108,14 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
             Cantidad.setText( valor+"" );//Envia la cantidad Inicial del producto
 
             Precio = (TextView) convertView.findViewById(R.id.textView28);
-            //Precio.setPaintFlags(Precio.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            Precio.setText("$" + modelitems[position].getPrecio());
+            Precio.setPaintFlags(Precio.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
+            double precio=Double.parseDouble(modelitems[position].getPrecio());
+            Precio.setText("$" +dec.format(precio));
 
+            double precio_f=Double.parseDouble( modelitems[position].getPrecio_neto());
             Precio_neto = (TextView) convertView.findViewById(R.id.textView58);
-            Precio_neto.setText("$" + modelitems[position].getPrecio_neto());
+            Precio_neto.setText("$" + dec.format(precio_f));
 
             Clasificacion = (TextView) convertView.findViewById(R.id.textViewSubtitle);
             Clasificacion.setText(modelitems[position].getClasificacion());
@@ -108,20 +126,21 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
             existencias = (TextView) convertView.findViewById(R.id.textView72);
             existencias.setText(modelitems[position].getExistencia());
 
+            imgDev=(ImageView)convertView.findViewById(R.id.imageDev);
+
+            if(modelitems[position].getDevolucion()==true){
+                imgDev.setImageResource(R.drawable.img);
+            }
+
 
             name.setText(modelitems[position].getName());//Asigna el nombre a los Texview
-            //cb.setClickable(false);
-            /*else {
-                convertView.setBackgroundColor(Color.TRANSPARENT);
-                //  cb.setChecked(false);
-            }*/
 
 
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
-                    ShowDialog(position, view);
+                    ShowDialog(position, view, convertV);
 
                 }
             });
@@ -141,12 +160,12 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
         }catch (Exception e){
             subject="getView";
             body="Diseño list: "+ e.toString();
-            new sendEmail().execute("");
+            //new sendEmail().execute("");
         }
         return convertView;
     }
 
-    public void ShowDialog( int position , final View view){
+    public void ShowDialog( int position , final View view, final View convertView){
 
 
      LayoutInflater inflater=((Activity)context).getLayoutInflater();
@@ -160,9 +179,9 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
             public void onClick(DialogInterface dialog,int id) {
 
-
-
-
+                String cantidad = "0"+CustomAdapter.this.txt3Cant.getText();
+                Agregar_Producto(CustomAdapter.this.contentList, new Integer(cantidad), CustomAdapter.this.posicionList);
+                notifyDataSetChanged();
             }
 
         });
@@ -225,11 +244,11 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
             if (cantidad != 0) {
                 Cursor rs = db.rawQuery("select Cantidad from productos where codigo='" + ean + "'", null);
                 int pzas = 0;
-                if (rs.moveToFirst()) {
+                /*if (rs.moveToFirst()) {
 
                     pzas = rs.getInt(0);
 
-                }
+                }*/
                 db.execSQL("update productos set  Cantidad=" + (cantidad + pzas) + ",isCheck=" + isChecked + " where codigo='" + ean + "'");
 
                 LlenarModelItems();
@@ -265,7 +284,6 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
     public void Agregar_Producto(View view,int cantidad,int position){
 
-
      try {
          int pzas = AgregarProducto(modelitems[position].getEan(), cantidad, 1, view,position);
 
@@ -292,24 +310,38 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
         try {
 
-            rs=db.rawQuery("select distinct descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad " +
-                           " from productos as p left join ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo limit 1000 ",null);
+            rs = db.rawQuery("select distinct descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad ,devolucion " +
+                    "from productos as p left join ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo limit 1000 ", null);
 
-        }catch (Exception e){
+        }
+        catch (Exception e)
+        {
            subject="LlenarModelItems";
            body="Error: "+e.toString();
            new sendEmail().execute("");
         }
 
 
-
         modelitems=new Model[rs.getCount()];
+
+
 
         int cont=0;
 
         while (rs.moveToNext()){
+
+            String valDev=rs.getString(10).toUpperCase();//Revisar
+            boolean dev=false;
+
+            if(valDev.equals("S"))
+                dev=true;
+            if(valDev.equals("Y"))
+                dev=true;
+            if(valDev.isEmpty())
+                dev=true;
+
             String oferta=(rs.getString(7)==null)?"0":rs.getString(7);
-            modelitems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),oferta,rs.getString(8),rs.getString(9));
+            modelitems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),oferta,rs.getString(8),rs.getString(9),dev);
             cont++;
         }
 
@@ -346,6 +378,8 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
     public void Evento_Botones(View viewBoton, final View content, final int posicion){
 
+        CustomAdapter.this.contentList = content;
+        CustomAdapter.this.posicionList = posicion;
 
 try {
     boton1 = (Button) viewBoton.findViewById(R.id.button12);
@@ -353,17 +387,19 @@ try {
     boton3 = (Button) viewBoton.findViewById(R.id.button14);
     boton4 = (Button) viewBoton.findViewById(R.id.button15);
     boton5 = (Button) viewBoton.findViewById(R.id.button16);
-    boton6 = (Button) viewBoton.findViewById(R.id.button17);
+
 
     TextView txt1 = (TextView) viewBoton.findViewById(R.id.textView50);
     TextView txt2 = (TextView) viewBoton.findViewById(R.id.textView52);
-    final TextView txt3 = (TextView) viewBoton.findViewById(R.id.textView54);
+    final EditText txt3 = (EditText) viewBoton.findViewById(R.id.editText6);
+    CustomAdapter.this.txt3Cant = txt3;
 
     final String[] info = ObtenerInfoProductos(posicion);
 
     txt1.setText(info[0]);
     txt2.setText(info[1]);
     txt3.setText(info[2]);
+    txt3.setSelection(txt3.getText().length(), txt3.getText().length());
 
     final int[] cont = {0};
 
@@ -371,17 +407,19 @@ try {
         @Override
         public void onClick(View view) {
 
-            Agregar_Producto(content, 0, posicion);
+            /*Agregar_Producto(content, 0, posicion);*/
             cont[0] = 0;
             txt3.setText("0");
+            txt3.setSelection(txt3.getText().length(), txt3.getText().length());
         }
     });
     boton2.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            Agregar_Producto(content, 1, posicion);
+            //Agregar_Producto(content, 1, posicion);
             int val = Integer.parseInt(info[2]);
-            txt3.setText("" + ((val + cont[0]) + 1));
+            txt3.setText(((new Integer("0"+txt3.getText())).intValue() + 1)+"");
+            txt3.setSelection(txt3.getText().length(), txt3.getText().length());
             cont[0]++;
         }
     });
@@ -389,9 +427,10 @@ try {
         @Override
         public void onClick(View view) {
 
-            Agregar_Producto(content, 2, posicion);
+            //Agregar_Producto(content, 2, posicion);
             int val = Integer.parseInt(info[2]);
-            txt3.setText("" + ((val + cont[0]) + 2));
+            txt3.setText(((new Integer("0"+txt3.getText())).intValue() + 2)+"");
+            txt3.setSelection(txt3.getText().length(), txt3.getText().length());
             cont[0] += 2;
         }
     });
@@ -399,9 +438,10 @@ try {
         @Override
         public void onClick(View view) {
 
-            Agregar_Producto(content, 5, posicion);
+            //Agregar_Producto(content, 5, posicion);
             int val = Integer.parseInt(info[2]);
-            txt3.setText("" + ((val + cont[0]) + 5));
+            txt3.setText(((new Integer("0"+txt3.getText())).intValue() + 5)+"");
+            txt3.setSelection(txt3.getText().length(), txt3.getText().length());
             cont[0] += 5;
         }
     });
@@ -409,19 +449,11 @@ try {
         @Override
         public void onClick(View view) {
 
-            Agregar_Producto(content, 10, posicion);
+            //Agregar_Producto(content, 10, posicion);
             int val = Integer.parseInt(info[2]);
-            txt3.setText("" + ((val + cont[0]) + 10));
+            txt3.setText(((new Integer("0"+txt3.getText())).intValue() + 10)+"");
+            txt3.setSelection(txt3.getText().length(), txt3.getText().length());
             cont[0] += 10;
-
-        }
-    });
-    boton6.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-
-            alertDialog.dismiss();
-            ShowDialog_picker(posicion, content);
 
         }
     });
@@ -457,5 +489,7 @@ try {
             return null;
         }
     }
+
+
 
 }

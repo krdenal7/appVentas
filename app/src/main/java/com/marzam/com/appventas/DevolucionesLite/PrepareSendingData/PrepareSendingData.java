@@ -1,9 +1,7 @@
 package com.marzam.com.appventas.DevolucionesLite.PrepareSendingData;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -15,12 +13,6 @@ import com.marzam.com.appventas.WebService.WebServices;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 /**
  * Created by lcabral on 14/04/2015.
@@ -380,10 +372,13 @@ public class PrepareSendingData {
 
                 if( finalStatus.compareTo("20")==0 ){
                   Toast.makeText(PrepareSendingData.thiz.devolucionesLiteActivity, "Enviados Exitosamente", Toast.LENGTH_LONG).show();
+                  DevolucionesLite.thiz.finishActivity = true;
                   DevolucionesLite.clearSumaryListAndFormPakage();
+
                 } else{
                     if( finalSuccessHeader && finalSuccessDetail ){
                         Toast.makeText(PrepareSendingData.thiz.devolucionesLiteActivity, "Enviados Exitosamente", Toast.LENGTH_LONG).show();
+                        DevolucionesLite.thiz.finishActivity = true;
                         DevolucionesLite.clearSumaryListAndFormPakage();
                     }else {
                         Toast.makeText(PrepareSendingData.thiz.devolucionesLiteActivity, "Ocurrio un inconveniente al enviar los datos, intente de nuevo", Toast.LENGTH_LONG).show();

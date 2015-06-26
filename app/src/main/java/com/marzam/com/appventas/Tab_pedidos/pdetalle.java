@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -64,8 +65,9 @@ public class pdetalle extends Activity {
     Button boton3;
     Button boton4;
     Button boton5;
-    Button boton6;
 
+    private String codigoList;
+    private EditText txt3Cant;
 
     /*Cambio de Prueba*/
 
@@ -82,11 +84,35 @@ public class pdetalle extends Activity {
 
         Productos();
         lista=(ListView)findViewById(R.id.listEncabezado);
-        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64}){
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,
+                new String[]{"A","B","C","E"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64,R.id.textViewSub}){
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
 
                 convertView = super.getView(position, convertView, parent);
+                HashMap<String,?> val= (HashMap<String, ?>) simpleAdapter.getItem(position);
+                String dev=val.get("F").toString();
+                ImageView imageView=(ImageView)convertView.findViewById(R.id.imageView);
+
+                boolean res=false;
+
+                if(dev.equals("S"))
+                    res=true;
+                if(dev.equals("Y"))
+                    res=true;
+                if(dev.isEmpty())
+                    res=true;
+
+                if(res==true){
+
+                    imageView.setImageResource(R.drawable.img);
+
+                }
+                else {
+
+                    imageView.setImageResource(0);
+
+                }
 
                 if (position % 2 == 0) {
                     convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
@@ -100,6 +126,8 @@ public class pdetalle extends Activity {
         lista.setAdapter(simpleAdapter);
         NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
         DecimalFormat dec=(DecimalFormat)nf;
+        dec.setMaximumFractionDigits(2);
+        dec.setMinimumFractionDigits(2);
         txtMonto.setText("Monto actual: $"+dec.format(monto));
 
       lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -125,11 +153,34 @@ public class pdetalle extends Activity {
                         lista.setAdapter(simpleAdapter);
                 }else {
 
-                    simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64}){
+                    simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C","E"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64,R.id.textViewSub}){
                         @Override
                         public View getView(int position, View convertView, ViewGroup parent) {
 
                             convertView = super.getView(position, convertView, parent);
+                            HashMap<String,?> val= (HashMap<String, ?>) simpleAdapter.getItem(position);
+                            String dev=val.get("F").toString();
+                            ImageView imageView=(ImageView)convertView.findViewById(R.id.imageView);
+
+                            boolean res=false;
+
+                            if(dev.equals("S"))
+                                res=true;
+                            if(dev.equals("Y"))
+                                res=true;
+                            if(dev.isEmpty())
+                                res=true;
+
+                            if(res==true){
+
+                                imageView.setImageResource(R.drawable.img);
+
+                            }
+                            else {
+
+                                imageView.setImageResource(0);
+
+                            }
 
                             if (position % 2 == 0) {
                                 convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
@@ -140,7 +191,7 @@ public class pdetalle extends Activity {
                             return convertView;
                         }
                     };
-                        lista.setAdapter(simpleAdapter);
+                    lista.setAdapter(simpleAdapter);
 
                 }
             }
@@ -154,19 +205,44 @@ public class pdetalle extends Activity {
         btnClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 txtBuscar.setText("");
-                simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64}){
+                simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C","E"},
+                        new int[]{R.id.textView62,R.id.textView63,R.id.textView64,R.id.textViewSub}){
                     @Override
                     public View getView(int position, View convertView, ViewGroup parent) {
 
                         convertView = super.getView(position, convertView, parent);
+                        HashMap<String,?> val= (HashMap<String, ?>) simpleAdapter.getItem(position);
+                        String dev=val.get("F").toString();
+                        ImageView imageView=(ImageView)convertView.findViewById(R.id.imageView);
+
+                        boolean res=false;
+
+                        if(dev.equals("S"))
+                            res=true;
+                        if(dev.equals("Y"))
+                            res=true;
+                        if(dev.isEmpty())
+                            res=true;
+
+                        if(res==true){
+
+                            imageView.setImageResource(R.drawable.img);
+
+                        }
+                        else {
+
+                            imageView.setImageResource(0);
+
+                        }
 
                         if (position % 2 == 0) {
                             convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
                         }else {
                             convertView.setBackgroundColor(Color.parseColor("#F2F2F2"));
                         }
-                        //return super.getView(position, convertView, parent);
+
                         return convertView;
                     }
                 };
@@ -196,7 +272,11 @@ public class pdetalle extends Activity {
 
             public void onClick(DialogInterface dialog, int id) {
 
+                int cantidad = new Integer("0"+pdetalle.this.txt3Cant.getText());
+                int isCheqket = 0;
+                if(cantidad>0) isCheqket = 1;
 
+                AgregarProducto(pdetalle.this.codigoList, cantidad, isCheqket);
                 Actualizar();
 
             }
@@ -286,34 +366,39 @@ public class pdetalle extends Activity {
         int Cantidad=0;
         Double precio=0.00;
 
-        String query="select descripcion,precio_final,Cantidad,codigo,precio_oferta  from productos where isCheck=1";
+        String query="select descripcion,precio_final,Cantidad,codigo,precio_oferta,(Cantidad*precio_final)as sub,devolucion  from productos where isCheck=1";
 
         rs=db.rawQuery(query,null);
         data=new ArrayList<HashMap<String, ?>>();
         producto_row=new HashMap<String, String>();
 
-        int cont=rs.getCount();
+        NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
+        DecimalFormat dec=(DecimalFormat)nf;
+        dec.setMaximumFractionDigits(2);
+        dec.setMinimumFractionDigits(2);
+
         while (rs.moveToNext()){
+
+            double precio_=Double.parseDouble(rs.getString(1));
+            double sub=Double.parseDouble(rs.getString(5));
+
             producto_row.put("A",rs.getString(0));
-            producto_row.put("B","$"+rs.getString(1));
+            producto_row.put("B","$"+dec.format(precio_));
             producto_row.put("C",""+rs.getString(2));
             producto_row.put("D","codigo: "+rs.getString(3));
+            producto_row.put("E","$"+dec.format(sub));
+            producto_row.put("F",rs.getString(6));
             data.add(producto_row);
             producto_row=new HashMap<String, String>();
 
-           precio=Double.parseDouble(rs.getString(4));
+           precio=Double.parseDouble(rs.getString(1));
            Cantidad=Integer.parseInt(rs.getString(2));
 
            monto+=(precio*Cantidad);
         }
-
-
-
         rs.close();
         db.close();
         lite.close();
-
-
 
     }
 
@@ -355,11 +440,11 @@ public class pdetalle extends Activity {
         if(cantidad!=0){
             Cursor rs=db.rawQuery("select Cantidad from productos where codigo='"+ean+"'",null);
             int pzas=0;
-            if(rs.moveToFirst()){
+            /*if(rs.moveToFirst()){
 
                 pzas=rs.getInt(0);
 
-            }
+            }*/
             db.execSQL("update productos set  Cantidad="+(cantidad+pzas)+",isCheck="+isChecked+" where codigo='"+ean+"'");
 
             Actualizar();
@@ -388,17 +473,21 @@ public class pdetalle extends Activity {
         boton3=(Button)view.findViewById(R.id.button14);
         boton4=(Button)view.findViewById(R.id.button15);
         boton5=(Button)view.findViewById(R.id.button16);
-        boton6=(Button)view.findViewById(R.id.button17);
+
 
         TextView txt1=(TextView)view.findViewById(R.id.textView50);
         TextView txt2=(TextView)view.findViewById(R.id.textView52);
-        final TextView txt3=(TextView)view.findViewById(R.id.textView54);
+        final EditText txt3=(EditText)view.findViewById(R.id.editText6);
 
         final String[] info=ObtenerInfoProductos(codigo);
 
         txt1.setText(info[0]);
         txt2.setText(info[1]);
         txt3.setText(info[2]);
+        txt3.setSelection(txt3.getText().length(), txt3.getText().length());
+
+        pdetalle.this.codigoList = codigo;
+        pdetalle.this.txt3Cant = txt3;
 
         final int[] cont = {0};
 
@@ -406,21 +495,22 @@ public class pdetalle extends Activity {
             @Override
             public void onClick(View view) {
 
-                AgregarProducto(codigo,0,0);
-                Actualizar();
+                //AgregarProducto(codigo,0,0);
+                //Actualizar();
                 cont[0]=0;
                 txt3.setText("0");
-                alertDialog.dismiss();
-
+                txt3.setSelection(txt3.getText().length(), txt3.getText().length());
+                //alertDialog.dismiss();
             }
         });
         boton2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Actualizar();
-                AgregarProducto(codigo,1,1);
+                //Actualizar();
+                //AgregarProducto(codigo,1,1);
                 int val=Integer.parseInt(info[2]);
-                txt3.setText(""+((val+ cont[0])+1));
+                txt3.setText(((new Integer("0"+txt3.getText())).intValue() +1)+"");
+                txt3.setSelection(txt3.getText().length(), txt3.getText().length());
                 cont[0]++;
 
             }
@@ -428,20 +518,22 @@ public class pdetalle extends Activity {
         boton3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Actualizar();
-                AgregarProducto(codigo, 2, 1);
+                //Actualizar();
+                // AgregarProducto(codigo, 2, 1);
                 int val=Integer.parseInt(info[2]);
-                txt3.setText(""+((val+ cont[0])+2));
+                txt3.setText(((new Integer("0"+txt3.getText())).intValue()+2)+"");
+                txt3.setSelection(txt3.getText().length(), txt3.getText().length());
                 cont[0]+=2;
             }
         });
         boton4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Actualizar();
-                AgregarProducto(codigo,5,1);
+                //Actualizar();
+                // AgregarProducto(codigo,5,1);
                 int val=Integer.parseInt(info[2]);
-                txt3.setText(""+((val+ cont[0])+5));
+                txt3.setText(((new Integer("0"+txt3.getText())).intValue() +5)+"");
+                txt3.setSelection(txt3.getText().length(), txt3.getText().length());
                 cont[0]+=5;
 
             }
@@ -449,19 +541,12 @@ public class pdetalle extends Activity {
         boton5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Actualizar();
-                AgregarProducto(codigo,10,1);
-                int val=Integer.parseInt(info[2]);
-                txt3.setText(""+((val+ cont[0])+10));
+                //Actualizar();
+                //AgregarProducto(codigo,10,1);
+                int val = Integer.parseInt(info[2]);
+                txt3.setText(((new Integer("0"+txt3.getText())).intValue()+10)+"");
+                txt3.setSelection(txt3.getText().length(), txt3.getText().length());
                 cont[0]+=10;
-            }
-        });
-        boton6.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Actualizar();
-                alertDialog.dismiss();
-                ShowDialog_picker(codigo);
             }
         });
 
@@ -558,7 +643,7 @@ public class pdetalle extends Activity {
         monto=0.00;
         Productos();
         lista=(ListView)findViewById(R.id.listEncabezado);
-        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64}){
+        simpleAdapter=new SimpleAdapter(context,data,R.layout.list_row_simple2,new String[]{"A","B","C","E"},new int[]{R.id.textView62,R.id.textView63,R.id.textView64,R.id.textViewSub}){
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -576,6 +661,8 @@ public class pdetalle extends Activity {
         lista.setAdapter(simpleAdapter);
         NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
         DecimalFormat dec=(DecimalFormat)nf;
+        dec.setMaximumFractionDigits(2);
+        dec.setMinimumFractionDigits(2);
         txtMonto.setText("Monto actual: $"+dec.format(monto));
         txtBuscar.setText("");
     }

@@ -40,6 +40,7 @@ public class pliquidacion extends Activity {
     Double total=0.00;
     Double iva=0.00;
     Double ieps=0.00;
+    Double oferta=0.0;
     int CantProductos=0;
 
     TextView txtSubtotal;
@@ -47,6 +48,7 @@ public class pliquidacion extends Activity {
     TextView txtCantp;
     TextView txtIva;
     TextView txtIeps;
+    TextView txtOfertas;
 
     ProgressDialog progress;
 
@@ -55,6 +57,7 @@ public class pliquidacion extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pliquidacion);
         context=this;
+
         MostrarFirma();
         ObtenerValores();
 
@@ -63,11 +66,12 @@ public class pliquidacion extends Activity {
         txtCantp=(TextView)findViewById(R.id.textView24);
         txtIva=(TextView)findViewById(R.id.textView16);
         txtIeps=(TextView)findViewById(R.id.textView18);
+        txtOfertas=(TextView)findViewById(R.id.textView20);
 
         NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
         DecimalFormat dec=(DecimalFormat)nf;
-
-
+        dec.setMaximumFractionDigits(2);
+        dec.setMinimumFractionDigits(2);
 
 
         txtSubtotal.setText("$"+ dec.format(subTotal));
@@ -75,11 +79,9 @@ public class pliquidacion extends Activity {
         txtIeps.setText("$"+dec.format(ieps));
         txtIva.setText("$"+dec.format(iva));
         txtCantp.setText(""+CantProductos);
+        txtOfertas.setText("-$"+dec.format(oferta));
 
     }
-
-
-
 
     public void ShowisEnvio(){
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
@@ -101,6 +103,7 @@ public class pliquidacion extends Activity {
         AlertDialog alertDialog=alert.create();
         alertDialog.show();
     }
+
     public void MostrarFirma(){
 
         File folder = android.os.Environment.getExternalStorageDirectory();
@@ -122,35 +125,47 @@ public class pliquidacion extends Activity {
         SQLiteDatabase db=lite.getWritableDatabase();
         iva=0.00;
         ieps=0.00;
+        oferta=0.00;
 
-        Cursor rs=db.rawQuery("select precio_oferta,Cantidad,ieps,iva from productos where isCheck=1",null);
-       // CantProductos=rs.getCount();
+        Cursor rs=db.rawQuery("select precio_oferta,Cantidad,ieps,iva,codigo,precio from productos where isCheck=1",null);
+      //CantProductos=rs.getCount();
+
         while (rs.moveToNext()){
 
-            Double precio=Double.parseDouble(rs.getString(0));
+            Double precioOf=Double.parseDouble(rs.getString(0));
             int cantidad=Integer.parseInt(rs.getString(1));
             Double ieps1=Double.parseDouble(rs.getString(2));
             Double iva1=Double.parseDouble(rs.getString(3));
+            Double preciof=Double.parseDouble(rs.getString(5));
+            Double of1=0.0;
 
+            CSQLite lt=new CSQLite(context);
+            SQLiteDatabase db1=lt.getReadableDatabase();
+            Cursor rs1=db1.rawQuery("select descuento from ofertas where codigo=?",new String[]{rs.getString(4)});
 
+            if(rs1.moveToFirst())
+                of1=Double.parseDouble(rs1.getString(0));
 
-            Double iep=(precio*ieps1/100)*cantidad;
-            Double cant1=(precio*ieps1/100);
-            Double cant=((precio)+cant1);
+            Double t1Ofertas=((preciof*of1)/100)*cantidad;
+
+            Double iep=(precioOf*ieps1/100)*cantidad;
+            Double cant1=(precioOf*ieps1/100);
+            Double cant=((precioOf)+cant1);
             Double cant2=(cant*iva1/100)*cantidad;
 
             ieps+=iep;
             iva+=cant2;
+            oferta+=t1Ofertas;
 
             CantProductos+=cantidad;
-            subTotal+=(precio*cantidad);
+            subTotal+=((precioOf*cantidad)+t1Ofertas);
 
         }
 
-
-          total=subTotal+ieps+iva;
+          total=subTotal+ieps+iva-oferta;
 
     }
+
     public String Obtener_Idcliente(){
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
@@ -254,16 +269,20 @@ public class pliquidacion extends Activity {
         subTotal=0.00;
         total=0.00;
         CantProductos=0;
+        oferta=0.00;
         ObtenerValores();
 
         NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
         DecimalFormat dec=(DecimalFormat)nf;
+        dec.setMaximumFractionDigits(2);
+        dec.setMinimumFractionDigits(2);
 
         txtSubtotal.setText("$"+ dec.format(subTotal));
         txtTotal.setText("$"+dec.format(total));
         txtIeps.setText("$"+dec.format(ieps));
         txtIva.setText("$"+dec.format(iva));
         txtCantp.setText(""+CantProductos);
+        txtOfertas.setText("-$"+dec.format(oferta));
 
         MostrarFirma();
     }

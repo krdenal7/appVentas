@@ -3,7 +3,8 @@
     android:layout_height="match_parent"
     tools:context="com.marzam.com.appventas.Tab_pedidos.pliquidacion"
     android:gravity="center_horizontal"
-    android:textAlignment="center">
+    android:textAlignment="center"
+    android:background="#3b3b3b">
 
     <LinearLayout
         android:orientation="vertical"
@@ -11,7 +12,7 @@
         android:layout_height="fill_parent">
 
         <GridLayout
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/gridLayout4"
             android:layout_alignParentTop="true"
@@ -26,7 +27,7 @@
             android:clickable="false"
             android:layout_alignParentStart="false"
             android:layout_margin="10dp"
-            android:layout_below="@+id/textView26" >
+            android:layout_below="@+id/textView26">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -50,7 +51,8 @@
                 android:layout_alignParentTop="true"
                 android:layout_alignRight="@+id/textView16"
                 android:layout_alignEnd="@+id/textView16"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                android:layout_gravity="right" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -75,7 +77,8 @@
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
                 style="@android:style/TextAppearance.DeviceDefault.Small"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                android:layout_gravity="right" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -99,7 +102,8 @@
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
                 style="@android:style/TextAppearance.DeviceDefault.Small"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                android:layout_gravity="right" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -123,7 +127,8 @@
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
                 style="@android:style/TextAppearance.DeviceDefault.Small"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                android:layout_gravity="right" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -147,7 +152,8 @@
                 android:layout_alignRight="@+id/textView20"
                 android:layout_alignEnd="@+id/textView20"
                 style="@android:style/TextAppearance.DeviceDefault.Small"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                android:layout_gravity="right" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -171,7 +177,8 @@
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
                 style="@android:style/TextAppearance.DeviceDefault.Small"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                android:layout_gravity="right" />
         </GridLayout>
 
         <TextView
