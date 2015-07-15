@@ -258,7 +258,6 @@ public class Crear_precioFinal {
                 }//While principal
 
                 resp[0] =true;
-                String a="";
             }
         });
         thPrincipal.start();
@@ -410,7 +409,11 @@ public class Crear_precioFinal {
 
        Cursor rs=null;
 
-       String query="select codigo,precio,iva,ieps  from productos where clasificacion_fiscal in"+where(clasificacion_Desc_Cliente);
+       String where=WhereFiltro();
+
+       String query=String.format("select p.codigo,p.precio,p.iva,p.ieps  from productos as p " +
+                    "left join productos_obligados as po  on p.codigo=po.codigo " +
+                    " where clasificacion_fiscal in"+where(clasificacion_Desc_Cliente) +" %s",where);
 
        rs=db.rawQuery(query,null);
        data1=new ArrayList<HashMap<String, ?>>();
@@ -440,7 +443,11 @@ public class Crear_precioFinal {
 
        Cursor rs=null;
 
-       String query="select codigo,precio,iva,ieps,descuento_producto  from productos where clasificacion_fiscal in "+where(clasificacion_Desc_menor);
+        String where=WhereFiltro();
+
+        String query=String.format("select p.codigo,p.precio,p.iva,p.ieps  from productos as p " +
+                "left join productos_obligados as po  on p.codigo=po.codigo " +
+                " where clasificacion_fiscal in"+where(clasificacion_Desc_menor) +" %s",where);
 
        rs=db.rawQuery(query,null);
        data2=new ArrayList<HashMap<String, ?>>();
@@ -452,10 +459,10 @@ public class Crear_precioFinal {
            Hasproducto2.put("B",rs.getString(1));
            Hasproducto2.put("C",rs.getString(2));
            Hasproducto2.put("D",rs.getString(3));
-           Hasproducto2.put("E",rs.getString(4));
            data2.add(Hasproducto2);
            Hasproducto2=new HashMap<String, String>();
        }
+
       db.close();
    }//Llena una lista con los productos a los cuales se les aplica el descuento menor
 
@@ -465,7 +472,11 @@ public class Crear_precioFinal {
 
        Cursor rs=null;
 
-       String query="select codigo,precio,iva,ieps  from productos where clasificacion_fiscal in "+where(clasificacion_No_aplica);
+        String where=WhereFiltro();
+
+        String query=String.format("select p.codigo,p.precio,p.iva,p.ieps  from productos as p " +
+                "left join productos_obligados as po  on p.codigo=po.codigo " +
+                " where clasificacion_fiscal in"+where(clasificacion_No_aplica) +" %s",where);
 
        rs=db.rawQuery(query,null);
        data3=new ArrayList<HashMap<String, ?>>();
@@ -482,7 +493,7 @@ public class Crear_precioFinal {
        }
        //db.close();
 
-   }
+   }//Llena una lista con los productos a los cuales de les aplican las ofertas
 
     public String Obtener_idCliente(){
          CSQLite lite=new CSQLite(context);
@@ -966,6 +977,25 @@ try {
 
        return  where+")";
    }
+
+    public String WhereFiltro(){
+
+        StringBuilder builder=new StringBuilder();
+        String id_cliente=Obtener_idCliente();
+
+
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getReadableDatabase();
+
+        Cursor rs=db.rawQuery("select filtro from clientes_obligados where id_cliente=?",new String[]{id_cliente});
+
+        if(rs.moveToFirst()){
+            builder.append("AND (po.filtro like '%,"+rs.getString(0)+",%' or po.filtro like '%,0,%')");
+        }else{
+            builder.append("");
+        }
+        return builder.toString();
+    }
 
    private String getDate(){
 

@@ -26,10 +26,11 @@ public class WebServices {
 
                  //static String ip="http://201.134.159.126/WebService/WebService.asmx";//
                 //static String ip="http://190.1.4.120/WebService/WebService.asmx";
-                //static String ip="http://190.1.4.129/WebServicePruebas/WebService.asmx";
+                 //static String ip="http://190.1.4.129/WebServicePruebas/WebService.asmx";
                  static String ip="http://201.134.159.126/WebServicePruebas/WebService.asmx";
                 //static String ip="http://201.134.159.126/WSFuerzasExternas/WebService.asmx";
                 //static String ip="http://marzam.mx/WSFuerzasExternas/WebService.asmx";
+                static String ip_cobranza="http://201.134.159.126/WSCobranza/WebService1.asmx";
 
     String from="WebServices";
     String subject;
@@ -627,5 +628,37 @@ public class WebServices {
             PrepareSendingData.callBack(response);
         }
     }
+
+    public String DownJsonCobranza (String agente){
+
+        String SOAP_ACTION="http://tempuri.org/DocumentosAgente";
+        String OPERATION_NAME="DocumentosAgente";
+        String WSDL_TARGET_NAMESPACE="http://tempuri.org/";
+        String SOAP_ADDRESS=ip_cobranza;
+
+        SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
+        request.addProperty("agente", agente);
+
+        SoapSerializationEnvelope envelope=new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.dotNet=true;
+
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE httpTransportSE=new HttpTransportSE(SOAP_ADDRESS);
+        Object response=null;
+
+        try{
+
+            httpTransportSE.call(SOAP_ACTION,envelope);
+            response=envelope.getResponse();
+
+        }catch (Exception e){
+            String a=e.toString();
+            Log.d("WebServiceBakError",a);
+            return null;
+        }
+        return response.toString();
+
+    }
+
 
 }

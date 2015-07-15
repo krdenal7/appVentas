@@ -35,7 +35,20 @@ public class DataBase {
     public static String QUERY_NAME_PRODUCT_SEARCH = "SELECT descripcion FROM productos WHERE descripcion LIKE ? OR codigo LIKE ? OR ean LIKE ? ORDER BY Descripcion ASC";
     public static String QUERY_MARZAM_CODE_PRODUCT_SEARCH = "SELECT codigo FROM productos WHERE descripcion LIKE ? OR codigo LIKE ? OR ean LIKE ? ORDER BY Descripcion ASC";
     public static String QUERY_BAR_CODE_PRODUCT_SEARCH = "SELECT ean FROM productos WHERE descripcion LIKE ? OR codigo LIKE ? OR ean LIKE ? ORDER BY Descripcion ASC";
+    public static String QUERY_PERCENTAGE_DEVOLUTION_ALLOCATED="";
 
+
+    public static String QUERY_CLAVE_AGENT="";
+    public static String QUERY_ESTIMATE_DEVOLUTION="";
+    public static String QUERY_AVERAGE_SALES="";
+    public static String QUERY_FOLIOS_IN_ESTIMATE="";
+    public static String QUERY_FOLIOS_IN_MERMA="";
+    public static String QUERY_FOLIOS_NO_ACCEPTED="";
+    public static String QUERY_FOLIOS_OUT_ESTIMATION="";
+    public static String QUERY_STATUS_RETURNED="";
+    public static String QUERY_GET_INVOICE="";
+    public static String QUERY_NEED_INVOICE="";
+    public static String QUERY_NEED_NOTE="";
     /**
      * Constructor
      * @param activity padre

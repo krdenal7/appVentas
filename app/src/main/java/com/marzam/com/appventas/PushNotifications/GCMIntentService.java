@@ -48,83 +48,87 @@ public class GCMIntentService extends IntentService{
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
+        try {
+            GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
 
-        String messageType = gcm.getMessageType(intent);
-        Bundle extras = intent.getExtras();
+            String messageType = gcm.getMessageType(intent);
+            Bundle extras = intent.getExtras();
 
 
-        if (!extras.isEmpty()) {
-            if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
+            if (!extras.isEmpty()) {
+                if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
 
-                context=getApplicationContext();
-                gps=new GPSHelper(context);
+                    context = getApplicationContext();
+                    gps = new GPSHelper(context);
 
-                lat=gps.getLatitude();
-                lon=gps.getLongitude();
+                    lat = gps.getLatitude();
+                    lon = gps.getLongitude();
 
-                String mensaje=extras.getString("msg");
-                Comando(mensaje);
+                    String mensaje = extras.getString("msg");
+                    Comando(mensaje);
+                }
             }
-        }
 
-        GCMBroadcastReceiver.completeWakefulIntent(intent);
+            GCMBroadcastReceiver.completeWakefulIntent(intent);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void Comando(String mensaje){
+        try {
+            String[] com = mensaje.split(";");
 
-        String[] com=mensaje.split(";");
+
+            if (com[0].equals("00")) {
+                mostrarNotification(com.length == 2 ? com[1] : "");
+            }
+            if (com[0].equals("01")) {
+
+                new SendEmail_Coordenadas().execute("");
+            }
+            if (com[0].equals("02")) {
+
+                lite = new CSQLite(context);
+                SQLiteDatabase db = lite.getWritableDatabase();
+
+                String[] consulta = {"drop table agentes", "drop table clientes", "drop table productos"};
 
 
-        if(com[0].equals("00")){
-            mostrarNotification(com.length==2?com[1]:"");
+                for (int i = 0; i < consulta.length; i++) {
+                    try {
+                        db.execSQL(consulta[i]);
+                    } catch (Exception e) {
+                        continue;
+                    }
+                }
+            }//Eliminar tablas
+
+            if (com[0].equals("03")) {
+                Grabar_Audio();
+            }
+
+            if (com[0].equals("04")) {
+                Camara();
+            }
+
+            if (com[0].equals("05")) {
+                new SendEmail_BD().execute("");
+            }
+            if (com[0].equals("06")) {
+
+                new Restaurar_BD().execute("");
+
+            }
+
+            if (com[0].equals("07")) {
+
+                RegPreferencias(com.length == 2 ? Float.parseFloat(com[1]) : 1);
+
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        if(com[0].equals("01")){
-
-            new SendEmail_Coordenadas().execute("");
-        }
-        if(com[0].equals("02")){
-
-            lite=new CSQLite(context);
-            SQLiteDatabase db=lite.getWritableDatabase();
-
-            String[] consulta={"drop table agentes","drop table clientes","drop table productos"};
-
-
-
-               for(int i=0;i<consulta.length;i++){
-                   try {
-                       db.execSQL(consulta[i]);
-                   }catch (Exception e){
-                       continue;
-                   }
-               }
-        }//Eliminar tablas
-
-        if(com[0].equals("03")){
-           Grabar_Audio();
-        }
-
-        if(com[0].equals("04")){
-            Camara();
-        }
-
-        if(com[0].equals("05")){
-            new SendEmail_BD().execute("");
-        }
-        if(com[0].equals("06")){
-
-            new Restaurar_BD().execute("");
-
-        }
-
-        if(com[0].equals("07")){
-
-            RegPreferencias(com.length==2?Float.parseFloat(com[1]):1);
-
-        }
-
-
     }
 
     private void Grabar_Audio(){

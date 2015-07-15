@@ -48,9 +48,13 @@
 		var limite;
 		var saldo;
 		var limite;
+		var nombre1;
 		var d30;
+		var nombre2;
 		var d60;
+		var nombre3;
 		var d90;
+		var nombre4;
 		var dmas;
 		
 		
@@ -59,41 +63,75 @@
             {
 			        if(index=="A")
 			        saldo=valores[index];
+					
 					if(index=="B")
 					limite=valores[index];
-			        if(index=="C")
+					
+					if(index=="C")
+					nombre1=valores[index];
+			        if(index=="D")
 			        d30=valores[index];
-					 if(index=="D")
+					
+					if(index=="E")
+					nombre2=valores[index];
+					if(index=="F")
 			        d60=valores[index];
-					 if(index=="E")
+					
+					if(index=="G")
+					nombre3=valores[index];
+					 if(index=="H")
 			        d90=valores[index];
-					 if(index=="F")
+					
+					if(index=="I")
+					nombre4=valores[index];
+					if(index=="J")
 			        dmas=valores[index];
 					
 					
 			   
 		 }
+		 
+		 var signo1="";
+		 var signo2="";
+		 
+		 if (saldo.indexOf("-") >= 0)
+			signo1="-";
+			
+		 if (limite.indexOf("-") >= 0)
+			 signo2="-";
+			 
 
 		 saldo = deci(saldo);
 		 limite = deci(limite);
-			
-	    var d302=parseFloat(d30);
-		var d602=parseFloat(d60);
-		var d902=parseFloat(d90);
-		var dmas2=parseFloat(dmas);
 
-
+	    var d302=parseFloat(d30==null?0:d30);
+		var d602=parseFloat(d60==null?0:d60);
+		var d902=parseFloat(d90==null?0:d90);
+		var dmas2=parseFloat(dmas==null?0:dmas);
 		
 		
         var disponible=2500.00,D30=d302,D60=d602,D90=d902,MD90=dmas2;
+		var n1=nombre1==null?"--":nombre1;
+		var n2=nombre2==null?"--":nombre2;
+		var n3=nombre3==null?"--":nombre3;
+		var n4=nombre4==null?"--":nombre4;
+		
+		var v1=nombre1==null?false:true;
+		var v2=nombre2==null?false:true;
+		var v3=nombre3==null?false:true;
+		var v4=nombre4==null?false:true;
+		
+		
+
+		
 	 $('#inf').empty();
 
 	 $( "#progressbar").progressbar({
 			value:(140*100)/1000
 			});
 
-	 $('#inf').append('<span>Saldo:&nbsp;</span> <span id="saldo">$' + saldo + '</span> <br/>' +
-        '<span>Límite:</span> <span id="limite">$'+limite+'</span><div id="progressbar" style="width:100%; height:15px; margin:0px auto;"></div>');
+	 $('#inf').append('<span>Saldo:&nbsp;</span> <span id="saldo">$'+signo1+saldo+'</span> <br/>' +
+        '<span>Límite:</span> <span id="limite">$'+signo2+limite+'</span><div id="progressbar" style="width:100%; height:15px; margin:0px auto;"></div>');
 
     $('#container').highcharts({
         chart: {
@@ -136,18 +174,25 @@
         },
         series: [
 		{
-            name: '30D $'+deci(D30.toString()),
-            data: [D30]
-        },{
-            name: '60D $'+deci(D60.toString()),
-            data: [D60]
-        },{
-            name: '90D $'+deci(D90.toString()),
-            data: [D90]
-        },{
-            name: '+90D $'+deci(MD90.toString()),
-            data: [MD90]
-        }]
+			name: n1+deci(D30.toString()),data: [D30],
+			visible:v1		
+			
+		},
+		{
+			name: n2+deci(D60.toString()),data: [D60],
+			visible:v2
+		},
+		{
+			name: n3+deci(D90.toString()),data: [D90],
+			visible:v3
+		},
+		{
+			name: n4+deci(MD90.toString()),data: [MD90],
+			visible:v4
+		}
+		
+		
+		]
     });
 });
 

@@ -566,6 +566,22 @@ public class envio_pedido {
 
   }
 
+    public String ObtenerIdFuerza(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        String clave="";
+
+        Cursor rs=db.rawQuery("select id_fuerza from agentes where Sesion=1",null);
+        if(rs.moveToFirst()){
+
+            clave=rs.getString(0);
+        }
+
+
+        return clave;
+    }
+
   public String Obtener_descuentoComercial(){
       String desc = "0";
 try {
@@ -835,8 +851,8 @@ try {
 
       cabecero[0] = id_pedido;
       cabecero[1] = Obtener_idCliente();
-      cabecero[2] = Obtener_NoEmpleado();
-      cabecero[3] = ObtenerAgenteActivo();
+      cabecero[2] = ObtenerAgenteActivo();
+      cabecero[3] = ObtenerIdFuerza();
       cabecero[4] = String.valueOf(total_piezas);
       cabecero[5] = String.valueOf(importe_total);
       cabecero[6] = Obtener_tipoOrden();
@@ -853,7 +869,7 @@ try {
       SQLiteDatabase db=lite.getWritableDatabase();
 
      try {
-         db.execSQL("update encabezado_pedido set id_pedido=?,id_cliente=?,numero_empleado=?,clave_agente=?,total_piezas=?,impote_total=?" +
+         db.execSQL("update encabezado_pedido set id_pedido=?,id_cliente=?,clave_agente=?,id_fuerza=?,total_piezas=?,impote_total=?" +
                     ",tipo_orden=?,fecha_captura=?,fecha_transmision=?,id_estatus=?,no_pedido_cliente=?,firma=?,id_visita=? where id_pedido='"+cabecero[0]+"'", cabecero);
      }catch (Exception e){
          from="envio_pedido";
@@ -975,8 +991,8 @@ while (rs.moveToNext()) {
 
         json.put("id_pedido", rs.getString(0).equals("") ? id_pedido : rs.getString(0));
         json.put("id_cliente", rs.getString(1).equals("")?Obtener_idCliente():rs.getString(1));
-        json.put("numero_empleado", rs.getString(2).equals("")?Obtener_NoEmpleado():rs.getString(2));
-        json.put("clave_agente", rs.getString(3).equals("")?ObtenerAgenteActivo():rs.getString(3));
+        json.put("clave_agente", rs.getString(2).equals("")?Obtener_NoEmpleado():rs.getString(2));
+        json.put("id_fuerza", rs.getString(3).equals("")?ObtenerAgenteActivo():rs.getString(3));
         json.put("total_piezas", rs.getString(4));
         json.put("impote_total", rs.getString(5));
         json.put("tipo_orden", rs.getString(6));
@@ -1067,20 +1083,20 @@ try {
         while (rs.moveToNext()){
 
             try {
-                String id_cliente=rs.getString(1);
+                String id_cliente=rs.getString(2);
 
                 if(VerificarEstatusCteDr(id_cliente)) {
-                    object.put("numero_empleado", rs.getString(0));
+                    object.put("clave_agente", rs.getString(0));
+                    object.put("id_fuerza",rs.getString(1));
                     object.put("id_cliente", id_cliente);
-                    object.put("latitud", rs.getString(2));
-                    object.put("longitud", rs.getString(3));
-                    String fechavisita = rs.getString(4);
+                    object.put("latitud", rs.getString(3));
+                    object.put("longitud", rs.getString(4));
+                    String fechavisita = rs.getString(5);
                     object.put("fecha_visita", fechavisita != null ? fechavisita.replaceAll(":", "|") : "01-01-2014 00|00|00");
-                    String fecharegistro = rs.getString(5);
+                    String fecharegistro = rs.getString(6);
                     object.put("fecha_registro", fecharegistro != null ? fecharegistro.replaceAll(":", "|") : "01-01-2014 00|00|00");
-                    String id_visita = rs.getString(6);
+                    String id_visita = rs.getString(7);
                     object.put("id_visita", id_visita);
-
 
                     array.put(object);
                     object = new JSONObject();
@@ -1177,8 +1193,8 @@ try {
 
     public void Extraer_json(String json){
 
-        String estatus="20";
-        String id_visita="";
+        String estatus;
+        String id_visita;
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 

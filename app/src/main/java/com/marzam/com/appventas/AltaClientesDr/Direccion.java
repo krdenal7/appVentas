@@ -489,7 +489,7 @@ public class Direccion extends Activity {
         String id_suc="";
         String query="";
 
-            query="select id_sucursal from agentes where numero_empleado=(select numero_empleado from agentes where Sesion=1)";
+            query="select id_sucursal from SucursalAgente where  clave_agente=(select clave_agente from agentes where Sesion=1)";
             Cursor rs = db.rawQuery(query, null);
             if (rs.moveToFirst()) {
 
@@ -502,13 +502,13 @@ public class Direccion extends Activity {
         return id_suc;
     }
 
-    public String ObtenerNumEmpleado(){
+    public String ObtenerIdFuerza(){
         CSQLite lite=new CSQLite(context);
         SQLiteDatabase db=lite.getReadableDatabase();
         String num="";
         String query="";
 
-        query="select numero_empleado from agentes where Sesion=1";
+        query="select id_fuerza from agentes where Sesion=1";
         Cursor rs = db.rawQuery(query, null);
         if (rs.moveToFirst()) {
 
@@ -770,22 +770,30 @@ public class Direccion extends Activity {
 
     public void InsertAgenda(String id){
 
-        String empleado=ObtenerNumEmpleado();
+        String empleado=ObtenerClaveEmpleado();
+        String id_fuerza=ObtenerIdFuerza();
         CSQLite lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        String[]dias=new String[]{"Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"};
+        String[]frecuencia=new String[]{"S1","S2"};
 
         try{
 
-            for(int i=0;i<dias.length;i++){
+            for(int i=0;i<frecuencia.length;i++){
 
                 ContentValues values=new ContentValues();
-                values.put("numero_empleado",empleado);
+                values.put("clave_agente",empleado);
+                values.put("id_fuerza",id_fuerza);
                 values.put("id_cliente",id);
-                values.put("dia",dias[i]);
-                values.put("orden_visita",i);
-                values.put("id_frecuencia","SS");
+                values.put("Lunes",true);
+                values.put("Martes",true);
+                values.put("Miercoles",true);
+                values.put("Jueves",true);
+                values.put("Viernes",true);
+                values.put("Sabado",true);
+                values.put("Domingo",true);
+                values.put("id_frecuencia",frecuencia[i]);
+                values.put("orden",i);
                 db.insertOrThrow("agenda",null,values);
 
             }

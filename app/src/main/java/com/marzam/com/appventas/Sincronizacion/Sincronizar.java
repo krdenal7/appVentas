@@ -89,7 +89,7 @@ public class Sincronizar extends Activity {
         txtClientes.setText(""+VerificarClientesPendientes());
 
         txtDevoluciones=(TextView)findViewById(R.id.textView45);
-        txtDevoluciones.setText(""+VerificarDevolucionesPendiente());
+        //txtDevoluciones.setText(""+VerificarDevolucionesPendiente());
 
 
         Button btnCerrar=(Button)findViewById(R.id.button5);
@@ -190,7 +190,7 @@ public class Sincronizar extends Activity {
                 if(!VerificarSesionActiva()) {
                  if(VerificarClientesPendientes()<=0){
                     if (VerificarPedidosPendientes() <= 0) {
-                        if(VerificarDevolucionesPendiente()<=0) {
+                        /*if(VerificarDevolucionesPendiente()<=0) {*/
                             if (isOnline()) {
 
 
@@ -205,9 +205,9 @@ public class Sincronizar extends Activity {
                             } else {
                                 Toast.makeText(context, "Verifique su conexión a internet e intente nuevamente", Toast.LENGTH_LONG).show();
                             }
-                        }else {
+                       /* }else {
                             Toast.makeText(context, "No se puede completar la sincronización. Envíe sus devoluciónes pendientes", Toast.LENGTH_LONG).show();
-                        }
+                        }*/
                     } else {
                         Toast.makeText(context, "No se puede completar la sincronización. Envíe sus pedidos pendientes", Toast.LENGTH_LONG).show();
                     }//Pedidos pendientes por transmitir
@@ -504,7 +504,7 @@ public class Sincronizar extends Activity {
 
                 txtPedidos.setText("" + VerificarPedidosPendientes());
                 txtClientes.setText(""+VerificarClientesPendientes());
-                txtDevoluciones.setText(""+VerificarDevolucionesPendiente());
+                //txtDevoluciones.setText(""+VerificarDevolucionesPendiente());
 
                 progres.dismiss();
 

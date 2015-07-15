@@ -86,6 +86,132 @@
     <string name="title_activity_direccion">Dirección</string>
     <string name="por_visitar">Por visitar:</string>
     <string name="txtDevLiteCaptSearch">Buscar producto</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <!--Cobranza-->
+
+    <string name="pago_parcial">Pago parcial: </string>
+    <string name="pago_total">Pago total: </string>
+    <string name="seleccion_pago">Seleccionar tipo de pago: </string>
+    <string name="hint_buscador"><i>Buscar por número de factura</i></string>
+    <!--<string name="total_importe">Total importe:</string>
+    <string name="total_cubrir">Total adeudo a cubrir:</string>
+    <string name="total_pendiente">Total adeudo pendiente:</string>-->
+    <string name="total_importe">Deuda total:</string>
+    <string name="total_cubrir">Monto total a aplicar:</string>
+    <string name="total_pendiente">Restante total:</string>
+    <string name="sin_internet">Sin conexión a internet</string>
+    <string name="error_usuario">Error, intentelo de nuevo</string>
+
+    <string name="num_fac">Número de factura: </string>
+    <string name="fecha_emision">Fecha emision: </string>
+    <string name="fecha_ven">Fecha vencimiento: </string>
+    <string name="dias_f">Días atraso: </string>
+    <string name="importe">Importe: </string>
+    <string name="adeudo_p">Adeudo pendiente: </string>
+    <string name="adeudo_c">Adeudo a cubrir: </string>
+
+    <string name="selec_banco_cheque">Seleccionar banco</string>
+    <string name="num_cheque">Núm. cheque</string>
+    <string name="fecha_cheque">Fecha cheque</string>
+    <string name="num_transb">Núm. trans. bancaria</string>
+    <string name="fecha_transb">Fecha trans. bancaria</string>
+    <string name="num_notac">Núm. nota crédito</string>
+    <string name="fecha_notac">Fecha nota crédito</string>
+    <string name="monto_notac">Monto nota crédito</string>
+    <string name="num_fichap">Núm. ficha pago</string>
+    <string name="fecha_fichap">Fecha ficha pago</string>
+    <string name="num_fichab">Núm. ficha bancaria</string>
+    <string name="fecha_fichab">Fecha ficha bancaria</string>
+
+    <string name="dias_adapter">días</string>
+    <string name="tipo_pago">Seleccione un tipo de pago</string>
+
+    <string name="efectivo">Efectivo</string>
+    <string name="cheque">Cheque</string>
+    <string name="nota_credito">Nota de crédito</string>
+    <string name="transferencia_bancaria">Transferencia bancaria</string>
+    <string name="ficha_pago">Ficha de pago</string>
+    <string name="ficha_bancaria">Ficha bancaria</string>
+
+    <string name="btnguardar_dialog">Guardar</string>
+
+    <string name="sinseleccionar_dialog">Debe seleccionar una forma de pago</string>
+    <string name="seleccion_banco_dialog">Seleccione un banco</string>
+    <string name="num_cheque_dialog">Introduzca el número de cheque</string>
+    <string name="fecha_cheque_dialog">Introduzca la fecha del cheque</string>
+    <string name="datos_guardar_dialog">Datos Guardados</string>
+    <string name="seleccion_nota_credito_dialog">Seleccione una nota de crédito</string>
+    <string name="monto_nota_credito_dialog">Introduzca el monto de la nota de crédito</string>
+    <string name="fecha_nota_credito_dialog">Introduzca la fecha de la nota de crédito</string>
+    <string name="num_trans_bancaria_dialog">Introduzca el número de la transferecnia bancaria</string>
+    <string name="fecha_trans_bancaria_dialog">Introduzca la fecha de la transferecnia bancaria</string>
+    <string name="num_ficha_pago_dialog">Introduzca el número de la ficha de pago</string>
+    <string name="fecha_ficha_pago_dialog">Introduzca la fecha de la ficha de pago</string>
+    <string name="num_ficha_bancaria_dialog">Introduzca el número de la ficha bancaria</string>
+    <string name="fecha_ficha_bancaria_dialog">Introduzca la fecha de la ficha bancaria</string>
+
+    <string name="conf_cheque">Confirmar cheque</string>
+    <string name="conf_efectivo">Confirmar efectivo</string>
+    <string name="conf_ficha_pago">Confirmar ficha de pago</string>
+    <string name="conf_nota_cre">Confirmar nota de crédito</string>
+    <string name="conf_ficha_bancaria">Confirmar ficha bancaria</string>
+    <string name="conf_trans_bancaria">Confirmar transferecnia bancaria</string>
+
+    <string name="llenar_campo">Campo Obligatorio</string>
+
+    <string name="cubrir_adeudo">¿Desea cubrir adeudo total?</string>
+    <string name="quitar_cubrir_adeudo">¿Desea quitar adeudo total?</string>
+    <string name="cubrir_adeudo_si">Sí</string>
+    <string name="cubrir_adeudo_no">No</string>
+
+    <string name="confirmar">¿Desea agregar un nuevo tipo de pago?</string>
+    <string name="confirmar_no">No, terminar transacción</string>
+    <string name="confirmar_si">Sí</string>
+
+    <string name="banco_prompt"> Seleccione un banco </string>
+
+    <string name="title_activity_cobranza">Cobranza</string>
+
+    <string name="pagos_hecho">Sus pagos han sido guardados con éxito</string>
+    <string name="pagos_hecho_aceptar">Aceptar</string>
+
+    <string name="correoe_cobranza_detalle">Correo Electrónico</string>
+
+    <string name="msg_formato_incorrecto_num_cheque">El número de cheque debe contener 8 dígitos</string>
+    <string name="msg_formato_incorrecto_trans">El número de transferencia bancaria debe contener 8 dígitos</string>
+    <string name="msg_formato_incorrecto_ficha_pago">El número de la ficha de pago debe contener 8 dígitos</string>
+    <string name="msg_formato_incorrecto_ficha_bancaria">El número de la ficha de bancaria debe contener 8 dígitos</string>
+
+
+
+
+
+    <color name="color_item_list_selected">#89BBEE</color>
+
+    <string-array name="banco_arrays">
+        <item>-Seleccione un banco-</item>
+        <item>BANCOMER</item>
+        <item>HSBC</item>
+        <item>BANAMEX</item>
+        <item>SCOTIABANK</item>
+        <item>SANTANDER SERFIN</item>
+        <item>BANORTE</item>
+    </string-array>
+
+    <string name="notac_prompt"> Seleccione una nota </string>
+
+    <string-array name="notac_arrays">
+        <item>-Seleccione una nota-</item>
+        <item>49596939</item>
+        <item>49596838</item>
+        <item>47576737</item>
+        <item>46566636</item>
+        <item>45556535</item>
+        <item>44546434</item>
+        <item>43536333</item>
+    </string-array>
 
 
 </resources>

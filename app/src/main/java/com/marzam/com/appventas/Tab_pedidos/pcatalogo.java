@@ -111,7 +111,7 @@ public class pcatalogo extends Activity {
 
 
         LlenarModelItems(false);
-        adapter1=new CustomAdapter(this,modelItems);
+        adapter1=new CustomAdapter(this,modelItems,spFiltro.getSelectedItemPosition()==1?true:false);
         lproductos.setAdapter(adapter1);
 
 
@@ -140,7 +140,7 @@ public class pcatalogo extends Activity {
                             fil=true;
 
                         LlenarModelItems(fil);
-                        adapter1 = new CustomAdapter(context, modelItems);
+                        adapter1 = new CustomAdapter(context, modelItems,spFiltro.getSelectedItemPosition()==1?true:false);
                         lproductos.setAdapter(adapter1);
                     }
                 } catch (Exception e) {
@@ -163,7 +163,7 @@ public class pcatalogo extends Activity {
                 if (EditBuscar.getText().length() > 0) {
                     LlenarModelItems(false);
                     EditBuscar.setText("");
-                    adapter1 = new CustomAdapter(context, modelItems);
+                    adapter1 = new CustomAdapter(context, modelItems,spFiltro.getSelectedItemPosition()==1?true:false);
                     lproductos.setAdapter(adapter1);
                 }
 
@@ -274,9 +274,14 @@ public class pcatalogo extends Activity {
             if(filtro==true)
                 where="where o.descuento > 0";
 
+            String filt=WhereFiltro(filtro);
+
              String query=String.format("select distinct descripcion,precio,p.Cantidad,p.codigo,precio_final,clasificacion_fiscal,o.descuento, " +
                     "p.laboratorio, e.cantidad,devolucion,isCheck from productos as p left join " +
-                     " ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo %s",where);
+                     " ofertas as o on p.codigo=o.codigo " +
+                     " left join existencias as e on p.codigo=e.codigo " +
+                     " left join productos_obligados as po on p.codigo=po.codigo " +
+                     "%s %s",where,filt);
 
             try {
 
@@ -331,10 +336,17 @@ public class pcatalogo extends Activity {
               String where="";
 
               if(filtro==true)
-                  where="where o.descuento > 0";
+                  where = "where o.descuento > 0";
 
-              String query=String.format("select distinct descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad ,devolucion " +
-                      "from productos as p left join ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo %s limit 1000 ",where);
+
+              String filt=WhereFiltro(filtro);
+
+              String query=String.format("select distinct descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal" +
+                                          ",o.descuento, p.laboratorio, e.cantidad ,devolucion " +
+                                          "from productos as p left join ofertas as o on p.codigo=o.codigo " +
+                                          "left join existencias as e on p.codigo=e.codigo " +
+                                          "left join productos_obligados as po on p.codigo=po.codigo " +
+                                          " %s %s limit 1000 ",where,filt);
 
               rs = db.rawQuery(query, null);
 
@@ -700,7 +712,7 @@ public class pcatalogo extends Activity {
                  LLenarList();
                  LlenarModelItems(false);
 
-                 adapter1=new CustomAdapter(context,modelItems);
+                 adapter1=new CustomAdapter(context,modelItems,spFiltro.getSelectedItemPosition()==1?true:false);
 
 
              }else {
@@ -708,7 +720,7 @@ public class pcatalogo extends Activity {
                  if(val==1) {
                      LLenarList();
                      LlenarModelItems(true);
-                     adapter1 = new CustomAdapter(context, modelItems);
+                     adapter1 = new CustomAdapter(context, modelItems,spFiltro.getSelectedItemPosition()==1?true:false);
 
                  }
 
@@ -754,6 +766,53 @@ public class pcatalogo extends Activity {
         }
     }
 
+    public String WhereFiltro(boolean filt){
+
+        StringBuilder builder=new StringBuilder();
+        String id_cliente=ObtenerId_cliente();
+
+
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getReadableDatabase();
+
+        Cursor rs=db.rawQuery("select filtro from clientes_obligados where id_cliente=?",new String[]{id_cliente});
+
+        if(rs.moveToFirst()){
+            if(filt==true){
+                builder.append("AND ");
+            }else {
+                builder.append("where ");
+            }
+
+            builder.append("po.filtro like '%,"+rs.getString(0)+",%' or po.filtro like '%,0,%'");
+        }else{
+            builder.append("");
+        }
+        return builder.toString();
+    }
+
+    public String ObtenerId_cliente(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        Cursor rs=db.rawQuery("select id_cliente from sesion_cliente where Sesion=1",null);
+
+
+        String id="";
+
+        if(rs.moveToFirst()){
+            id=rs.getString(0);
+        }
+        try {
+            rs.close();
+            db.close();
+            lite.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return id;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -787,7 +846,7 @@ public class pcatalogo extends Activity {
             fil=true;
 
        LlenarModelItems(fil);
-       adapter1=new CustomAdapter(this,modelItems);
+       adapter1=new CustomAdapter(this,modelItems,spFiltro.getSelectedItemPosition()==1?true:false);
        lproductos.setAdapter(adapter1);
 
     }

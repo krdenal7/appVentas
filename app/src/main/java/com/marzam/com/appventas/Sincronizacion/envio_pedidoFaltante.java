@@ -52,6 +52,20 @@ public class envio_pedidoFaltante {
         directorio = new File(folder.getAbsolutePath() + "/Marzam/Imagenes");
         services=new WebServices();
 
+
+        String json=jsonVisitas();
+        if(json!=null)
+            services.SincronizarVisitas(json);
+
+        String jsonCierre=JSonCierreVisitas();
+        String respjson=null;
+
+        if(jsonCierre!=null);
+        respjson= services.CierreVisitas(jsonCierre);
+        if(respjson!=null)
+            Extraer_json(respjson);
+
+
         if(VerificarClientesPendientes()>0){
 
             String jsonClientes=JSonClientes();
@@ -79,23 +93,9 @@ public class envio_pedidoFaltante {
             respuesta = EnvioPedido();
         }
 
-            if(VerificarDevolucionesPendiente()>0) {
+            /*if(VerificarDevolucionesPendiente()>0) {
                 respuesta = EnvioDevoluciones();
-            }
-
-
-            String json=jsonVisitas();
-            if(json!=null)
-                services.SincronizarVisitas(json);
-
-            String jsonCierre=JSonCierreVisitas();
-            String respjson=null;
-
-            if(jsonCierre!=null);
-            respjson= services.CierreVisitas(jsonCierre);
-            if(respjson!=null)
-                Extraer_json(respjson);
-
+            }*/
 
 
         if(respuesta.isEmpty()){
@@ -304,12 +304,16 @@ public class envio_pedidoFaltante {
 
                     if(!id_cliente.isEmpty()) {
                         if (!cteIbs.isEmpty()) {
-                               UpdateStatusCteDr(id_corto, cteIbs, "50");
-                               UpdateCteSm(id_corto, cteIbs);
-                               UpdateEncabezadoPedido(cteIbs, id_corto);
-                               UpdateVisitas(cteIbs,id_corto);
-                               UpdateAgendaPedido(cteIbs, id_corto);
-                               resp="Clientes registrados exitosamente.";
+                            if(!id_cliente.equals("null")) {
+                                if(!cteIbs.equals("null")) {
+                                    UpdateStatusCteDr(id_corto, cteIbs, "50");
+                                    UpdateCteSm(id_corto, cteIbs);
+                                    UpdateEncabezadoPedido(cteIbs, id_corto);
+                                    UpdateVisitas(cteIbs, id_corto);
+                                    UpdateAgendaPedido(cteIbs, id_corto);
+                                    resp = "Clientes registrados exitosamente.";
+                                }
+                            }
                         }
                     }
 
@@ -561,17 +565,18 @@ public class envio_pedidoFaltante {
 
             try {
 
-                String id_cliente=rs.getString(1);
+                String id_cliente=rs.getString(2);
 
                 if(VerificarEstatusCteDr(id_cliente)) {
 
-                    object.put("numero_empleado", rs.getString(0));
-                    object.put("id_cliente", rs.getString(1));
-                    object.put("latitud", rs.getString(2));
-                    object.put("longitud", rs.getString(3));
-                    object.put("fecha_visita", rs.getString(4).replace(":", "|"));
-                    object.put("fecha_registro", rs.getString(5).replace(":", "|"));
-                    String id_visita = rs.getString(6);
+                    object.put("clave_agente", rs.getString(0));
+                    object.put("id_fuerza", rs.getString(1));
+                    object.put("id_cliente", id_cliente);
+                    object.put("latitud", rs.getString(3));
+                    object.put("longitud", rs.getString(4));
+                    object.put("fecha_visita", rs.getString(5).replace(":", "|"));
+                    object.put("fecha_registro", rs.getString(6).replace(":", "|"));
+                    String id_visita = rs.getString(7);
                     object.put("id_visita", id_visita);
                     array.put(object);
                     object = new JSONObject();
@@ -747,8 +752,8 @@ public class envio_pedidoFaltante {
 
                        json.put("id_pedido", rs.getString(0));
                        json.put("id_cliente", rs.getString(1));
-                       json.put("numero_empleado", rs.getString(2));
-                       json.put("clave_agente", rs.getString(3));
+                       json.put("clave_agente", rs.getString(2));
+                       json.put("id_fuerza", rs.getString(3));
                        json.put("total_piezas", rs.getString(4));
                        json.put("impote_total", rs.getString(5));
                        json.put("tipo_orden", rs.getString(6));
@@ -950,7 +955,6 @@ public class envio_pedidoFaltante {
             }
         }
     }
-
 
     public String getDate(){
 

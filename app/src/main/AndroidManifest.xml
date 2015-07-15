@@ -176,6 +176,11 @@
             android:label="@string/title_activity_direccion"
             android:screenOrientation="portrait">
         </activity>
+
+        <activity android:name=".Cobranza.Cobranza"
+            android:label="@string/title_activity_cobranza"
+            android:screenOrientation="portrait">
+        </activity>
     </application>
 
 </manifest>

@@ -109,18 +109,14 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         txtVisitados=(TextView)findViewById(R.id.textView9);
         txtPendientes=(TextView)findViewById(R.id.textView78);
 
-        ObtenerCtesHoy(ObtenerAgenteActivo());
+        ObtenerCtesHoy(ObtenerClavedeAgente());
         ObtenerClientesVisitados();
 
         id_visita=Obtener_Idvisita();
 
-
-
     }
 
-
-    public void ShowCteH()
-    {
+    public void ShowCteH(){
 
         final CharSequence[] list=ObtenerCtesHoy(ObtenerAgenteActivo());
 
@@ -144,7 +140,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     }
 
     public void ShowCteT(){
-        final CharSequence[] list=ObtenerCteTotales(ObtenerAgenteActivo());
+        final CharSequence[] list=ObtenerCteTotales(ObtenerClavedeAgente());
 
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context, AlertDialog.THEME_DEVICE_DEFAULT_DARK);
@@ -185,7 +181,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                  Toast.makeText(context, "Campo vacio.Ingrese una clave de agente", Toast.LENGTH_LONG).show();
              } else {
 
-                 String num_emp = ObtenerAgenteActivo();
+                 String clave_agente = ObtenerClavedeAgente();
 
                  char isLetter = 0;
 
@@ -193,7 +189,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                      isLetter = cuenta.charAt(1);
 
                  if (Character.isDigit(isLetter)) {
-                     if (Verificar_ClienteExiste(cuenta, num_emp)) {
+                     if (Verificar_ClienteExiste(cuenta, clave_agente)) {
                          if (!VerificarSesion_Cliente(cuenta))
                              ShowSesionActiva();
                      } else {
@@ -202,7 +198,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
                  }//En caso de que sea Numero realiza la busqueda por cuenta
                  else {
                      if (Character.isLetter(isLetter)) {
-                         ShowBuscarXnombre(cuenta, num_emp);
+                         ShowBuscarXnombre(cuenta, clave_agente);
                      }
                  }//Va a entrar en caso de que detecte una letra
 
@@ -266,13 +262,13 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     public String[] ObtenerClientesLike(String palabra){
 
-        String no_empleado=ObtenerAgenteActivo();
+        String no_empleado=ObtenerClavedeAgente();
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
 
         Cursor rs=db.rawQuery("select distinct(a.id_cliente),c.nombre from  agenda as a inner join clientes " +
-                               "as c on a.id_cliente=c.id_cliente where c.nombre like'%"+palabra+"%' and a.numero_empleado='"+no_empleado+"'",null);
+                               "as c on a.id_cliente=c.id_cliente where c.nombre like'%"+palabra+"%' and a.clave_agente='"+no_empleado+"'",null);
         String[] clientes=new String[rs.getCount()];
         int contador=0;
 
@@ -341,10 +337,9 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         CharSequence[] datos=null;
 
-
         lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
-        String query="select id_cliente from agenda where numero_empleado='"+agente+"' and id_frecuencia in"+where()+" order by orden_visita";
+        SQLiteDatabase db=lite.getReadableDatabase();
+        String query="select id_cliente from agenda where clave_agente='"+agente+"' and id_frecuencia in"+where()+" order by orden";
 
         Cursor cursor=db.rawQuery(query,null);
 
@@ -386,7 +381,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor cursor=db.rawQuery("select distinct(id_cliente) from  agenda where numero_empleado='"+agente+"' ",null);
+        Cursor cursor=db.rawQuery("select distinct(id_cliente) from  agenda where clave_agente='"+agente+"' ",null);
 
         clientesT=new String[cursor.getCount()];
         datos=new CharSequence[cursor.getCount()];
@@ -428,6 +423,22 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         String clave="";
 
         Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
+        if(rs.moveToFirst()){
+
+            clave=rs.getString(0);
+        }
+
+
+        return clave;
+    }
+
+    public String ObtenerIdFuerza(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        String clave="";
+
+        Cursor rs=db.rawQuery("select id_fuerza from agentes where Sesion=1",null);
         if(rs.moveToFirst()){
 
             clave=rs.getString(0);
@@ -482,7 +493,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
        String[] arg={cliente,numero_emp};
 
-       Cursor rs=db.rawQuery("select id_cliente from agenda where id_cliente=? and numero_empleado=?",arg);
+       Cursor rs=db.rawQuery("select id_cliente from agenda where id_cliente=? and clave_agente=?",arg);
 
         if(rs.moveToFirst()){
             return true;
@@ -497,7 +508,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         SQLiteDatabase db=lite.getWritableDatabase();
         String clave="";
 
-        Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
+        Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
         if(rs.moveToFirst()){
 
             clave=rs.getString(0);
@@ -519,23 +530,24 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
             values.put("id_cliente",cliente);
             values.put("Sesion",1);
             values.put("Fecha_ingreso",getDate());
-            String query="insert into sesion_cliente (id_cliente,Sesion,Fecha_ingreso)values('"+cliente+"',1,'"+getDate()+"') ";
+            String query="insert into sesion_cliente (id_cliente,sesion,fecha_ingreso)values('"+cliente+"',1,'"+getDate()+"') ";
             Long d= db.insert("sesion_cliente",null,values);
             String err="";
         }catch (Exception e){
-
-            String error=e.toString();
             Toast.makeText(context,"Error al insertar visita",Toast.LENGTH_SHORT).show();
         }
     }//INSERTA EL CLIENTE CON EL QUE SE INICIO VISITA
 
     public void RegistrarVisitas(String cliente){
+
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
         GPSHelper gpsHelper=new GPSHelper(context);
         ContentValues values=new ContentValues();
-        String agente=ObtenerAgenteActivo();
-        values.put("numero_empleado",agente);
+        String agente=ObtenerClavedeAgente();
+        String id_fuerza=ObtenerIdFuerza();
+        values.put("clave_agente",agente);
+        values.put("id_fuerza",id_fuerza);
         values.put("id_cliente",cliente);
         values.put("latitud",gpsHelper.getLatitude());
         values.put("longitud", gpsHelper.getLongitude());
@@ -543,7 +555,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         values.put("fecha_registro",getDate());
         values.put("id_visita",id_visita);
         values.put("status_visita","10");
-        Long res= db.insert("visitas",null,values);
+        db.insert("visitas",null,values);
 
         db.close();
         lite.close();
@@ -598,7 +610,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     private String ObtenerId_Agente(){
         String id="";
-        String agente=ObtenerClavedeAgente();
+        String agente=ObtenerAgenteActivo();
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
@@ -637,7 +649,6 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
-        String agente=ObtenerAgenteActivo();
         Cursor rs=db.rawQuery("select * from visitas where id_visita='"+id_visita+"'",null);
         JSONArray array=new JSONArray();
         JSONObject object=new JSONObject();
@@ -645,21 +656,17 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         if(rs.moveToFirst()){
 
             try {
-
-
-
-                object.put("numero_empleado",rs.getString(0));
-                object.put("id_cliente",rs.getString(1));
-                object.put("latitud",rs.getString(2));
-                object.put("longitud",rs.getString(3));
-                String Fecha=rs.getString(4);
+                object.put("clave_agente",rs.getString(0));
+                object.put("id_fuerza",rs.getString(1));
+                object.put("id_cliente",rs.getString(2));
+                object.put("latitud",rs.getString(3));
+                object.put("longitud",rs.getString(4));
+                String Fecha=rs.getString(5);
                 object.put("fecha_visita", Fecha!=null ? Fecha.replaceAll(":","|"):"01-01-2014 00|00|00");
-                String Fecha2=rs.getString(5);
+                String Fecha2=rs.getString(6);
                 object.put("fecha_registro",Fecha2!=null ? Fecha2.replaceAll(":","|"):"01-01-2014 00|00|00");
-                object.put("id_visita",rs.getString(6));
+                object.put("id_visita",rs.getString(7));
                 array.put(object);
-
-                String a= 5==6 ? null:"B";
 
             } catch (JSONException e) {
 
@@ -814,7 +821,6 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
         return image;
     }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -846,7 +852,6 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         return datos;
     }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -856,7 +861,6 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         mGoogleApiClient.connect();
 
     }
-
     @Override
     public void onPause() {
         super.onPause();
@@ -905,7 +909,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
                         if(cuentas.length!=0){
                             if(cuenta[0].equals(cuentas[0])){
-                                String num_emp=ObtenerAgenteActivo();
+                                String num_emp=ObtenerClavedeAgente();
                                 if (Verificar_ClienteExiste(cuenta[0], num_emp)) {
                                     if (!VerificarSesion_Cliente(cuenta[0
                                             ]))
@@ -968,7 +972,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     public String[] ObtenerMenuFuerzas(){
 
-        String agente=ObtenerClavedeAgente();
+        String agente=ObtenerAgenteActivo();
 
         if(lite!=null)
             lite.close();
@@ -1157,36 +1161,46 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     private String where(){
 
-        String dia="";
-
         Calendar cal = new GregorianCalendar();
         Date dt = cal.getTime();
-        SimpleDateFormat df=new SimpleDateFormat("dd");
-        int diames=Integer.parseInt(df.format(dt.getTime()));
+
+        SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd");
+        String fact=df.format(dt.getTime());
 
         GregorianCalendar FechaCalendario=new GregorianCalendar();
         FechaCalendario.setTime(dt);
 
-
-
-
         int numDia=FechaCalendario.get(Calendar.DAY_OF_WEEK);
+        String dia="";
 
 
-        String where="(";
 
-        int resultado= diames%7>0?(diames/7)+1:diames/7;
+        CSQLite lt1=new CSQLite(context);
+        SQLiteDatabase bd=lt1.getReadableDatabase();
 
-        where+= resultado==1?"'M1','Q1','SS')": resultado==2?"'M2','Q2','SS')":
-                           resultado==3?"'M3','Q1','SS')": resultado==4?"'M4','Q2','SS')":
-                                        "'M1','Q1','SS')";
+        Cursor rs=bd.rawQuery("select formula,letra from formulaMovil",null);
+        StringBuilder builder=new StringBuilder();
+        builder.append("(");
 
+        while (rs.moveToNext()){
 
+             String formula=rs.getString(0);
+             String letra=rs.getString(1);
+
+             Cursor res=bd.rawQuery(formula,new String[]{letra,fact});
+
+            if(res.moveToFirst()) {
+                builder.append("'");
+                builder.append(res.getString(0));
+                builder.append("',");
+            }
+
+        }
 
         switch (numDia){
             case 1:
                 dia="Domingo";
-            break;
+                break;
             case 2:
                 dia="Lunes";
                 break;
@@ -1207,9 +1221,11 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         }
 
-        where+=" and dia='"+dia+"'";
+        builder.deleteCharAt(builder.length()-1);
+        builder.append(") and ");
+        builder.append(dia+"=1");
 
-        return where;
+        return builder.toString();
     }
 
     public static Bitmap createDrawableFromView(Context context,View view){

@@ -56,7 +56,6 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     Button boton5;
 
    AlertDialog alertDialog;
-   AlertDialog alertDialog_picker;
 
     String from="CustomAdapter";
     String subject;
@@ -67,16 +66,17 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     private int posicionList;
     private EditText txt3Cant;
     private ImageView imgDev;
+    private boolean filtro;
 
     private View convertV;
 
 
-    public CustomAdapter(Context context, Model[] resource) {
+    public CustomAdapter(Context context, Model[] resource,boolean filtro) {
         super(context, R.layout.row,resource);
         this.context=context;
         this.modelitems=resource;
+        this.filtro=filtro;
     }
-
     @Override
     public View getView(final int position, View convertView,ViewGroup parent){
 
@@ -193,46 +193,6 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
         pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
     }
 
-    public void ShowDialog_picker(final int posicion, final View view){
-
-
-        final EditText txtCantidad=new EditText(context);
-        txtCantidad.setHint("cantidad");
-        txtCantidad.setInputType(InputType.TYPE_CLASS_NUMBER);
-
-        AlertDialog.Builder alert=new AlertDialog.Builder(context);
-        alert.setTitle("Seleccione una cantidad");
-        alert.setView(txtCantidad);
-        alert.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-
-                int cant = Integer.parseInt(txtCantidad.getText().toString());
-
-                Agregar_Producto(view, 0, posicion);
-                Agregar_Producto(view, cant, posicion);
-
-            }
-        });
-        alert.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-            }
-        });
-        alertDialog_picker=alert.create();
-        alertDialog_picker.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialogInterface) {
-                InputMethodManager imm = (InputMethodManager)((Activity)context).getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(txtCantidad, InputMethodManager.SHOW_IMPLICIT);
-            }
-        });
-
-        alertDialog_picker.show();
-    }
-
     public int AgregarProducto(String ean,int cantidad,int isChecked,View view,int posicion){
 
         try {
@@ -310,9 +270,21 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
         try {
 
-            rs = db.rawQuery("select distinct descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal,o.descuento, p.laboratorio, e.cantidad ,devolucion " +
-                    "from productos as p left join ofertas as o on p.codigo=o.codigo left join existencias as e on p.codigo=e.codigo limit 1000 ", null);
+            String where="";
 
+            if(filtro==true)
+                where="where o.descuento > 0";
+
+            String filt=WhereFiltro(filtro);
+
+            String query=String.format("select distinct descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal" +
+                    ",o.descuento, p.laboratorio, e.cantidad ,devolucion " +
+                    "from productos as p left join ofertas as o on p.codigo=o.codigo " +
+                    "left join existencias as e on p.codigo=e.codigo " +
+                    "left join productos_obligados as po on p.codigo=po.codigo " +
+                    " %s %s limit 1000 ",where,filt);
+
+            rs = db.rawQuery(query, null);
         }
         catch (Exception e)
         {
@@ -349,6 +321,53 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
         db.close();
 
         lite.close();
+    }
+
+    public String WhereFiltro(boolean filt){
+
+        StringBuilder builder=new StringBuilder();
+        String id_cliente=ObtenerId_cliente();
+
+
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getReadableDatabase();
+
+        Cursor rs=db.rawQuery("select filtro from clientes_obligados where id_cliente=?",new String[]{id_cliente});
+
+        if(rs.moveToFirst()){
+            if(filt==true){
+                builder.append("AND ");
+            }else {
+                builder.append("where ");
+            }
+
+            builder.append("po.filtro like '%,"+rs.getString(0)+",%' or po.filtro like '%,0,%'");
+        }else{
+            builder.append("");
+        }
+        return builder.toString();
+    }
+
+    public String ObtenerId_cliente(){
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        Cursor rs=db.rawQuery("select id_cliente from sesion_cliente where Sesion=1",null);
+
+
+        String id="";
+
+        if(rs.moveToFirst()){
+            id=rs.getString(0);
+        }
+        try {
+            rs.close();
+            db.close();
+            lite.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return id;
     }
 
     public String[] ObtenerInfoProductos(int posicion){
@@ -463,7 +482,6 @@ try {
     new sendEmail().execute("");
 }
     }
-
 
     public class sendEmail extends AsyncTask<String,Void,Object> {
 

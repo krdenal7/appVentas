@@ -20,6 +20,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.TextView;
 
+import com.marzam.com.appventas.Cobranza.Cobranza;
+import com.marzam.com.appventas.Cobranza.CobranzaDetallePago;
 import com.marzam.com.appventas.DevolucionesLite.DevolucionesLite;
 import com.marzam.com.appventas.GPS.Actualizar_Coordenadas;
 import com.marzam.com.appventas.MapsLocation;
@@ -27,14 +29,12 @@ import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 import com.marzam.com.appventas.Tab_pedidos.pedido;
 import com.marzam.com.appventas.WebService.WebServices;
-
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -68,6 +68,7 @@ public class KPI_General extends Activity {
 
         webViews=(WebView)findViewById(R.id.webView2);
         webViews.setScrollContainer(false);
+
         WebView();
 
 
@@ -141,6 +142,7 @@ public class KPI_General extends Activity {
 
         return formatteDate;
     }
+
     private String getDateCierre(){
 
         Calendar cal = new GregorianCalendar();
@@ -150,9 +152,6 @@ public class KPI_General extends Activity {
 
         return formatteDate;
     }
-
-
-
 
     public String Obtener_Idvisita(){
 
@@ -283,33 +282,40 @@ public class KPI_General extends Activity {
 
     Cursor rs=null;
 
-    String query="select saldo,limite_credito,cartera_vencida,cartera_novencida,venta_mes_anterior,venta_mes_actual from presupuesto_clientes where id_cliente='"+id_cliente+"'";
+    String query="select saldo,limite_credito from presupuesto_clientes where id_cliente='"+id_cliente+"'";
 
 
     rs=db.rawQuery(query,null);
+    List<NameValuePair> params = new LinkedList<NameValuePair>();
 
 
     if(rs.moveToFirst()){
-
-        List<NameValuePair> params = new LinkedList<NameValuePair>();
-        params.add(new BasicNameValuePair("A", rs.getString(0)));
-        params.add(new BasicNameValuePair("B", rs.getString(1)));
-        params.add(new BasicNameValuePair("C", rs.getString(2)));
-        params.add(new BasicNameValuePair("D", rs.getString(3)));
-        params.add(new BasicNameValuePair("E", rs.getString(4)));
-        params.add(new BasicNameValuePair("F", rs.getString(5)));
-        datos = URLEncodedUtils.format(params, "utf-8");
-    }else{
-        List<NameValuePair> params = new LinkedList<NameValuePair>();
-        params.add(new BasicNameValuePair("A", "0"));
-        params.add(new BasicNameValuePair("B", "0"));
-        params.add(new BasicNameValuePair("C", "0"));
-        params.add(new BasicNameValuePair("D", "0"));
-        params.add(new BasicNameValuePair("E", "0"));
-        params.add(new BasicNameValuePair("F", "0"));
-        datos = URLEncodedUtils.format(params, "utf-8");
-
+        params.add(new BasicNameValuePair("A", rs.getString(0)));//Inserta el saldo
+        params.add(new BasicNameValuePair("B", rs.getString(1)));//Inserta el limite de credito
     }
+    else
+    {
+        params.add(new BasicNameValuePair("A", "0"));//Envia el valor en 0 si no encontro datos del cliente
+        params.add(new BasicNameValuePair("B", "0"));
+    }
+        rs.close();
+        db.close();
+
+        db=lite.getReadableDatabase();
+        rs=db.rawQuery("select tipo_kpi,valor from kpi_clientes where id_cliente='"+id_cliente+"'",null);
+        String[] array={"C","D","E","F","G","H","I","J"};
+        int cont=0;
+
+        while (rs.moveToNext()){
+
+            params.add(new BasicNameValuePair(array[cont],rs.getString(0)+"D%20"));
+            params.add(new BasicNameValuePair(array[cont+1],rs.getString(1)));
+            cont+=2;
+
+        }
+
+     datos = URLEncodedUtils.format(params, "utf-8");
+
 
      return datos;
     }
@@ -343,6 +349,11 @@ public class KPI_General extends Activity {
                Intent i = new Intent(context, DevolucionesLite.class);
                i.putExtra("pharmacy", ((TextView)findViewById( R.id.textView55 )).getText());
                startActivity( i );
+               break;
+           case R.id.Cobranza:
+               Intent iCob=new Intent(context, Cobranza.class);
+               iCob.putExtra("pharmacy", ((TextView)findViewById( R.id.textView55 )).getText());
+               startActivity(iCob);
                break;
            case R.id.Cerra:
                ShowCierreVisita();
@@ -397,7 +408,6 @@ public class KPI_General extends Activity {
         }
         return menu;
     }
-
     @Override
     public boolean onKeyDown(int keyEvent,KeyEvent event){
         return super.onKeyDown(keyEvent,event);

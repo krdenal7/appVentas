@@ -14,13 +14,17 @@ public class GCMBroadcastReceiver extends WakefulBroadcastReceiver
     @Override
     public void onReceive(Context context, Intent intent)
     {
-        ComponentName comp =
-                new ComponentName(context.getPackageName(),
-                        GCMIntentService.class.getName());
+        try {
+            ComponentName comp =
+                    new ComponentName(context.getPackageName(),
+                            GCMIntentService.class.getName());
 
-        startWakefulService(context, (intent.setComponent(comp)));
+            startWakefulService(context, (intent.setComponent(comp)));
 
-           setResultCode(Activity.RESULT_OK);
+            setResultCode(Activity.RESULT_OK);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
 
     }
