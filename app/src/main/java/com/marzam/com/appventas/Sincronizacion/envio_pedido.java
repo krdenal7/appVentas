@@ -60,7 +60,7 @@ public class envio_pedido {
 
    //File file=new File(directorio+"/dbBackup.zip");
 
-    public String GuardarPedido(Context context){
+    public String GuardarPedido(Context context,Boolean guardar){
         this.context=context;
         String resp="";
         webServices=new WebServices();
@@ -72,6 +72,7 @@ public class envio_pedido {
 
             if (Insertar_Cabecero())
                    Insertar_Detalle();
+
 
 
             if(VerificarClientesPendientes()>0) {
@@ -98,8 +99,6 @@ public class envio_pedido {
                 Extraer_json(respCierre);
 
 
-
-
             if(isOnline()==false) {
                 LimpiarBD_Insertados();
                 return "Pedido guardado localmente. Verifique su conexión y sincronize los pedidos";
@@ -108,19 +107,25 @@ public class envio_pedido {
                 LimpiarBD_Insertados();
                 return "Pedido guardado localmente. Sincronize los clientes pendientes";
             }
+            if(!guardar) {
+                String res = webServices.SincronizarPedidos(JSONCabecera(), JSONDetalle());
 
-            String res=webServices.SincronizarPedidos(JSONCabecera(),JSONDetalle());
+                if (res == null) {
+                    LimpiarBD_Insertados();
+                    return "Fallo al enviar pedidos. Sincronize el dispositivo para envíarlos nuevamente";
+                }
 
-            if(res==null) {
+                if (res != null)
+                    ActualizarStatusPedido(res);
+
+                resp = LimpiarBD_Insertados();
+                return resp;
+
+            }else{
                 LimpiarBD_Insertados();
-                return "Fallo al enviar pedidos. Sincronize el dispositivo para envíarlos nuevamente";
+                return "El pedido se ha guardado correctamente";
             }
 
-            if(res!=null)
-                ActualizarStatusPedido(res);
-
-            resp = LimpiarBD_Insertados();
-            return resp;
         }else
         {
             return "No hay productos para agregar";
@@ -566,7 +571,7 @@ public class envio_pedido {
 
   }
 
-    public String ObtenerIdFuerza(){
+  public String ObtenerIdFuerza(){
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();

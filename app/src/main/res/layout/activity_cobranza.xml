@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.marzam.com.appventas.Cobranza.Cobranza"
+    tools:context="com.marzam.com.appventas.Cobranza.ActivitiesCobranza.Cobranza"
     android:background="#3B3B3B">
 
 
@@ -26,13 +26,15 @@
             android:layout_marginLeft="20dp"
             android:textColor="#ffffff"
             android:textStyle="bold"
-            android:textSize="14dp" />
+            android:textSize="14dp"
+            android:visibility="gone" />
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="2dp">
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp">
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -98,31 +100,32 @@
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp">
 
-        <RelativeLayout
-            android:layout_width="60dp"
-            android:layout_height="fill_parent"
-            android:background="#7D7E8d"
-            android:id="@+id/rl_btn_busqueda">
+    <RelativeLayout
+        android:layout_width="60dp"
+        android:layout_height="fill_parent"
+        android:background="#7D7E8d"
+        android:id="@+id/rl_btn_busqueda">
 
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/idSetDevLiteCaptIconSearch"
-                android:layout_alignParentTop="false"
-                android:layout_alignParentLeft="false"
-                android:layout_alignParentStart="false"
-                android:background="@drawable/lupa"
-                android:layout_centerInParent="true"
-                android:layout_alignWithParentIfMissing="false" />
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/idSetDevLiteCaptIconSearch"
+            android:layout_alignParentTop="false"
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentStart="false"
+            android:background="@drawable/lupa"
+            android:layout_centerInParent="true"
+            android:layout_alignWithParentIfMissing="false" />
 
-        </RelativeLayout>
+    </RelativeLayout>
 
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="#7D7E8d">
+            android:background="#7D7E8d"
+            android:focusableInTouchMode="true">
 
             <Button
                 android:layout_width="match_parent"
@@ -182,214 +185,157 @@
 
     <ListView
         android:layout_width="fill_parent"
-        android:layout_height="300dp"
+        android:layout_height="360dp"
         android:id="@+id/lv_pagos"
-        android:background="#ffffff"
+        android:background="#3B3B3B"
         android:layout_below="@+id/ll_spinner"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
-        android:layout_marginTop="5dp"/>
+        android:layout_marginTop="5dp" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/lv_pagos"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/lv_pagos"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp">
+        android:background="#7D7E7d">
 
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:id="@+id/grid_totales_cobranza"
-            android:layout_gravity="right"
-            android:columnCount="3"
-            android:rowCount="3"
-            android:useDefaultMargins="false"
-            android:rowOrderPreserved="false"
-            android:longClickable="false"
-            android:focusableInTouchMode="false"
-            android:focusable="false"
-            android:columnOrderPreserved="true"
-            android:clickable="false"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp">
-
-            <TextView
+            <GridLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/total_importe"
-                android:id="@+id/textView922"
-                android:layout_row="0"
-                android:layout_column="1"
-                android:textStyle="bold"
-                android:textColor="#ffffff"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:layout_marginRight="5dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/total_cubrir"
-                android:id="@+id/textView944"
-                android:layout_row="1"
-                android:layout_column="1"
-                android:textStyle="bold"
-                android:textColor="#ff7727"
-                android:layout_marginRight="5dp"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/total_pendiente"
-                android:id="@+id/textView966"
-                android:layout_row="2"
-                android:layout_column="1"
-                android:textStyle="bold"
-                android:textColor="#ffffff"
-                android:layout_marginRight="5dp"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="$0.00"
-                android:id="@+id/txt_total_importe"
-                android:layout_row="0"
-                android:layout_column="2"
-                android:textColor="#ffffff"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:gravity="right" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="$0.00"
-                android:id="@+id/txt_total_cubrir"
-                android:layout_row="1"
-                android:layout_column="2"
-                android:textColor="#ff7727"
-                android:gravity="right"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:layout_gravity="right" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="$0.00"
-                android:id="@+id/txt_total_pendiente"
-                android:layout_row="2"
-                android:layout_column="2"
-                android:textColor="#ffffff"
-                android:gravity="right"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:layout_gravity="right" />
-
-
-        </GridLayout>
-
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:layout_marginTop="5dp"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:id="@+id/grid_totales_cobranza"
+                android:columnCount="3"
+                android:rowCount="3"
+                android:useDefaultMargins="false"
+                android:rowOrderPreserved="false"
+                android:longClickable="false"
+                android:focusableInTouchMode="false"
+                android:focusable="false"
+                android:columnOrderPreserved="true"
+                android:clickable="false"
+                android:layout_gravity="right">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/total_importe"
-                    android:id="@+id/textView92"
+                    android:id="@+id/textView922"
+                    android:layout_row="0"
+                    android:layout_column="1"
                     android:textStyle="bold"
                     android:textColor="#ffffff"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:layout_marginRight="5dp" />
-
-                <!--<TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="$0.00"
-                    android:id="@+id/txt_total_importe"
-                    android:textColor="#ffffff"
-                    android:gravity="right"
-                    android:layout_weight="1"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />-->
-            </LinearLayout>
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                    android:layout_marginRight="5dp"
+                    android:textSize="12sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/total_cubrir"
-                    android:id="@+id/textView94"
+                    android:id="@+id/textView944"
+                    android:layout_row="1"
+                    android:layout_column="1"
                     android:textStyle="bold"
                     android:textColor="#ff7727"
                     android:layout_marginRight="5dp"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-                <!-- <TextView
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:text="$0.00"
-                     android:id="@+id/txt_total_cubrir"
-                     android:textColor="#ff7727"
-                     android:layout_weight="1"
-                     android:gravity="right"
-                     android:textAppearance="?android:attr/textAppearanceSmall" />-->
-            </LinearLayout>
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                    android:textSize="12sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/total_pendiente"
-                    android:id="@+id/textView96"
+                    android:id="@+id/textView966"
+                    android:layout_row="2"
+                    android:layout_column="1"
                     android:textStyle="bold"
                     android:textColor="#ffffff"
                     android:layout_marginRight="5dp"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
+                    android:textSize="12sp" />
 
-                <!--<TextView
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="$0.00"
+                    android:id="@+id/txt_total_importe"
+                    android:layout_row="0"
+                    android:layout_column="2"
+                    android:textColor="#ffffff"
+                    android:gravity="right"
+                    android:layout_marginRight="5dp"
+                    android:textSize="12sp"
+                    android:layout_gravity="right" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="$0.00"
+                    android:id="@+id/txt_total_cubrir"
+                    android:layout_row="1"
+                    android:layout_column="2"
+                    android:textColor="#ff7727"
+                    android:gravity="right"
+                    android:layout_gravity="right"
+                    android:layout_marginRight="5dp"
+                    android:textSize="12sp" />
+
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="$0.00"
                     android:id="@+id/txt_total_pendiente"
+                    android:layout_row="2"
+                    android:layout_column="2"
                     android:textColor="#ffffff"
                     android:gravity="right"
-                    android:layout_weight="1"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />-->
-            </LinearLayout>
-        </LinearLayout>
+                    android:layout_gravity="right"
+                    android:layout_marginRight="5dp"
+                    android:textSize="12sp" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:id="@+id/btn_confirmar"
-            android:layout_gravity="center"
-            android:background="@drawable/bluebutton"
-            android:textColor="#ffffff"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:visibility="gone"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp" />
+
+            </GridLayout>
 
     </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:gravity="bottom"
+                android:visibility="gone">
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:id="@+id/btn_confirmar"
+                    android:background="@drawable/bluebutton"
+                    android:textColor="#ffffff"
+                    android:layout_weight="0.5"
+                    android:text="Confirmar"
+                    android:textSize="14dp" />
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:id="@+id/btn_siguiente"
+                    android:background="@drawable/bluebutton"
+                    android:textColor="#ffffff"
+                    android:text="Siguinte"
+                    android:layout_weight="0.5"
+                    android:visibility="visible"
+                    android:textSize="14dp" />
+
+
+            </LinearLayout>
+
+        </LinearLayout>
 </RelativeLayout>

@@ -1,0 +1,292 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#3B3B3B"
+    tools:context=".DevolucionesFull.DevolucionesFullInvoiceList">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#7D7E7d"
+            android:layout_marginTop="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp">
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/txtCheckBoxDevFullFilterDate"
+                android:id="@+id/idCheckBoxDevFullFilterDate"
+                android:singleLine="true"
+                android:textColor="#FFFFFF"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:padding="5dp"
+                android:checked="false"
+                android:layout_alignTop="@+id/idImgDevFullFromDate"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical">
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:paddingBottom="5dp">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/idRLDevFullFatherFromDateSearchInvoice"
+                        android:background="@drawable/background_txtfile" />
+
+                    <ImageButton
+                        android:layout_width="27dp"
+                        android:layout_height="27dp"
+                        android:id="@+id/idImgDevFullFromDate"
+                        android:background="@drawable/calentar_ico"
+                        android:layout_alignWithParentIfMissing="false"
+                        android:layout_alignParentTop="false"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="false"
+                        android:layout_marginTop="3dp"
+                        android:layout_marginRight="4dp" />
+
+                    <EditText
+                        android:layout_width="fill_parent"
+                        android:layout_height="40dp"
+                        android:ems="10"
+                        android:id="@+id/idTxtDevFullFromDateSearchInvoice"
+                        android:textSize="15sp"
+                        android:layout_weight="1"
+                        android:layout_gravity="center_vertical|right"
+                        android:background="#00000000"
+                        android:layout_marginRight="33dp"
+                        android:textStyle="normal"
+                        android:layout_alignTop="@+id/idRLDevFullFatherFromDateSearchInvoice"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:hint="@string/hintDevFullDateSearchInvoice"
+                        android:layout_alignBottom="@+id/idRLDevFullFatherFromDateSearchInvoice"
+                        android:clickable="true"
+                        android:capitalize="words"
+                        android:enabled="false" />
+
+                </RelativeLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="@string/txtDevFullTo"
+                    android:id="@+id/textView107" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:paddingBottom="5dp">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/imageView20"
+                        android:background="@drawable/background_txtfile" />
+
+                    <ImageButton
+                        android:layout_width="27dp"
+                        android:layout_height="27dp"
+                        android:id="@+id/idImgDevFullToDate"
+                        android:background="@drawable/calentar_ico"
+                        android:layout_alignWithParentIfMissing="false"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="false"
+                        android:layout_marginTop="3dp"
+                        android:layout_marginRight="4dp" />
+
+                    <EditText
+                        android:layout_width="fill_parent"
+                        android:layout_height="40dp"
+                        android:ems="10"
+                        android:id="@+id/idTxtDevFullToDateSearchInvoice"
+                        android:textSize="15sp"
+                        android:layout_weight="1"
+                        android:layout_gravity="center_vertical|right"
+                        android:background="#00000000"
+                        android:layout_marginRight="33dp"
+                        android:textStyle="normal"
+                        android:layout_alignTop="@+id/imageView20"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:hint="@string/hintDevFullDateSearchInvoice"
+                        android:layout_alignBottom="@+id/imageView20"
+                        android:clickable="true"
+                        android:capitalize="words" />
+
+                </RelativeLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="10dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="2">
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginTop="5dp">
+
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:text="@string/txtDevFullInvoices"
+                            android:id="@+id/textView102"
+                            android:textSize="15sp"
+                            android:textStyle="normal"
+                            android:textColor="#FFFFFF"
+                            android:layout_gravity="left|center_vertical"
+                            android:layout_marginRight="5dp"
+                            android:layout_marginLeft="5dp" />
+
+                        <RelativeLayout
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginTop="5dp"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="5dp">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/imageView18"
+                                android:background="@drawable/background_txtfile" />
+
+                            <ImageButton
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/idIconTxtDevFullStartSearch"
+                                android:src="@drawable/lupa"
+                                android:background="#00000000"
+                                android:layout_alignParentTop="true"
+                                android:layout_alignParentLeft="true"
+                                android:layout_alignParentStart="true" />
+
+                            <ImageButton
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/idIconTxtDevFullCancelSearch"
+                                android:src="@drawable/exis"
+                                android:background="#00000000"
+                                android:layout_alignWithParentIfMissing="false"
+                                android:layout_alignParentTop="true"
+                                android:layout_alignParentRight="true"
+                                android:layout_alignParentEnd="true" />
+
+                            <EditText
+                                android:layout_width="fill_parent"
+                                android:layout_height="40dp"
+                                android:inputType="textNoSuggestions"
+                                android:ems="10"
+                                android:id="@+id/idEditTxtDevFullInputSearh"
+                                android:textSize="15sp"
+                                android:layout_weight="1"
+                                android:layout_gravity="center_vertical|right"
+                                android:background="#00000000"
+                                android:layout_marginRight="40dp"
+                                android:textStyle="normal"
+                                android:layout_alignTop="@+id/imageView18"
+                                android:gravity="center_vertical"
+                                android:layout_marginLeft="40dp"
+                                android:imeOptions="actionSearch"
+                                android:layout_alignBottom="@+id/idIconTxtDevFullStartSearch"
+                                android:hint="@string/hintDevFullInputSearchNumInvoice" />
+                        </RelativeLayout>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ListView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/idListDevFullInvoice"
+                        android:background="#3B3B3B"
+                        android:scrollingCache="false"
+                        android:cacheColorHint="@android:color/white"
+                        android:fastScrollEnabled="false"
+                        android:drawSelectorOnTop="false"
+                        android:clickable="false"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:choiceMode="singleChoice" />
+                </RelativeLayout>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="@string/btnTextDevFullReturn"
+            android:id="@+id/idBtnDevFullInvoiceReturnMainMenu"
+            android:layout_gravity="center_horizontal"
+            android:layout_alignParentBottom="true"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/bluebutton"
+            android:layout_alignParentLeft="true"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:paddingRight="5dp"
+            android:paddingLeft="5dp"
+            android:paddingBottom="3dp"
+            android:layout_marginBottom="10dp" />
+
+    </LinearLayout>
+
+</RelativeLayout>

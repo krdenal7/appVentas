@@ -1,87 +1,74 @@
 package com.marzam.com.appventas.Cobranza;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.marzam.com.appventas.DataBase.DataBase;
 import com.marzam.com.appventas.DevolucionesLite.CustomPrompt.NumeroEnorme;
 import com.marzam.com.appventas.R;
-import com.marzam.com.appventas.WebService.WebServices;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Locale;
+import java.util.List;
 
 public class Cobranza extends Activity {
 
-    private TextView txt_cliente,txtpago_parcial,txtpago_total;
-    public static TextView txt_total_importe,txt_total_cubrir,txt_total_pendiente;
+    private TextView txt_cliente, txtpago_parcial, txtpago_total;
+    public static TextView txt_total_importe, txt_total_cubrir, txt_total_pendiente;
     private ListView lv_facturas;
-    private ImageButton search,cancel_search;
+    private ImageButton search, cancel_search;
     private ProgressDialog dialogo;
-    private ArrayList<Dictionary<String, String> > arrayfacturas = new ArrayList<Dictionary<String, String> >();
-    public ArrayList<Dictionary<String, String> > arrayseleccionpagos = new ArrayList<Dictionary<String, String> >();
-    public static ArrayList<Dictionary<String, String> > arrayseleccionpagosfinal = new ArrayList<Dictionary<String, String> >();
-    public static ArrayList<Dictionary<String, String> > arraynotasdecredito = new ArrayList<Dictionary<String, String> >();
-    private JSONObject jsonObjectResponse;
-    private String id_cliente, nombre_cliente, monto_aplicar,
-            scheque_banco,scheque_numero,scheque_fecha,snotac_numero,snotac_monto,snotac_fecha,stransb_numero,stransb_fecha,sfichap_numero,sfichap_fecha,sfichab_numero,sfichab_fecha;
-    private RelativeLayout relativebuscar,rl_btn_busqueda;
-    private Button btn_tipo_pago,btn_confirmar;
-    private int swicht_search=0, total_pagos,pagoshechos;
-    public static int bandera=0;
+    private ArrayList<Dictionary<String, String>> arrayfacturas = new ArrayList<Dictionary<String, String>>();
+    public ArrayList<Dictionary<String, String>> arrayseleccionpagos = new ArrayList<Dictionary<String, String>>();
+    private String id_cliente, nombre_cliente, monto_aplicar, agente, swictch_confirmar_pago, num_confirmar_pago,
+            scheque_banco, scheque_numero, scheque_fecha, snotac_numero, snotac_monto, snotac_fecha, stransb_numero,
+            stransb_fecha, sfichap_numero, sfichap_fecha, sfichab_numero, sfichab_fecha;
+    private RelativeLayout relativebuscar, rl_btn_busqueda;
+    private Button btn_tipo_pago, btn_confirmar;//, btn_siguiente;
+    private int swicht_search = 0, total_pagos, pagoshechos, pagoshechosdialog, flag_next = 0;
+    public static int bandera = 0;
     private EditText editsearch;
     private CobranzaAdapter adaptercob;
-    private float var=0, var1, var2=0, var12;
-    private  EditText et_monto_aplicar;
-    private  Button btnDevLitePromptReset0;
-    private  Button btnDevLitePromptAdd1;
-    private  Button btnDevLitePromptAdd2;
-    private  Button btnDevLitePromptAdd5;
-    private  Button btnDevLitePromptAdd10;
-    private  String monto_aplicar_cobranzaadapter="", nombre_tipp_pago;
+    private EditText et_monto_aplicar;
+    private Button btnDevLitePromptReset0;
+    private Button btnDevLitePromptAdd1;
+    private Button btnDevLitePromptAdd2;
+    private Button btnDevLitePromptAdd5;
+    private Button btnDevLitePromptAdd10;
+    private String monto_aplicar_cobranzaadapter = "";
+    private DataBase db;
+  //  private static ArrayList<InvoiceDetails> invoice_list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cobranza);
-        setTitle("Cobranza");
 
         txt_cliente = (TextView) findViewById(R.id.txt_cliente);
         txtpago_parcial = (TextView) findViewById(R.id.txtpago_parcial);
@@ -97,96 +84,169 @@ public class Cobranza extends Activity {
         rl_btn_busqueda = (RelativeLayout) findViewById(R.id.rl_btn_busqueda);
         btn_tipo_pago = (Button) findViewById(R.id.btn_tipo_pago);
         editsearch = (EditText) findViewById(R.id.idSetDevLiteCaptProductSearch);
+        //btn_siguiente = (Button) findViewById(R.id.btn_siguiente);
 
-        /*editsearch.addTextChangedListener(watcher1);
+        Bundle extras = getIntent().getExtras();
+        nombre_cliente = extras.getString("pharmacy");
+        txt_cliente.setText(nombre_cliente);
 
-        btn_confirmar.setOnClickListener(new View.OnClickListener() {
+        setTitle("Cobranza  -   " + nombre_cliente);
+
+        editsearch.addTextChangedListener(watcher1);
+
+       /* btn_siguiente.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if (flag_next == 1) {
+                    Intent intento = new Intent(Cobranza.this, CobranzaDetallePago.class);
+                    intento.putExtra("pharmacy", txt_cliente.getText().toString());
+                    startActivity(intento);
+                } else {
+                    Toast toast = Toast.makeText(Cobranza.this, "Debe confirmar el pago", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
+                    toast.show();
+                }
+            }
+        });*/
+
+/*        btn_confirmar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //if(arrayseleccionpagos.size()<0){
                 AlertDialog.Builder builder = new AlertDialog.Builder(Cobranza.this);
                 builder.setMessage(getString(R.string.confirmar))
                         .setPositiveButton(getString(R.string.confirmar_si), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                Dictionary<String, String> dic = new Hashtable<String, String>();
-                                for(int i=0;i<arrayseleccionpagos.size();i++){
-                                    if(arrayseleccionpagos.get(i).get("bandera").equals("2")){
-                                        dic.put("sp_seleccion_banco", arrayseleccionpagos.get(i).get("sp_seleccion_banco"));
-                                        dic.put("et_num_cheque", arrayseleccionpagos.get(i).get("et_num_cheque"));
-                                        dic.put("et_fecha_cheque", arrayseleccionpagos.get(i).get("et_fecha_cheque"));
-                                    }else if(arrayseleccionpagos.get(i).get("bandera").equals("3")){
-                                        dic.put("sp_num_nota_credito", arrayseleccionpagos.get(i).get("sp_num_nota_credito"));
-                                        dic.put("et_monto_nota_credito", arrayseleccionpagos.get(i).get("et_monto_nota_credito"));
-                                        dic.put("et_fecha_nota_credito", arrayseleccionpagos.get(i).get("et_fecha_nota_credito"));
-                                    }else if(arrayseleccionpagos.get(i).get("bandera").equals("4")){
-                                        dic.put("et_num_transferencia_bancaria", arrayseleccionpagos.get(i).get("et_num_transferencia_bancaria"));
-                                        dic.put("et_fecha_transferencia_bancaria", arrayseleccionpagos.get(i).get("et_fecha_transferencia_bancaria"));
-                                    }else if(arrayseleccionpagos.get(i).get("bandera").equals("5")){
-                                        dic.put("et_num_ficha_pago", arrayseleccionpagos.get(i).get("et_num_ficha_pago"));
-                                        dic.put("et_fecha_ficha_pago", arrayseleccionpagos.get(i).get("et_fecha_ficha_pago"));
-                                    }else if(arrayseleccionpagos.get(i).get("bandera").equals("6")){
-                                        dic.put("et_num_ficha_bancaria", arrayseleccionpagos.get(i).get("et_num_ficha_bancaria"));
-                                        dic.put("et_fecha_ficha_bancaria", arrayseleccionpagos.get(i).get("et_fecha_ficha_bancaria"));
+
+                                invoice_list = new ArrayList<InvoiceDetails>();
+
+                                for (int i = 0; i < arrayfacturas.size(); i++) {
+                                    if (arrayfacturas.get(i).get("selected").equals("true")) {
+                                        InvoiceDetails invoice1 = new InvoiceDetails();
+                                        //invoice1 = invoice_list1.get(i);
+                                        invoice1.setDocumento(arrayfacturas.get(i).get("Documento"));
+                                        invoice1.setCuenta(arrayfacturas.get(i).get("Cuenta"));
+                                        invoice1.setFecha_Documento(arrayfacturas.get(i).get("Fecha_Documento"));
+                                        invoice1.setFecha_Vencimiento(arrayfacturas.get(i).get("Fecha_Vencimiento"));
+                                        invoice1.setImporte(arrayfacturas.get(i).get("Importe"));
+                                        invoice1.setSaldo(arrayfacturas.get(i).get("Saldo"));
+                                        invoice1.setDays(arrayfacturas.get(i).get("days"));
+                                        invoice1.setSelected(arrayfacturas.get(i).get("selected"));
+                                        invoice1.setAdeudo_cubrir(arrayfacturas.get(i).get("adeudo_cubrir"));
+                                        invoice1.setPressed_again(arrayfacturas.get(i).get("pressed_again"));
+                                        if (arrayfacturas.get(i).get("bandera").equals("2")) {
+                                            invoice1.setSp_seleccion_banco(arrayfacturas.get(i).get("sp_seleccion_banco"));
+                                            invoice1.setEt_num_cheque(arrayfacturas.get(i).get("et_num_cheque"));
+                                            invoice1.setEt_fecha_cheque(arrayfacturas.get(i).get("et_fecha_cheque"));
+
+                                        } else if (arrayfacturas.get(i).get("bandera").equals("3")) {
+                                            invoice1.setSp_num_nota_credito(arrayfacturas.get(i).get("sp_num_nota_credito"));
+                                            invoice1.setEt_monto_nota_credito(arrayfacturas.get(i).get("et_monto_nota_credito"));
+                                            invoice1.setEt_fecha_nota_credito(arrayfacturas.get(i).get("et_fecha_nota_credito"));
+
+                                        } else if (arrayfacturas.get(i).get("bandera").equals("4")) {
+                                            invoice1.setEt_num_transferencia_bancaria(arrayfacturas.get(i).get("et_num_transferencia_bancaria"));
+                                            invoice1.setEt_fecha_transferencia_bancaria(arrayfacturas.get(i).get("et_fecha_transferencia_bancaria"));
+
+                                        } else if (arrayfacturas.get(i).get("bandera").equals("5")) {
+                                            invoice1.setEt_num_ficha_pago(arrayfacturas.get(i).get("et_num_ficha_pago"));
+                                            invoice1.setEt_fecha_ficha_pago(arrayfacturas.get(i).get("et_fecha_ficha_pago"));
+
+                                        } else if (arrayfacturas.get(i).get("bandera").equals("6")) {
+                                            invoice1.setEt_num_ficha_bancaria(arrayfacturas.get(i).get("et_num_ficha_bancaria"));
+                                            invoice1.setEt_fecha_ficha_bancaria(arrayfacturas.get(i).get("et_fecha_ficha_bancaria"));
+                                        }
+
+                                        invoice1.setTipo_pago(arrayfacturas.get(i).get("tipo_pago"));
+                                        invoice1.setRestantetotal(txt_total_pendiente.getText().toString());
+                                        invoice1.setMontototal(txt_total_cubrir.getText().toString());
+                                        invoice1.setPago_parcial(txtpago_parcial.getText().toString());
+                                        invoice1.setPago_total(txtpago_total.getText().toString());
+                                        invoice1.setDeudatotal(txt_total_importe.getText().toString());
+                                        invoice_list.add(invoice1);
                                     }
-                                    dic.put("tipo_pago", arrayseleccionpagos.get(i).get("tipo_pago"));
-                                    dic.put("bandera", arrayseleccionpagos.get(i).get("bandera"));
-                                    dic.put("monto_aplicar", txt_total_cubrir.getText().toString());
-                                    arrayseleccionpagos = new ArrayList<Dictionary<String, String> >();
-                                    arrayseleccionpagosfinal.add(dic);
-                                    Log.i("arrayseleccionpagos1", "arrayseleccionpagos1 = " + arrayseleccionpagosfinal.toString());
                                 }
-                                dialog.cancel();
+                                openDialog();
                             }
                         })
-                        .setNegativeButton(getString(R.string.confirmar_no), new DialogInterface.OnClickListener() {
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                Dictionary<String, String> dic = new Hashtable<String, String>();
-                                for(int i=0;i<arrayseleccionpagos.size();i++){
-                                    if(arrayseleccionpagos.get(i).get("bandera").equals("2")){
-                                        dic.put("sp_seleccion_banco", arrayseleccionpagos.get(i).get("sp_seleccion_banco"));
-                                        dic.put("et_num_cheque", arrayseleccionpagos.get(i).get("et_num_cheque"));
-                                        dic.put("et_fecha_cheque", arrayseleccionpagos.get(i).get("et_fecha_cheque"));
-                                    }else if(arrayseleccionpagos.get(i).get("bandera").equals("3")){
-                                        dic.put("sp_num_nota_credito", arrayseleccionpagos.get(i).get("sp_num_nota_credito"));
-                                        dic.put("et_monto_nota_credito", arrayseleccionpagos.get(i).get("et_monto_nota_credito"));
-                                        dic.put("et_fecha_nota_credito", arrayseleccionpagos.get(i).get("et_fecha_nota_credito"));
-                                    }else if(arrayseleccionpagos.get(i).get("bandera").equals("4")){
-                                        dic.put("et_num_transferencia_bancaria", arrayseleccionpagos.get(i).get("et_num_transferencia_bancaria"));
-                                        dic.put("et_fecha_transferencia_bancaria", arrayseleccionpagos.get(i).get("et_fecha_transferencia_bancaria"));
-                                    }else if(arrayseleccionpagos.get(i).get("bandera").equals("5")){
-                                        dic.put("et_num_ficha_pago", arrayseleccionpagos.get(i).get("et_num_ficha_pago"));
-                                        dic.put("et_fecha_ficha_pago", arrayseleccionpagos.get(i).get("et_fecha_ficha_pago"));
-                                    }else if(arrayseleccionpagos.get(i).get("bandera").equals("6")){
-                                        dic.put("et_num_ficha_bancaria", arrayseleccionpagos.get(i).get("et_num_ficha_bancaria"));
-                                        dic.put("et_fecha_ficha_bancaria", arrayseleccionpagos.get(i).get("et_fecha_ficha_bancaria"));
+
+                                invoice_list = new ArrayList<InvoiceDetails>();
+
+                                for (int i = 0; i < arrayfacturas.size(); i++) {
+                                    if (arrayfacturas.get(i).get("selected").equals("true")) {
+                                        InvoiceDetails invoice1 = new InvoiceDetails();
+                                        invoice1.setDocumento(arrayfacturas.get(i).get("Documento"));
+                                        invoice1.setCuenta(arrayfacturas.get(i).get("Cuenta"));
+                                        invoice1.setFecha_Documento(arrayfacturas.get(i).get("Fecha_Documento"));
+                                        invoice1.setFecha_Vencimiento(arrayfacturas.get(i).get("Fecha_Vencimiento"));
+                                        invoice1.setImporte(arrayfacturas.get(i).get("Importe"));
+                                        invoice1.setSaldo(arrayfacturas.get(i).get("Saldo"));
+                                        invoice1.setDays(arrayfacturas.get(i).get("days"));
+                                        invoice1.setSelected(arrayfacturas.get(i).get("selected"));
+                                        invoice1.setAdeudo_cubrir(arrayfacturas.get(i).get("adeudo_cubrir"));
+                                        invoice1.setPressed_again(arrayfacturas.get(i).get("pressed_again"));
+                                        if (arrayfacturas.get(i).get("bandera").equals("2")) {
+                                            invoice1.setSp_seleccion_banco(arrayfacturas.get(i).get("sp_seleccion_banco"));
+                                            invoice1.setEt_num_cheque(arrayfacturas.get(i).get("et_num_cheque"));
+                                            invoice1.setEt_fecha_cheque(arrayfacturas.get(i).get("et_fecha_cheque"));
+
+                                        } else if (arrayfacturas.get(i).get("bandera").equals("3")) {
+                                            invoice1.setSp_num_nota_credito(arrayfacturas.get(i).get("sp_num_nota_credito"));
+                                            invoice1.setEt_monto_nota_credito(arrayfacturas.get(i).get("et_monto_nota_credito"));
+                                            invoice1.setEt_fecha_nota_credito(arrayfacturas.get(i).get("et_fecha_nota_credito"));
+
+                                        } else if (arrayfacturas.get(i).get("bandera").equals("4")) {
+                                            invoice1.setEt_num_transferencia_bancaria(arrayfacturas.get(i).get("et_num_transferencia_bancaria"));
+                                            invoice1.setEt_fecha_transferencia_bancaria(arrayfacturas.get(i).get("et_fecha_transferencia_bancaria"));
+
+                                        } else if (arrayfacturas.get(i).get("bandera").equals("5")) {
+                                            invoice1.setEt_num_ficha_pago(arrayfacturas.get(i).get("et_num_ficha_pago"));
+                                            invoice1.setEt_fecha_ficha_pago(arrayfacturas.get(i).get("et_fecha_ficha_pago"));
+
+                                        } else if (arrayfacturas.get(i).get("bandera").equals("6")) {
+                                            invoice1.setEt_num_ficha_bancaria(arrayfacturas.get(i).get("et_num_ficha_bancaria"));
+                                            invoice1.setEt_fecha_ficha_bancaria(arrayfacturas.get(i).get("et_fecha_ficha_bancaria"));
+                                        }
+
+                                        invoice1.setTipo_pago(arrayfacturas.get(i).get("tipo_pago"));
+                                        invoice1.setRestantetotal(txt_total_pendiente.getText().toString());
+                                        invoice1.setMontototal(txt_total_cubrir.getText().toString());
+                                        invoice1.setPago_parcial(txtpago_parcial.getText().toString());
+                                        invoice1.setPago_total(txtpago_total.getText().toString());
+                                        invoice1.setDeudatotal(txt_total_importe.getText().toString());
+                                        invoice_list.add(invoice1);
                                     }
-                                    dic.put("tipo_pago", arrayseleccionpagos.get(i).get("tipo_pago"));
-                                    dic.put("bandera", arrayseleccionpagos.get(i).get("bandera"));
-                                    dic.put("monto_aplicar", txt_total_cubrir.getText().toString());
-                                    arrayseleccionpagos = new ArrayList<Dictionary<String, String> >();
-                                    arrayseleccionpagosfinal.add(dic);
-                                    Log.i("arrayseleccionpagos", "arrayseleccionpagos = " + arrayseleccionpagosfinal.toString());
                                 }
 
-                                Intent intento = new Intent(Cobranza.this,CobranzaDetallePago.class);
-                                intento.putExtra("pharmacy", txt_cliente.getText().toString());
-                                intento.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intento);
+                                flag_next = 1;
                                 dialog.cancel();
+
+
                             }
                         });
                 AlertDialog alertDialog = builder.create();
                 alertDialog.show();
+                *//*}else{
+                    Toast toast = Toast.makeText(Cobranza.this, "Debe seleccionar una factura",Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
+                    toast.show();
+                }*//*
             }
-        });
+        });*/
 
-        search.setOnClickListener(new View.OnClickListener() {
+        /*search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (swicht_search == 0) {
+                    UtilsCobranza.showSoftKeyboard(editsearch, Cobranza.this);
                     relativebuscar.setVisibility(View.VISIBLE);
                     btn_tipo_pago.setVisibility(View.GONE);
                     swicht_search = 1;
-                }else{
+                } else {
+                    UtilsCobranza.hideSoftKeyboard(Cobranza.this);
                     relativebuscar.setVisibility(View.GONE);
                     btn_tipo_pago.setVisibility(View.VISIBLE);
                     swicht_search = 0;
@@ -221,30 +281,30 @@ public class Cobranza extends Activity {
             }
         });*/
 
-        Bundle extras = getIntent().getExtras();
-        nombre_cliente = extras.getString("pharmacy");
-        txt_cliente.setText(nombre_cliente);
+        db = new DataBase(Cobranza.this);
+        agente = db.execSelect(db.QUERY_CLAVE_AGENT);
 
         new AsynkCobranza().execute();
     }
 
+
     TextWatcher watcher1 = new TextWatcher() {
-        public void beforeTextChanged(CharSequence s, int start, int count, int after){
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
         }
 
-        public void onTextChanged(CharSequence s, int start, int before, int count)
-        {
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
             adaptercob.getFilter().filter(s.toString());
         }
 
-        public void afterTextChanged(Editable s){
+        public void afterTextChanged(Editable s) {
         }
     };
 
 
     public class AsynkCobranza extends AsyncTask<Void, Void, Integer> {
 
-        int flag=0, dias=0;
+        int flag = 0, dias = 0;
+        ArrayList<Dictionary<String, String>> arraygetfacturas = new ArrayList<Dictionary<String, String>>();
 
         protected void onPreExecute() {
             dialogo = ProgressDialog.show(Cobranza.this, "Espere un momento", "Cargando...");
@@ -252,12 +312,63 @@ public class Cobranza extends Activity {
 
         @Override
         protected Integer doInBackground(Void... params) {
-            if (UtilsCobranza.isNetwork(getApplicationContext())){
+
+            if (!(agente.equals("") || agente.equals(null) || agente.equals("null"))) {
+
+                arraygetfacturas = db.execSelectArrayList(db.QUERY_GET_FACTURAS + " '" + agente + "') ORDER BY FechaVencimiento");
+
+                for (int i = 0; i < arraygetfacturas.size(); i++) {
+                    Dictionary<String, String> dic = new Hashtable<String, String>();
+
+                    dic.put("Documento", arraygetfacturas.get(i).get("NumeroFactura"));
+                    dic.put("Cuenta", arraygetfacturas.get(i).get("id_cliente"));
+                    dic.put("Fecha_Documento", arraygetfacturas.get(i).get("FechaFactura"));
+                    dic.put("Fecha_Vencimiento", arraygetfacturas.get(i).get("FechaVencimiento"));
+                    dic.put("Importe", arraygetfacturas.get(i).get("ValorOriginal"));
+                    dic.put("Saldo", arraygetfacturas.get(i).get("SaldoDocRemanente"));
+                    dic.put("days", arraygetfacturas.get(i).get("DiasAtraso"));
+                    dic.put("selected", "false");
+                    dic.put("adeudo_cubrir", "0");
+                    dic.put("NewSaldo", arraygetfacturas.get(i).get("SaldoDocRemanente"));
+                    dic.put("pressed_again", "0");
+
+                    dic.put("bandera","");
+                    dic.put("tipo_pago","");
+                    dic.put("Restantetotal","");
+                    dic.put("Montototal","");
+                    dic.put("Pago_parcial","");
+                    dic.put("Pago_total","");
+                    dic.put("Deudatotal","");
+                    dic.put("sp_seleccion_banco","");
+                    dic.put("et_num_cheque","");
+                    dic.put("et_fecha_cheque","");
+
+                    dic.put("sp_num_nota_credito", "");
+                    dic.put("et_monto_nota_credito", "");
+                    dic.put("et_fecha_nota_credito", "");
+
+                    dic.put("et_num_transferencia_bancaria", "");
+                    dic.put("et_fecha_transferencia_bancaria", "");
+
+                    dic.put("et_num_ficha_pago", "");
+                    dic.put("et_fecha_ficha_pago", "");
+
+                    dic.put("et_num_ficha_bancaria", "");
+                    dic.put("et_fecha_ficha_bancaria", "");
+
+                    arrayfacturas.add(dic);
+                }
+
+                total_pagos = Integer.parseInt(db.execSelect(db.QUERY_GET_COUNT_ROWS + " '" + agente + "')"));
+
+                flag = 2;
+            } else {
+                flag = 1;
+            }
+
+            /*if (UtilsCobranza.isNetwork(getApplicationContext())){
 
                 WebServices ws = new WebServices();
-                /*DataBase db = new DataBase(Cobranza.this);
-                String agentes = db.execSelect(db.QUERY_CLIENT);
-                Log.i("agentes","agentes "+agentes);*/
                 String agente = "YPC07";
                 String jsonInvoices;
                 int tries = 0;
@@ -309,7 +420,7 @@ public class Cobranza extends Activity {
 
                             //txt_total_importe
 
-                            /*String fechav = new String(Fecha_Vencimiento);
+                            *//**//*String fechav = new String(Fecha_Vencimiento);
 
                             Calendar cal = Calendar.getInstance();
                             DateTime start = new DateTime(Integer.parseInt(fechav.substring(0, 4)), Integer.parseInt(fechav.substring(4,6)), Integer.parseInt(fechav.substring(6, 8)), 0, 0, 0, 0);
@@ -324,7 +435,7 @@ public class Cobranza extends Activity {
 
                             if(!(dias>=30)){
                                 arrayfacturas.add(dic);
-                            }*/
+                            }*//**//*
                         }
                     }catch (Exception e){
                         Log.d("JSON", "Exception: " + e.getMessage());
@@ -335,7 +446,7 @@ public class Cobranza extends Activity {
                 }
             }else{
                 flag=0;
-            }
+            }*/
             return null;
         }
 
@@ -344,37 +455,37 @@ public class Cobranza extends Activity {
                 dialogo.dismiss();
             }
 
-            if(flag==0){
+            /*if(flag==0){
                 Toast toast = Toast.makeText(Cobranza.this, getString(R.string.sin_internet),Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
                 toast.show();
-            }
+            }*/
 
-            if(flag==1){
-                Toast toast = Toast.makeText(Cobranza.this, getString(R.string.error_usuario),Toast.LENGTH_LONG);
+            if (flag == 1) {
+                Toast toast = Toast.makeText(Cobranza.this, getString(R.string.error_usuario), Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
                 toast.show();
             }
 
-            if(flag==2){
+            if (flag == 2) {
 
-                for(int j=0;j<arrayfacturas.size();j++){
-                    var += (int) Float.parseFloat(arrayfacturas.get(j).get("Importe"));
-                    var2 += (int) Float.parseFloat(arrayfacturas.get(j).get("Saldo"));
-                    /*var1 = var + Float.parseFloat(arrayfacturas.get(j).get("Importe"));
-                    var = var1;
-                    var12 = var2 + Float.parseFloat(arrayfacturas.get(j).get("Saldo"));
-                    var2 = var12;*/
-                }
-                Log.i("var2", "var2 = " + var);
-                Log.i("var3", "var3 = " + var2);
-                txt_total_importe.setText("$" + UtilsCobranza.textdecimal(var + ""));
-                txt_total_pendiente.setText("$" + UtilsCobranza.textdecimal(var2 + ""));
+                db = new DataBase(Cobranza.this);
+                String imp=db.execSelect(db.QUERY_GET_SIZE_IMPORTE_TOTAL + " '" + agente + "')");
+                String impp=db.execSelect(db.QUERY_GET_SIZE_SALDO_TOTAL + " '" + agente + "')");
 
-                txtpago_total.setText("0/"+total_pagos);
-                txtpago_parcial.setText("0/"+total_pagos);
+                if(imp==null)
+                    imp="0";
 
-                adaptercob = new CobranzaAdapter(arrayfacturas,Cobranza.this,bandera);
+                if(impp==null)
+                    impp="0";
+
+                txt_total_importe.setText("$" + imp + "");
+                txt_total_pendiente.setText("$" + impp+ "");
+
+                txtpago_total.setText("0/" + total_pagos);
+                txtpago_parcial.setText("0/" + total_pagos);
+
+                adaptercob = new CobranzaAdapter(arrayfacturas, Cobranza.this, bandera);
                 lv_facturas.setAdapter(adaptercob);
 
                 /*lv_facturas.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -383,101 +494,178 @@ public class Cobranza extends Activity {
                         if (bandera != 0) {
                             final Dictionary<String, String> dic = (Dictionary<String, String>) adaptercob.getItem(position);
 
-                            if(dic.get("pressed_again").equals("0")){
-                                AlertDialog.Builder builder = new AlertDialog.Builder(Cobranza.this);
-                                builder.setMessage(R.string.cubrir_adeudo) //quitar_cubrir_adeudo
-                                        .setPositiveButton(R.string.cubrir_adeudo_si, new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
+                            if (dic.get("pressed_again").equals("0")) {
+                                if (!(dic.get("Importe").equals(dic.get("Saldo")))) {
 
-                                                dic.put("Saldo", "0");
-                                                dic.put("adeudo_cubrir", dic.get("Importe"));
-                                                dic.put("selected", "true");
-                                                dic.put("pressed_again", "1");
+                                    Float importe_adeudo_acubiri = Float.parseFloat(dic.get("Importe").replace("$", "").replace(",", ""))
+                                            - Float.parseFloat(dic.get("Saldo").replace("$", "").replace(",", ""));
+                                    dic.put("Saldo", dic.get("NewSaldo"));
+                                    dic.put("adeudo_cubrir", importe_adeudo_acubiri + "");
+                                    dic.put("selected", "true");
+                                    dic.put("pressed_again", "1");
+                                    for (int i = 0; i < arrayseleccionpagos.size(); i++) {
+                                        if (arrayseleccionpagos.get(i).get("bandera").equals("2")) {
+                                            dic.put("sp_seleccion_banco", arrayseleccionpagos.get(i).get("sp_seleccion_banco"));
+                                            dic.put("et_num_cheque", arrayseleccionpagos.get(i).get("et_num_cheque"));
+                                            dic.put("et_fecha_cheque", arrayseleccionpagos.get(i).get("et_fecha_cheque"));
+                                        } else if (arrayseleccionpagos.get(i).get("bandera").equals("3")) {
+                                            dic.put("sp_num_nota_credito", arrayseleccionpagos.get(i).get("sp_num_nota_credito"));
+                                            dic.put("et_monto_nota_credito", arrayseleccionpagos.get(i).get("et_monto_nota_credito"));
+                                            dic.put("et_fecha_nota_credito", arrayseleccionpagos.get(i).get("et_fecha_nota_credito"));
+                                        } else if (arrayseleccionpagos.get(i).get("bandera").equals("4")) {
+                                            dic.put("et_num_transferencia_bancaria", arrayseleccionpagos.get(i).get("et_num_transferencia_bancaria"));
+                                            dic.put("et_fecha_transferencia_bancaria", arrayseleccionpagos.get(i).get("et_fecha_transferencia_bancaria"));
+                                        } else if (arrayseleccionpagos.get(i).get("bandera").equals("5")) {
+                                            dic.put("et_num_ficha_pago", arrayseleccionpagos.get(i).get("et_num_ficha_pago"));
+                                            dic.put("et_fecha_ficha_pago", arrayseleccionpagos.get(i).get("et_fecha_ficha_pago"));
+                                        } else if (arrayseleccionpagos.get(i).get("bandera").equals("6")) {
+                                            dic.put("et_num_ficha_bancaria", arrayseleccionpagos.get(i).get("et_num_ficha_bancaria"));
+                                            dic.put("et_fecha_ficha_bancaria", arrayseleccionpagos.get(i).get("et_fecha_ficha_bancaria"));
+                                        }
+                                        dic.put("tipo_pago", arrayseleccionpagos.get(i).get("tipo_pago"));
+                                        dic.put("bandera", arrayseleccionpagos.get(i).get("bandera"));
+                                        dic.put("monto_aplicar", txt_total_cubrir.getText().toString());
+                                    }
+                                adaptercob.notifyDataSetChanged();
 
-                                                adaptercob.notifyDataSetChanged();
+                                Float pendiente = Float.parseFloat(txt_total_pendiente.getText().toString().replace("$", "").replace(",", ""))
+                                        - Float.parseFloat(dic.get("adeudo_cubrir"));
+                                Float acubrir = Float.parseFloat(txt_total_cubrir.getText().toString().replace("$", "").replace(",", ""))
+                                        + Float.parseFloat(dic.get("adeudo_cubrir"));
 
-                                                Float pendiente = Float.parseFloat(txt_total_pendiente.getText().toString().replace("$", "").replace(",", ""))
-                                                        - Float.parseFloat(dic.get("Importe"));
-                                                Float acubrir = Float.parseFloat(txt_total_cubrir.getText().toString().replace("$", "").replace(",", ""))
-                                                        + Float.parseFloat(dic.get("Importe"));
+                                txt_total_pendiente.setText("$" + UtilsCobranza.textdecimal(pendiente + ""));
+                                txt_total_cubrir.setText("$" + UtilsCobranza.textdecimal(acubrir + ""));
 
-                                                txt_total_pendiente.setText("$" + UtilsCobranza.textdecimal(pendiente + ""));
-                                                txt_total_cubrir.setText("$" + UtilsCobranza.textdecimal(acubrir + ""));
+                            } else {
+                                dic.put("Saldo", "0");
+                                dic.put("adeudo_cubrir", dic.get("Importe"));
+                                dic.put("selected", "true");
+                                dic.put("pressed_again", "1");
+                                    for (int i = 0; i < arrayseleccionpagos.size(); i++) {
+                                        if (arrayseleccionpagos.get(i).get("bandera").equals("2")) {
+                                            dic.put("sp_seleccion_banco", arrayseleccionpagos.get(i).get("sp_seleccion_banco"));
+                                            dic.put("et_num_cheque", arrayseleccionpagos.get(i).get("et_num_cheque"));
+                                            dic.put("et_fecha_cheque", arrayseleccionpagos.get(i).get("et_fecha_cheque"));
+                                        } else if (arrayseleccionpagos.get(i).get("bandera").equals("3")) {
+                                            dic.put("sp_num_nota_credito", arrayseleccionpagos.get(i).get("sp_num_nota_credito"));
+                                            dic.put("et_monto_nota_credito", arrayseleccionpagos.get(i).get("et_monto_nota_credito"));
+                                            dic.put("et_fecha_nota_credito", arrayseleccionpagos.get(i).get("et_fecha_nota_credito"));
+                                        } else if (arrayseleccionpagos.get(i).get("bandera").equals("4")) {
+                                            dic.put("et_num_transferencia_bancaria", arrayseleccionpagos.get(i).get("et_num_transferencia_bancaria"));
+                                            dic.put("et_fecha_transferencia_bancaria", arrayseleccionpagos.get(i).get("et_fecha_transferencia_bancaria"));
+                                        } else if (arrayseleccionpagos.get(i).get("bandera").equals("5")) {
+                                            dic.put("et_num_ficha_pago", arrayseleccionpagos.get(i).get("et_num_ficha_pago"));
+                                            dic.put("et_fecha_ficha_pago", arrayseleccionpagos.get(i).get("et_fecha_ficha_pago"));
+                                        } else if (arrayseleccionpagos.get(i).get("bandera").equals("6")) {
+                                            dic.put("et_num_ficha_bancaria", arrayseleccionpagos.get(i).get("et_num_ficha_bancaria"));
+                                            dic.put("et_fecha_ficha_bancaria", arrayseleccionpagos.get(i).get("et_fecha_ficha_bancaria"));
+                                        }
+                                        dic.put("tipo_pago", arrayseleccionpagos.get(i).get("tipo_pago"));
+                                        dic.put("bandera", arrayseleccionpagos.get(i).get("bandera"));
+                                        dic.put("monto_aplicar", txt_total_cubrir.getText().toString());
+                                    }
 
+                                adaptercob.notifyDataSetChanged();
 
-                                                if (dic.get("selected").compareTo("true") == 0) {
-                                                    Log.i("entro al if", "entro al if");
-                                                    pagoshechos++;
-                                                }
-                                                Log.i("pagoshechos", " = " + pagoshechos);
-                                                txtpago_total.setText(pagoshechos + "/" + total_pagos);
+                                Float pendiente = Float.parseFloat(txt_total_pendiente.getText().toString().replace("$", "").replace(",", ""))
+                                        - Float.parseFloat(dic.get("Importe"));
+                                Float acubrir = Float.parseFloat(txt_total_cubrir.getText().toString().replace("$", "").replace(",", ""))
+                                        + Float.parseFloat(dic.get("Importe"));
 
-                                                dialog.cancel();
+                                txt_total_pendiente.setText("$" + UtilsCobranza.textdecimal(pendiente + ""));
+                                txt_total_cubrir.setText("$" + UtilsCobranza.textdecimal(acubrir + ""));
 
-                                                btn_confirmar.setEnabled(true);
-                                            }
-                                        })
-                                        .setNegativeButton(R.string.cubrir_adeudo_no, new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                dialog.cancel();
-                                            }
-                                        });
-                                AlertDialog alertDialog = builder.create();
-                                alertDialog.show();
-
-                            }else{
-
-                                AlertDialog.Builder builder = new AlertDialog.Builder(Cobranza.this);
-                                builder.setMessage(R.string.quitar_cubrir_adeudo)
-                                        .setPositiveButton(R.string.cubrir_adeudo_si, new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                Log.i("Saldo"," = "+dic.get("NewSaldo"));
-                                                dic.put("Saldo", dic.get("NewSaldo"));
-                                                dic.put("adeudo_cubrir", "0");
-                                                dic.put("selected", "false");
-                                                dic.put("pressed_again", "0");
-
-                                                adaptercob.notifyDataSetChanged();
-
-                                                Float pendiente = Float.parseFloat(txt_total_pendiente.getText().toString().replace("$", "").replace(",", ""))
-                                                        + Float.parseFloat(dic.get("Importe"));
-                                                Float acubrir = Float.parseFloat(txt_total_cubrir.getText().toString().replace("$", "").replace(",", ""))
-                                                        - Float.parseFloat(dic.get("Importe"));
-
-                                                txt_total_pendiente.setText("$" + UtilsCobranza.textdecimal(pendiente + ""));
-                                                txt_total_cubrir.setText("$" + UtilsCobranza.textdecimal(acubrir + ""));
-
-
-                                                if (dic.get("selected").compareTo("false") == 0) {
-                                                    Log.i("entro al if", "entro al if");
-                                                    pagoshechos--;
-                                                }
-                                                Log.i("pagoshechos", " = " + pagoshechos);
-                                                txtpago_total.setText(pagoshechos + "/" + total_pagos);
-
-                                                dialog.cancel();
-                                            }
-                                        })
-                                        .setNegativeButton(R.string.cubrir_adeudo_no, new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                dialog.cancel();
-                                            }
-                                        });
-                                AlertDialog alertDialog = builder.create();
-                                alertDialog.show();
                             }
+
+                            if (dic.get("selected").compareTo("true") == 0) {
+                                pagoshechos++;
+                            }
+
+                            txtpago_total.setText(pagoshechos + "/" + total_pagos);
+
                         } else {
-                            Toast toast = Toast.makeText(Cobranza.this, R.string.sinseleccionar_dialog, Toast.LENGTH_LONG);
-                            toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
-                            toast.show();
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(Cobranza.this);
+                            builder.setMessage(R.string.quitar_cubrir_adeudo)
+                                    .setPositiveButton(R.string.cubrir_adeudo_si, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+
+                                            Dictionary<String, String> dic = (Dictionary<String, String>) adaptercob.getItem(position);
+
+                                            Float pendiente = Float.parseFloat(txt_total_pendiente.getText().toString().replace("$", "").replace(",", ""))
+                                                    + Float.parseFloat(dic.get("adeudo_cubrir"));
+                                            Float acubrir = Float.parseFloat(txt_total_cubrir.getText().toString().replace("$", "").replace(",", ""))
+                                                    - Float.parseFloat(dic.get("adeudo_cubrir"));
+
+                                            txt_total_pendiente.setText("$" + UtilsCobranza.textdecimal(pendiente + ""));
+                                            txt_total_cubrir.setText("$" + UtilsCobranza.textdecimal(acubrir + ""));
+
+                                            String s = dic.get("adeudo_cubrir");
+
+                                            dic.put("Saldo", dic.get("NewSaldo"));
+                                            dic.put("adeudo_cubrir", "0");
+                                            dic.put("selected", "false");
+                                            dic.put("pressed_again", "0");
+
+                                            dic.put("sp_seleccion_banco", "0");
+                                            dic.put("et_num_cheque", "0");
+                                            dic.put("et_fecha_cheque", "0");
+                                            dic.put("sp_num_nota_credito", "0");
+                                            dic.put("et_monto_nota_credito", "0");
+                                            dic.put("et_fecha_nota_credito", "0");
+                                            dic.put("et_num_transferencia_bancaria", "0");
+                                            dic.put("et_fecha_transferencia_bancaria", "0");
+                                            dic.put("et_num_ficha_pago", "0");
+                                            dic.put("et_fecha_ficha_pago", "0");
+                                            dic.put("et_num_ficha_bancaria", "0");
+                                            dic.put("et_fecha_ficha_bancaria", "0");
+                                            dic.put("tipo_pago", "0");
+                                            dic.put("bandera", "0");
+                                            dic.put("monto_aplicar", "0");
+
+                                            adaptercob.notifyDataSetChanged();
+
+                                            float fadeudoc = Float.parseFloat(s);
+                                            float fsaldo = Float.parseFloat(dic.get("NewSaldo"));
+
+                                            if (dic.get("selected").compareTo("false") == 0) {
+                                                if (Math.abs(fadeudoc) == fsaldo) {
+                                                    pagoshechos--;
+                                                    txtpago_total.setText(pagoshechos + "/" + total_pagos);
+                                                } else {
+                                                    pagoshechosdialog--;
+                                                    txtpago_parcial.setText(pagoshechosdialog + "/" + total_pagos);
+                                                }
+                                            }
+
+                                            dialog.cancel();
+                                        }
+                                    })
+                                    .setNegativeButton(R.string.cubrir_adeudo_no, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                        }
+                                    });
+                            AlertDialog alertDialog = builder.create();
+                            alertDialog.show();
                         }
-                        return true;
                     }
-                });
+
+                    else
+
+                    {
+                        Toast toast = Toast.makeText(Cobranza.this, R.string.sinseleccionar_dialog, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
+                        toast.show();
+                    }
+
+                    return true;
+                }
+            });
 
                 lv_facturas.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
 
                         if (bandera == 0) {
                             Toast toast = Toast.makeText(Cobranza.this, R.string.sinseleccionar_dialog, Toast.LENGTH_LONG);
@@ -496,46 +684,65 @@ public class Cobranza extends Activity {
                                 days = Integer.parseInt(dic.get("days"));
                             }
 
-                            if(dic.get("pressed_again").equals("0")){
-                            openDialogEditarMonto(dic.get("Importe"),
-                                    fechad.substring(0, 4) + "/" + fechad.substring(4, 6) + "/" + fechad.substring(6, 8),
-                                    fechav.substring(0, 4) + "/" + fechav.substring(4, 6) + "/" + fechav.substring(6, 8),
-                                    days, position);
-                            }else{
+                            if (dic.get("pressed_again").equals("0")) {
+                                openDialogEditarMonto(dic.get("Importe"),
+                                        fechad.substring(0, 4) + "/" + fechad.substring(4, 6) + "/" + fechad.substring(6, 8),
+                                        fechav.substring(0, 4) + "/" + fechav.substring(4, 6) + "/" + fechav.substring(6, 8),
+                                        days, position);
+                            } else {
 
                                 AlertDialog.Builder builder = new AlertDialog.Builder(Cobranza.this);
                                 builder.setMessage(R.string.quitar_cubrir_adeudo)
                                         .setPositiveButton(R.string.cubrir_adeudo_si, new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
-                                                Log.i("Saldo", " = " + dic.get("NewSaldo"));
+
+                                                Dictionary<String, String> dic = (Dictionary<String, String>) adaptercob.getItem(position);
+
+                                                Float pendiente = Float.parseFloat(txt_total_pendiente.getText().toString().replace("$", "").replace(",", ""))
+                                                        + Float.parseFloat(dic.get("adeudo_cubrir"));
+                                                Float acubrir = Float.parseFloat(txt_total_cubrir.getText().toString().replace("$", "").replace(",", ""))
+                                                        - Float.parseFloat(dic.get("adeudo_cubrir"));
+
+                                                txt_total_pendiente.setText("$" + UtilsCobranza.textdecimal(pendiente + ""));
+                                                txt_total_cubrir.setText("$" + UtilsCobranza.textdecimal(acubrir + ""));
+
+                                                String s = dic.get("adeudo_cubrir");
+
                                                 dic.put("Saldo", dic.get("NewSaldo"));
                                                 dic.put("adeudo_cubrir", "0");
                                                 dic.put("selected", "false");
                                                 dic.put("pressed_again", "0");
 
+                                                dic.put("sp_seleccion_banco", "0");
+                                                dic.put("et_num_cheque", "0");
+                                                dic.put("et_fecha_cheque", "0");
+                                                dic.put("sp_num_nota_credito", "0");
+                                                dic.put("et_monto_nota_credito", "0");
+                                                dic.put("et_fecha_nota_credito", "0");
+                                                dic.put("et_num_transferencia_bancaria", "0");
+                                                dic.put("et_fecha_transferencia_bancaria", "0");
+                                                dic.put("et_num_ficha_pago", "0");
+                                                dic.put("et_fecha_ficha_pago", "0");
+                                                dic.put("et_num_ficha_bancaria", "0");
+                                                dic.put("et_fecha_ficha_bancaria", "0");
+                                                dic.put("tipo_pago", "0");
+                                                dic.put("bandera", "0");
+                                                dic.put("monto_aplicar", "0");
+
                                                 adaptercob.notifyDataSetChanged();
 
-                                                Float pendiente = Float.parseFloat(txt_total_pendiente.getText().toString().replace("$", "").replace(",", ""))
-                                                        + Float.parseFloat(dic.get("Importe"));
-                                                Float acubrir = Float.parseFloat(txt_total_cubrir.getText().toString().replace("$", "").replace(",", ""))
-                                                        - Float.parseFloat(dic.get("Importe"));
-
-                                                txt_total_pendiente.setText("$" + UtilsCobranza.textdecimal(pendiente + ""));
-                                                txt_total_cubrir.setText("$" + UtilsCobranza.textdecimal(acubrir + ""));
-
+                                                float fadeudoc = Float.parseFloat(s);
+                                                float fsaldo = Float.parseFloat(dic.get("NewSaldo"));
 
                                                 if (dic.get("selected").compareTo("false") == 0) {
-                                                    Log.i("entro al if", "entro al if");
-                                                    pagoshechos--;
+                                                    if (Math.abs(fadeudoc) == fsaldo) {
+                                                        pagoshechos--;
+                                                        txtpago_total.setText(pagoshechos + "/" + total_pagos);
+                                                    } else {
+                                                        pagoshechosdialog--;
+                                                        txtpago_parcial.setText(pagoshechosdialog + "/" + total_pagos);
+                                                    }
                                                 }
-                                                Log.i("pagoshechos", " = " + pagoshechos);
-
-                                                if (dic.get("adeudo_cubrir").equals(dic.get("NewSaldo"))) {
-                                                    txtpago_total.setText(pagoshechos + "/" + total_pagos);
-                                                } else {
-                                                    txtpago_parcial.setText(pagoshechos + "/" + total_pagos);
-                                                }
-
                                                 dialog.cancel();
                                             }
                                         })
@@ -552,10 +759,9 @@ public class Cobranza extends Activity {
                 });*/
             }
         }
-
     }
 
-    public void openDialogEditarMonto(String monto_total, String fechae, String fechacv, int days, final int position){
+    public void openDialogEditarMonto(final String monto_total, String fechae, String fechacv, int days, final int position) {
         final Dialog dialog = new Dialog(Cobranza.this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.cobranza_dialogo_editar_monto);
@@ -573,13 +779,13 @@ public class Cobranza extends Activity {
         btnDevLitePromptAdd5 = (Button) dialog.findViewById(R.id.idDevLitePromptAdd5);
         btnDevLitePromptAdd10 = (Button) dialog.findViewById(R.id.idDevLitePromptAdd10);
 
-        btnDevLitePromptReset0.setOnClickListener( btnsuma_monto_cobranza );
-        btnDevLitePromptAdd1.setOnClickListener( btnsuma_monto_cobranza );
-        btnDevLitePromptAdd2.setOnClickListener( btnsuma_monto_cobranza );
-        btnDevLitePromptAdd5.setOnClickListener( btnsuma_monto_cobranza );
+        btnDevLitePromptReset0.setOnClickListener(btnsuma_monto_cobranza);
+        btnDevLitePromptAdd1.setOnClickListener(btnsuma_monto_cobranza);
+        btnDevLitePromptAdd2.setOnClickListener(btnsuma_monto_cobranza);
+        btnDevLitePromptAdd5.setOnClickListener(btnsuma_monto_cobranza);
         btnDevLitePromptAdd10.setOnClickListener(btnsuma_monto_cobranza);
 
-        txt_monto_total.setText("$" +monto_total);
+        txt_monto_total.setText("$" + monto_total);
         txtfecha_e.setText(fechae);
         txtfecha_v.setText(fechacv);
         txtdias_f.setText(days + " " + Cobranza.this.getString(R.string.dias_adapter));
@@ -590,40 +796,67 @@ public class Cobranza extends Activity {
                 if (et_monto_aplicar.getText().toString().equals("")) {
                     et_monto_aplicar.setError("Debe agregar un monto a aplicar");
                 } else {
-                    monto_aplicar_cobranzaadapter = et_monto_aplicar.getText().toString();
-
-                    Dictionary<String, String> dic = (Dictionary<String, String>) adaptercob.getItem(position);
-                    float resultsaldo = Float.parseFloat(dic.get("Importe")) - Float.parseFloat(monto_aplicar_cobranzaadapter);
-
-                    dic.put("selected", "true");
-                    dic.put("adeudo_cubrir", monto_aplicar_cobranzaadapter);
-                    dic.put("Saldo", resultsaldo + "");
-                    dic.put("pressed_again", "1");
-                    adaptercob.notifyDataSetChanged();
-
-                    Float pendiente = Float.parseFloat(txt_total_pendiente.getText().toString().replace("$", "").replace(",", ""))
-                            - Float.parseFloat(monto_aplicar_cobranzaadapter);
-                    Float acubrir = Float.parseFloat(txt_total_cubrir.getText().toString().replace("$", "").replace(",", ""))
-                            + Float.parseFloat(monto_aplicar_cobranzaadapter);
-
-                    txt_total_pendiente.setText("$" + UtilsCobranza.textdecimal(pendiente + ""));
-                    txt_total_cubrir.setText("$" + UtilsCobranza.textdecimal(acubrir + ""));
-
-                    if (dic.get("selected").compareTo("true") == 0) {
-                        Log.i("entro al if", "entro al if");
-                        pagoshechos++;
-                    }
-                    Log.i("pagoshechos", " = " + pagoshechos);
-
-                    if (dic.get("adeudo_cubrir").equals(dic.get("Saldo"))) {
-                        txtpago_total.setText(pagoshechos + "/" + total_pagos);
+                    float dmonto_t = Float.parseFloat(monto_total);
+                    float d_monto_a = Float.parseFloat(et_monto_aplicar.getText().toString());
+                    if (Math.abs(d_monto_a) > dmonto_t) {
+                        et_monto_aplicar.setError("El monto a aplicar no debe ser mayor que el monto total de la factura");
                     } else {
-                        txtpago_parcial.setText(pagoshechos + "/" + total_pagos);
+                        monto_aplicar_cobranzaadapter = et_monto_aplicar.getText().toString();
+
+                        Dictionary<String, String> dic = (Dictionary<String, String>) adaptercob.getItem(position);
+                        float resultsaldo = Float.parseFloat(dic.get("Importe")) - Float.parseFloat(monto_aplicar_cobranzaadapter);
+
+                        dic.put("selected", "true");
+                        dic.put("adeudo_cubrir", monto_aplicar_cobranzaadapter);
+                        dic.put("Saldo", resultsaldo + "");
+                        dic.put("pressed_again", "1");
+                        for (int i = 0; i < arrayseleccionpagos.size(); i++) {
+                            if (arrayseleccionpagos.get(i).get("bandera").equals("2")) {
+                                dic.put("sp_seleccion_banco", arrayseleccionpagos.get(i).get("sp_seleccion_banco"));
+                                dic.put("et_num_cheque", arrayseleccionpagos.get(i).get("et_num_cheque"));
+                                dic.put("et_fecha_cheque", arrayseleccionpagos.get(i).get("et_fecha_cheque"));
+                            } else if (arrayseleccionpagos.get(i).get("bandera").equals("3")) {
+                                dic.put("sp_num_nota_credito", arrayseleccionpagos.get(i).get("sp_num_nota_credito"));
+                                dic.put("et_monto_nota_credito", arrayseleccionpagos.get(i).get("et_monto_nota_credito"));
+                                dic.put("et_fecha_nota_credito", arrayseleccionpagos.get(i).get("et_fecha_nota_credito"));
+                            } else if (arrayseleccionpagos.get(i).get("bandera").equals("4")) {
+                                dic.put("et_num_transferencia_bancaria", arrayseleccionpagos.get(i).get("et_num_transferencia_bancaria"));
+                                dic.put("et_fecha_transferencia_bancaria", arrayseleccionpagos.get(i).get("et_fecha_transferencia_bancaria"));
+                            } else if (arrayseleccionpagos.get(i).get("bandera").equals("5")) {
+                                dic.put("et_num_ficha_pago", arrayseleccionpagos.get(i).get("et_num_ficha_pago"));
+                                dic.put("et_fecha_ficha_pago", arrayseleccionpagos.get(i).get("et_fecha_ficha_pago"));
+                            } else if (arrayseleccionpagos.get(i).get("bandera").equals("6")) {
+                                dic.put("et_num_ficha_bancaria", arrayseleccionpagos.get(i).get("et_num_ficha_bancaria"));
+                                dic.put("et_fecha_ficha_bancaria", arrayseleccionpagos.get(i).get("et_fecha_ficha_bancaria"));
+                            }
+                            dic.put("tipo_pago", arrayseleccionpagos.get(i).get("tipo_pago"));
+                            dic.put("bandera", arrayseleccionpagos.get(i).get("bandera"));
+                            dic.put("monto_aplicar", txt_total_cubrir.getText().toString());
+                        }
+                        adaptercob.notifyDataSetChanged();
+
+                        Float pendiente = Float.parseFloat(txt_total_pendiente.getText().toString().replace("$", "").replace(",", ""))
+                                - Float.parseFloat(monto_aplicar_cobranzaadapter);
+                        Float acubrir = Float.parseFloat(txt_total_cubrir.getText().toString().replace("$", "").replace(",", ""))
+                                + Float.parseFloat(monto_aplicar_cobranzaadapter);
+
+                        txt_total_pendiente.setText("$" + UtilsCobranza.textdecimal(pendiente + ""));
+                        txt_total_cubrir.setText("$" + UtilsCobranza.textdecimal(acubrir + ""));
+
+                        float fadeudoc = Float.parseFloat(dic.get("adeudo_cubrir"));
+                        float fsaldo = Float.parseFloat(dic.get("NewSaldo"));
+
+                        if (dic.get("selected").compareTo("true") == 0) {
+                            if (Math.abs(fadeudoc) == fsaldo) {
+                                pagoshechos++;
+                                txtpago_total.setText(pagoshechos + "/" + total_pagos);
+                            } else {
+                                pagoshechosdialog++;
+                                txtpago_parcial.setText(pagoshechosdialog + "/" + total_pagos);
+                            }
+                        }
+                        dialog.dismiss();
                     }
-
-                    dialog.dismiss();
-
-                    btn_confirmar.setEnabled(true);
                 }
             }
         });
@@ -649,25 +882,25 @@ public class Cobranza extends Activity {
         @Override
         public void onClick(View view) {
             String strAmountReturn = et_monto_aplicar.getText().toString().trim();
-            if( strAmountReturn.length() == 0 ) strAmountReturn = "0";
+            if (strAmountReturn.length() == 0) strAmountReturn = "0";
 
-            if (view == btnDevLitePromptReset0){
+            if (view == btnDevLitePromptReset0) {
                 strAmountReturn = "";
-            }else if (view == btnDevLitePromptAdd1){
+            } else if (view == btnDevLitePromptAdd1) {
                 strAmountReturn = (NumeroEnorme.suma(strAmountReturn, "100")).toString();
-            }else if (view == btnDevLitePromptAdd2){
+            } else if (view == btnDevLitePromptAdd2) {
                 strAmountReturn = (NumeroEnorme.suma(strAmountReturn, "500")).toString();
-            }else if (view == btnDevLitePromptAdd5){
+            } else if (view == btnDevLitePromptAdd5) {
                 strAmountReturn = (NumeroEnorme.suma(strAmountReturn, "1000")).toString();
-            }else if (view == btnDevLitePromptAdd10){
+            } else if (view == btnDevLitePromptAdd10) {
                 strAmountReturn = (NumeroEnorme.suma(strAmountReturn, "5000")).toString();
             }
-            et_monto_aplicar.setText( strAmountReturn );
+            et_monto_aplicar.setText(strAmountReturn);
             et_monto_aplicar.setSelection(strAmountReturn.length(), strAmountReturn.length());
         }
     };
 
-    private void openDialog(){
+    private void openDialog() {
         final Dialog dialog = new Dialog(Cobranza.this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.cobranza_dialogo_tipo_pago);
@@ -696,12 +929,141 @@ public class Cobranza extends Activity {
         RadioGroup rdgGrupo = (RadioGroup) dialog.findViewById(R.id.rdgGrupo);
         Button btn_guardar_dialog = (Button) dialog.findViewById(R.id.btn_guardar_dialog);
 
+        et_monto_nota_credito.setEnabled(false);
+        et_fecha_nota_credito.setEnabled(false);
+
+        final TextWatcher tw = new TextWatcher() {
+
+            private String current = "";
+            private String ddmmyyyy = "DDMMYYYY";
+            private Calendar cal = Calendar.getInstance();
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!s.toString().equals(current)) {
+                    String clean = s.toString().replaceAll("[^\\d.]", "");
+                    String cleanC = current.replaceAll("[^\\d.]", "");
+
+                    int cl = clean.length();
+                    int sel = cl;
+                    for (int i = 2; i <= cl && i < 6; i += 2) {
+                        sel++;
+                    }
+                    //Fix for pressing delete next to a forward slash
+                    if (clean.equals(cleanC)) sel--;
+
+                    if (clean.length() < 8) {
+                        clean = clean + ddmmyyyy.substring(clean.length());
+                    } else {
+                        //This part makes sure that when we finish entering numbers
+                        //the date is correct, fixing it otherwise
+                        int day = Integer.parseInt(clean.substring(0, 2));
+                        int mon = Integer.parseInt(clean.substring(2, 4));
+                        int year = Integer.parseInt(clean.substring(4, 8));
+
+                        if (mon > 12) mon = Calendar.getInstance().get(Calendar.MONTH) + 1;
+                        cal.set(Calendar.MONTH, mon - 1);
+                        year = (year < 1900) ? 1900 : (year > 2100) ? Calendar.getInstance().get(Calendar.YEAR) : year;
+                        cal.set(Calendar.YEAR, year);
+                        // ^ first set year for the line below to work correctly
+                        //with leap years - otherwise, date e.g. 29/02/2012
+                        //would be automatically corrected to 28/02/2012
+
+                        day = (day > cal.getActualMaximum(Calendar.DATE)) ? cal.get(Calendar.DATE) : day;
+                        clean = String.format("%02d%02d%02d", day, mon, year);
+                    }
+
+                    clean = String.format("%s/%s/%s", clean.substring(0, 2),
+                            clean.substring(2, 4),
+                            clean.substring(4, 8));
+
+                    sel = sel < 0 ? 0 : sel;
+                    current = clean;
+
+                    if (band[0] == 2) {
+                        et_fecha_cheque.setText(current);
+                        et_fecha_cheque.setSelection(sel < current.length() ? sel : current.length());
+                    } else if (band[0] == 4) {
+                        et_fecha_transferencia_bancaria.setText(current);
+                        et_fecha_transferencia_bancaria.setSelection(sel < current.length() ? sel : current.length());
+                    } else if (band[0] == 5) {
+                        et_fecha_ficha_pago.setText(current);
+                        et_fecha_ficha_pago.setSelection(sel < current.length() ? sel : current.length());
+                    } else if (band[0] == 6) {
+                        et_fecha_ficha_bancaria.setText(current);
+                        et_fecha_ficha_bancaria.setSelection(sel < current.length() ? sel : current.length());
+                    }
+                }
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        };
+
+        et_fecha_cheque.addTextChangedListener(tw);
+        et_fecha_transferencia_bancaria.addTextChangedListener(tw);
+        et_fecha_ficha_pago.addTextChangedListener(tw);
+        et_fecha_ficha_bancaria.addTextChangedListener(tw);
+
         scroll.setScrollbarFadingEnabled(false);
         scroll.setVerticalScrollBarEnabled(true);
         scroll.setVerticalFadingEdgeEnabled(false);
 
+        List<String> list = new ArrayList<String>();
+        List<String> lista = new ArrayList<String>();
+        list = db.execSelectList(db.QUERY_GET_BANK);
+        lista.add(getString(R.string.banco_prompt));
+        list.add(0, lista.get(0));
+
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, list);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sp_seleccion_banco.setAdapter(dataAdapter);
         sp_seleccion_banco.setOnItemSelectedListener(OnCatSpinnerCL);
-        sp_num_nota_credito.setOnItemSelectedListener(OnCatSpinnerCLNotaC);
+
+
+        List<String> list2 = new ArrayList<String>();
+        List<String> list_credito = new ArrayList<String>();
+        list2 = db.execSelectList(db.QUERY_GET_CREDIT_NOTES);
+        list_credito.add(getString(R.string.notac_prompt));
+        list2.add(0, list_credito.get(0));
+
+        ArrayAdapter<String> dataAdapter1 = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, list2);
+        dataAdapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sp_num_nota_credito.setAdapter(dataAdapter1);
+
+        sp_num_nota_credito.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                ((TextView) parent.getChildAt(0)).setTextSize(16);
+
+                if (!parent.getItemAtPosition(position).toString().equals(getString(R.string.notac_prompt))) {
+                    ArrayList<Dictionary<String, String>> list_credito_setData = new ArrayList<Dictionary<String, String>>();
+                    list_credito_setData = db.execSelectArrayList(db.QUERY_GET_CREDIT_NOTES_COMPLETE + "'" + parent.getItemAtPosition(position).toString() + "'");
+
+                    for (int i = 0; i < list_credito_setData.size(); i++) {
+                        et_monto_nota_credito.setText(list_credito_setData.get(i).get("ValorOriginal").replace("-", ""));
+
+                        String fechan = new String(list_credito_setData.get(i).get("FechaNota"));
+                        et_fecha_nota_credito.setText(fechan.substring(0, 4) + "/" + fechan.substring(4, 6) + "/" + fechan.substring(6, 8));
+                    }
+                } else {
+                    et_monto_nota_credito.setText("");
+                    et_fecha_nota_credito.setText("");
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
 
         rdgGrupo.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -765,17 +1127,17 @@ public class Cobranza extends Activity {
                     toast.show();
                     bandera = 1;
                     Dictionary<String, String> dic = new Hashtable<String, String>();
+                    arrayseleccionpagos = new ArrayList<Dictionary<String, String>>();
                     btn_tipo_pago.setText(getString(R.string.efectivo));
                     dic.put("tipo_pago", getString(R.string.efectivo));
-                    dic.put("bandera", bandera+"");
+                    dic.put("bandera", bandera + "");
                     arrayseleccionpagos.add(dic);
 
                     btn_confirmar.setVisibility(View.VISIBLE);
                     btn_confirmar.setText(getString(R.string.conf_efectivo));
-                    btn_confirmar.setEnabled(false);
                     dialog.dismiss();
                 } else if (band[0] == 2) {
-                    if (sp_seleccion_banco.getSelectedItem().equals("") || sp_seleccion_banco.getSelectedItem().equals("-Seleccione un banco-")) {
+                    if (sp_seleccion_banco.getSelectedItem().equals("") || sp_seleccion_banco.getSelectedItem().equals(getString(R.string.banco_prompt))) {
                         Toast toast = Toast.makeText(Cobranza.this, getString(R.string.seleccion_banco_dialog), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
                         toast.show();
@@ -790,9 +1152,6 @@ public class Cobranza extends Activity {
                         toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
                         toast.show();
                     }
-                    /*else if (et_num_cheque.length()< 8||et_num_cheque.length()> 8) {
-                        et_num_cheque.setError(getString(R.string.msg_formato_incorrecto_num_cheque));
-                    }*/
                     else {
                         scheque_banco = sp_seleccion_banco.getSelectedItem().toString();
                         scheque_numero = et_num_cheque.getText().toString();
@@ -800,56 +1159,45 @@ public class Cobranza extends Activity {
                         Toast toast = Toast.makeText(Cobranza.this, getString(R.string.datos_guardar_dialog), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
                         toast.show();
-                        btn_confirmar.setVisibility(View.VISIBLE);
                         btn_confirmar.setText(getString(R.string.conf_cheque));
-                        btn_confirmar.setEnabled(false);
 
                         bandera = 2;
                         Dictionary<String, String> dic = new Hashtable<String, String>();
-                        dic.put("sp_seleccion_banco", sp_seleccion_banco.getSelectedItem()+"");
+                        arrayseleccionpagos = new ArrayList<Dictionary<String, String>>();
+                        dic.put("sp_seleccion_banco", sp_seleccion_banco.getSelectedItem() + "");
                         dic.put("et_num_cheque", et_num_cheque.getText().toString());
                         dic.put("et_fecha_cheque", et_fecha_cheque.getText().toString());
                         dic.put("tipo_pago", getString(R.string.cheque));
                         btn_tipo_pago.setText(getString(R.string.cheque));
-                        dic.put("bandera", bandera+"");
+                        dic.put("bandera", bandera + "");
                         arrayseleccionpagos.add(dic);
 
                         dialog.dismiss();
                     }
                 } else if (band[0] == 3) {
-                    if (sp_num_nota_credito.getSelectedItem().equals("") || sp_num_nota_credito.getSelectedItem().equals("-Seleccione una nota-")) {
+                    if (sp_num_nota_credito.getSelectedItem().equals("") || sp_num_nota_credito.getSelectedItem().equals(getString(R.string.notac_prompt))) {
                         Toast toast = Toast.makeText(Cobranza.this, getString(R.string.seleccion_nota_credito_dialog), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
                         toast.show();
-                    } else if (et_monto_nota_credito.getText().toString().equals("")) {
-                        et_monto_nota_credito.setError(getString(R.string.llenar_campo));
-                        Toast toast = Toast.makeText(Cobranza.this, getString(R.string.monto_nota_credito_dialog), Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.TOP | Gravity.RIGHT, 0, 80);
-                        toast.show();
-                    } else if (et_fecha_nota_credito.getText().toString().equals("")) {
-                        et_fecha_nota_credito.setError(getString(R.string.llenar_campo));
-                        Toast toast = Toast.makeText(Cobranza.this, getString(R.string.fecha_nota_credito_dialog), Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.TOP | Gravity.RIGHT, 0, 80);
-                        toast.show();
-                    } else {
+                    }
+                    else {
                         snotac_numero = sp_num_nota_credito.getSelectedItem().toString();
                         snotac_monto = et_monto_nota_credito.getText().toString();
                         snotac_fecha = et_fecha_nota_credito.getText().toString();
                         Toast toast = Toast.makeText(Cobranza.this, getString(R.string.datos_guardar_dialog), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP | Gravity.RIGHT, 0, 80);
                         toast.show();
-                        btn_confirmar.setVisibility(View.VISIBLE);
                         btn_confirmar.setText(getString(R.string.conf_nota_cre));
-                        btn_confirmar.setEnabled(false);
 
                         bandera = 3;
                         Dictionary<String, String> dic = new Hashtable<String, String>();
+                        arrayseleccionpagos = new ArrayList<Dictionary<String, String>>();
                         dic.put("et_monto_nota_credito", et_monto_nota_credito.getText().toString());
                         dic.put("et_fecha_nota_credito", et_fecha_nota_credito.getText().toString());
-                        dic.put("sp_num_nota_credito", sp_num_nota_credito.getSelectedItem()+"");
+                        dic.put("sp_num_nota_credito", sp_num_nota_credito.getSelectedItem() + "");
                         dic.put("tipo_pago", getString(R.string.nota_credito));
                         btn_tipo_pago.setText(getString(R.string.nota_credito));
-                        dic.put("bandera", bandera+"");
+                        dic.put("bandera", bandera + "");
                         arrayseleccionpagos.add(dic);
 
                         dialog.dismiss();
@@ -866,26 +1214,22 @@ public class Cobranza extends Activity {
                         toast.setGravity(Gravity.TOP | Gravity.RIGHT, 0, 80);
                         toast.show();
                     }
-                    /*else if (et_num_transferencia_bancaria.length()< 8||et_num_cheque.length()> 8) {
-                        et_num_transferencia_bancaria.setError(getString(R.string.msg_formato_incorrecto_trans));
-                    }*/
                     else {
                         stransb_numero = et_num_transferencia_bancaria.getText().toString();
                         stransb_fecha = et_fecha_transferencia_bancaria.getText().toString();
                         Toast toast = Toast.makeText(Cobranza.this, getString(R.string.datos_guardar_dialog), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP | Gravity.RIGHT, 0, 80);
                         toast.show();
-                        btn_confirmar.setVisibility(View.VISIBLE);
                         btn_confirmar.setText(getString(R.string.conf_trans_bancaria));
-                        btn_confirmar.setEnabled(false);
 
                         bandera = 4;
                         Dictionary<String, String> dic = new Hashtable<String, String>();
+                        arrayseleccionpagos = new ArrayList<Dictionary<String, String>>();
                         dic.put("et_num_transferencia_bancaria", et_num_transferencia_bancaria.getText().toString());
                         dic.put("et_fecha_transferencia_bancaria", et_fecha_transferencia_bancaria.getText().toString());
                         dic.put("tipo_pago", getString(R.string.transferencia_bancaria));
                         btn_tipo_pago.setText(getString(R.string.transferencia_bancaria));
-                        dic.put("bandera", bandera+"");
+                        dic.put("bandera", bandera + "");
                         arrayseleccionpagos.add(dic);
 
                         dialog.dismiss();
@@ -902,26 +1246,22 @@ public class Cobranza extends Activity {
                         toast.setGravity(Gravity.TOP | Gravity.RIGHT, 0, 80);
                         toast.show();
                     }
-                    /*else if (et_num_ficha_pago.length()< 8||et_num_cheque.length()> 8) {
-                        et_num_ficha_pago.setError(getString(R.string.msg_formato_incorrecto_ficha_pago));
-                    }*/
                     else {
                         sfichap_numero = et_num_ficha_pago.getText().toString();
                         sfichap_fecha = et_fecha_ficha_pago.getText().toString();
                         Toast toast = Toast.makeText(Cobranza.this, getString(R.string.datos_guardar_dialog), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP | Gravity.RIGHT, 0, 80);
                         toast.show();
-                        btn_confirmar.setVisibility(View.VISIBLE);
                         btn_confirmar.setText(getString(R.string.conf_ficha_pago));
-                        btn_confirmar.setEnabled(false);
 
                         bandera = 5;
                         Dictionary<String, String> dic = new Hashtable<String, String>();
+                        arrayseleccionpagos = new ArrayList<Dictionary<String, String>>();
                         dic.put("et_num_ficha_pago", et_num_ficha_pago.getText().toString());
                         dic.put("et_fecha_ficha_pago", et_fecha_ficha_pago.getText().toString());
                         dic.put("tipo_pago", getString(R.string.ficha_pago));
                         btn_tipo_pago.setText(getString(R.string.ficha_pago));
-                        dic.put("bandera", bandera+"");
+                        dic.put("bandera", bandera + "");
                         arrayseleccionpagos.add(dic);
 
                         dialog.dismiss();
@@ -947,17 +1287,16 @@ public class Cobranza extends Activity {
                         Toast toast = Toast.makeText(Cobranza.this, getString(R.string.datos_guardar_dialog), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
                         toast.show();
-                        btn_confirmar.setVisibility(View.VISIBLE);
                         btn_confirmar.setText(getString(R.string.conf_ficha_bancaria));
-                        btn_confirmar.setEnabled(false);
 
                         bandera = 6;
                         Dictionary<String, String> dic = new Hashtable<String, String>();
+                        arrayseleccionpagos = new ArrayList<Dictionary<String, String>>();
                         dic.put("et_num_ficha_bancaria", et_num_ficha_bancaria.getText().toString());
                         dic.put("et_fecha_ficha_bancaria", et_fecha_ficha_bancaria.getText().toString());
                         dic.put("tipo_pago", getString(R.string.ficha_bancaria));
                         btn_tipo_pago.setText(getString(R.string.ficha_bancaria));
-                        dic.put("bandera", bandera+"");
+                        dic.put("bandera", bandera + "");
                         arrayseleccionpagos.add(dic);
 
                         dialog.dismiss();
@@ -984,27 +1323,25 @@ public class Cobranza extends Activity {
     }
 
     private AdapterView.OnItemSelectedListener OnCatSpinnerCL = new AdapterView.OnItemSelectedListener() {
-        public void onItemSelected(AdapterView<?> parent, View view, int pos,long id) {
+        public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
             ((TextView) parent.getChildAt(0)).setTextSize(16);
-        }
-        public void onNothingSelected(AdapterView<?> parent) {
-        }
-    };
 
-    private AdapterView.OnItemSelectedListener OnCatSpinnerCLNotaC = new AdapterView.OnItemSelectedListener() {
-        public void onItemSelected(AdapterView<?> parent, View view, int pos,long id) {
-            ((TextView) parent.getChildAt(0)).setTextSize(16);
         }
+
         public void onNothingSelected(AdapterView<?> parent) {
         }
     };
 
     @Override
     protected void onDestroy() {
-        if ((dialogo != null) && dialogo.isShowing()){
+        if ((dialogo != null) && dialogo.isShowing()) {
             dialogo.dismiss();
         }
         dialogo = null;
         super.onDestroy();
     }
+
+    /*public static ArrayList<InvoiceDetails> getInvoice() {
+        return invoice_list;
+    }*/
 }

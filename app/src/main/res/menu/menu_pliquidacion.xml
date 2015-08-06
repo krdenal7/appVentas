@@ -4,6 +4,9 @@
     <item android:id="@+id/Enviar" android:showAsAction="never"
         android:orderInCategory="100" android:title="Enviar pedido"
         tools:ignore="AppCompatResource" />
+    <item android:id="@+id/GuardarP" android:showAsAction="never"
+        android:orderInCategory="100" android:title="Guardar pedido"
+        tools:ignore="AppCompatResource" />
 
     <item android:id="@+id/Firma" android:showAsAction="never"
         android:orderInCategory="100" android:title="Agregar firma"

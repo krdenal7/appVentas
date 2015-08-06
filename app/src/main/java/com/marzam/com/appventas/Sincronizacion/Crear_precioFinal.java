@@ -445,7 +445,7 @@ public class Crear_precioFinal {
 
         String where=WhereFiltro();
 
-        String query=String.format("select p.codigo,p.precio,p.iva,p.ieps  from productos as p " +
+        String query=String.format("select p.codigo,p.precio,p.iva,p.ieps,p.descuento_producto  from productos as p " +
                 "left join productos_obligados as po  on p.codigo=po.codigo " +
                 " where clasificacion_fiscal in"+where(clasificacion_Desc_menor) +" %s",where);
 
@@ -459,6 +459,7 @@ public class Crear_precioFinal {
            Hasproducto2.put("B",rs.getString(1));
            Hasproducto2.put("C",rs.getString(2));
            Hasproducto2.put("D",rs.getString(3));
+           Hasproducto2.put("E",rs.getString(4));
            data2.add(Hasproducto2);
            Hasproducto2=new HashMap<String, String>();
        }

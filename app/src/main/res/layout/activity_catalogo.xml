@@ -30,7 +30,8 @@
         android:id="@+id/listView2"
         android:layout_below="@+id/editText4"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp" />
+        android:layout_marginTop="30dp"
+        android:layout_above="@+id/button" />
 
     <Spinner
         android:layout_width="fill_parent"
@@ -64,5 +65,18 @@
         android:layout_alignParentTop="true"
         android:layout_alignRight="@+id/spinner2"
         android:layout_alignEnd="@+id/spinner2" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ver detalle"
+        android:id="@+id/button"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:textColor="#ffffff"
+        android:background="#0E3E91" />
 
 </RelativeLayout>

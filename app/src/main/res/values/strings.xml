@@ -88,22 +88,22 @@
     <string name="txtDevLiteCaptSearch">Buscar producto</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
-
-    <!--Cobranza-->
+    <!-- Cobranza -->
 
     <string name="pago_parcial">Pago parcial: </string>
     <string name="pago_total">Pago total: </string>
     <string name="seleccion_pago">Seleccionar tipo de pago: </string>
     <string name="hint_buscador"><i>Buscar por número de factura</i></string>
-    <!--<string name="total_importe">Total importe:</string>
+    <!--
+    <string name="total_importe">Total importe:</string>
     <string name="total_cubrir">Total adeudo a cubrir:</string>
-    <string name="total_pendiente">Total adeudo pendiente:</string>-->
+    <string name="total_pendiente">Total adeudo pendiente:</string>
+    -->
     <string name="total_importe">Deuda total:</string>
     <string name="total_cubrir">Monto total a aplicar:</string>
     <string name="total_pendiente">Restante total:</string>
     <string name="sin_internet">Sin conexión a internet</string>
     <string name="error_usuario">Error, intentelo de nuevo</string>
-
     <string name="num_fac">Número de factura: </string>
     <string name="fecha_emision">Fecha emision: </string>
     <string name="fecha_ven">Fecha vencimiento: </string>
@@ -111,7 +111,6 @@
     <string name="importe">Importe: </string>
     <string name="adeudo_p">Adeudo pendiente: </string>
     <string name="adeudo_c">Adeudo a cubrir: </string>
-
     <string name="selec_banco_cheque">Seleccionar banco</string>
     <string name="num_cheque">Núm. cheque</string>
     <string name="fecha_cheque">Fecha cheque</string>
@@ -124,19 +123,15 @@
     <string name="fecha_fichap">Fecha ficha pago</string>
     <string name="num_fichab">Núm. ficha bancaria</string>
     <string name="fecha_fichab">Fecha ficha bancaria</string>
-
     <string name="dias_adapter">días</string>
     <string name="tipo_pago">Seleccione un tipo de pago</string>
-
     <string name="efectivo">Efectivo</string>
     <string name="cheque">Cheque</string>
     <string name="nota_credito">Nota de crédito</string>
     <string name="transferencia_bancaria">Transferencia bancaria</string>
     <string name="ficha_pago">Ficha de pago</string>
     <string name="ficha_bancaria">Ficha bancaria</string>
-
     <string name="btnguardar_dialog">Guardar</string>
-
     <string name="sinseleccionar_dialog">Debe seleccionar una forma de pago</string>
     <string name="seleccion_banco_dialog">Seleccione un banco</string>
     <string name="num_cheque_dialog">Introduzca el número de cheque</string>
@@ -151,42 +146,29 @@
     <string name="fecha_ficha_pago_dialog">Introduzca la fecha de la ficha de pago</string>
     <string name="num_ficha_bancaria_dialog">Introduzca el número de la ficha bancaria</string>
     <string name="fecha_ficha_bancaria_dialog">Introduzca la fecha de la ficha bancaria</string>
-
     <string name="conf_cheque">Confirmar cheque</string>
     <string name="conf_efectivo">Confirmar efectivo</string>
     <string name="conf_ficha_pago">Confirmar ficha de pago</string>
     <string name="conf_nota_cre">Confirmar nota de crédito</string>
     <string name="conf_ficha_bancaria">Confirmar ficha bancaria</string>
     <string name="conf_trans_bancaria">Confirmar transferecnia bancaria</string>
-
     <string name="llenar_campo">Campo Obligatorio</string>
-
     <string name="cubrir_adeudo">¿Desea cubrir adeudo total?</string>
     <string name="quitar_cubrir_adeudo">¿Desea quitar adeudo total?</string>
     <string name="cubrir_adeudo_si">Sí</string>
     <string name="cubrir_adeudo_no">No</string>
-
     <string name="confirmar">¿Desea agregar un nuevo tipo de pago?</string>
     <string name="confirmar_no">No, terminar transacción</string>
     <string name="confirmar_si">Sí</string>
-
     <string name="banco_prompt"> Seleccione un banco </string>
-
     <string name="title_activity_cobranza">Cobranza</string>
-
     <string name="pagos_hecho">Sus pagos han sido guardados con éxito</string>
     <string name="pagos_hecho_aceptar">Aceptar</string>
-
     <string name="correoe_cobranza_detalle">Correo Electrónico</string>
-
     <string name="msg_formato_incorrecto_num_cheque">El número de cheque debe contener 8 dígitos</string>
     <string name="msg_formato_incorrecto_trans">El número de transferencia bancaria debe contener 8 dígitos</string>
     <string name="msg_formato_incorrecto_ficha_pago">El número de la ficha de pago debe contener 8 dígitos</string>
     <string name="msg_formato_incorrecto_ficha_bancaria">El número de la ficha de bancaria debe contener 8 dígitos</string>
-
-
-
-
 
     <color name="color_item_list_selected">#89BBEE</color>
 
@@ -212,6 +194,70 @@
         <item>44546434</item>
         <item>43536333</item>
     </string-array>
+
+    <string name="title_activity_catalogo_edit">catalogo_edit</string>
+    <string name="title_activity_tab_pedidos">tab_pedidos</string>
+    <string name="title_activity_cabezera_estatus">cabezera_estatus</string>
+    <string name="title_activity_detalle_estatus">detalle_estatus</string>
+    <string name="title_activity_liquidacion_estatus">liquidacion_estatus</string>
+
+    <!--DevolucionesFull-->
+    <string name="title_activity_devoluciones_full">Ddevoluciones Full</string>
+    <string name="txtDevFullReturnsAvailable">Disponibilidad de devoluciones:</string>
+    <string name="txtDevFullAverageSales">Promedio de venta (3 meses)</string>
+    <string name="title_activity_devoluciones_full_menu_principal">Devoluciones Full Menu</string>
+    <string name="title_activity_devoluciones_full_lista_motivos">Motivos de devolución</string>
+    <string name="title_activity_devoluciones_full_lista_invoice">Facturas</string>
+    <string name="title_activity_devoluciones_full_lista_product">Productos</string>
+    <string name="title_activity_devoluciones_full_lista_devoluciones_pendientes">Devoluciones Pendientes</string>
+    <string name="hintDevFullInputSearchNumInvoice"><i>Buscar por número de factura</i></string>
+    <string name="hintDevFullInputSearchReason"><i>Buscar motivo</i></string>
+    <string name="hintDevFullDateSearchInvoice"><i>dd/mm/yyyy</i></string>
+    <string name="hintDevFullInputSearchProduct"><i>Buscar producto por nombre o código</i></string>
+    <string name="btnTextDevFullReturn">Regresar</string>
+    <string name="txtDevFullDataSales">Datos</string>
+    <string name="txtDevFullAmountSales">Importe</string>
+    <string name="txtDevFullBudgetSales">%, presupuesto para devolución</string>
+    <string name="txtDevFullFoliosBudgetSales">Folios dentro del presupuesto</string>
+    <string name="txtDevFullFoliosDeclineSales">Folios con autorización merma</string>
+    <string name="txtDevFullFolioNoAceptSales">Folios NO aceptados</string>
+    <string name="txtDevFullReturningAvailableSales">Devolución disponible:</string>
+    <string name="txtDevFullAuthorizedReturnSales">Devoluciones autorizadas fuera del presupuesto:</string>
+    <string name="txtDevFullAuthorizedReturnDeclineSales">Devoluciones autorizadas merma fuera del presupuesto:</string>
+    <string name="txtDevFullReturnsConsult">Consultar devoluciones</string>
+    <string name="txtDevFullReturnsNew">Nueva devolución</string>
+    <string name="txtDevFullStatePaper">Estado de la papeleta</string>
+    <string name="txtDevFullSelectReason">Seleccione algún motivo</string>
+    <string name="txtDevFullBtnReason">Motivo</string>
+    <string name="txtDevFullAssignedFolio">Folio asignado:</string>
+    <string name="txtDevFullSelectProduct">Selecciona los productos</string>
+    <string name="txtDevFullBtnSelectedProduct">0 Productos seleccionados</string>
+    <string name="txtDevFullInsertNoteFolio">Folio de la nota de cargo:</string>
+    <string name="txtDevFullSelectInvoice">Selecciona alguna factura</string>
+    <string name="txtDevFullBtnInvoice">Factura</string>
+    <string name="txtDevFullProducts">Productos:</string>
+    <string name="txtDevFullBtnReturnCancel">Cancelar devolución</string>
+    <string name="txtDevFullBtnSaveCancel">Guardar devolución</string>
+    <string name="txtDevFullSelectReturnReason">Seleciona el motivo de la devolución</string>
+    <string name="txtCheckBoxDevFullFilterDate">Filtrar por rango de fechas</string>
+    <string name="txtDevFullTo">a</string>
+    <string name="txtDevFullInvoices">Facturas</string>
+    <string name="txtDevFullProductss">Únicamente, productos con derecho a devolución:</string>
+    <string name="txtDevFullTotalProductToReturn">Total de productos a devolver:</string>
+    <string name="btnTextDevFulFinishReturnProduct">Terminar</string>
+    <string name="txtDevFullPromptProduct">Producto:</string>
+    <string name="txtDevFullPromptProductAmount">Cantidad:</string>
+    <string name="txtDevFullPromptBudgetAvailableReturns">Devolución disponible:</string>
+    <string name="txtDevFullPromptReset0">0</string>
+    <string name="txtDevFullPromptAdd1">+1</string>
+    <string name="txtDevFullPromptAdd2">+2</string>
+    <string name="txtDevFullPromptAdd5">+5</string>
+    <string name="txtDevFullPromptAdd10">+10</string>
+    <string name="txtDevFullPromptAccept">Aceptar</string>
+    <string name="txtDevFullHistory">Historial</string>
+    <string name="txtDevFullPending">Pendientes</string>
+    <string name="txtDevFullInsertNumPackages">Número de paquetes:</string>
+    <string name="txtDevFullNoFoundProductsForDevolution">No se encontraron productos con derecho a devolución.</string>
 
 
 </resources>

@@ -56,6 +56,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
     Button boton5;
 
    AlertDialog alertDialog;
+    AlertDialog alertDescripcion;
 
     String from="CustomAdapter";
     String subject;
@@ -144,6 +145,46 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
 
                 }
             });
+            convertView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+
+                    NumberFormat nf=NumberFormat.getNumberInstance(Locale.US);
+                    DecimalFormat dec=(DecimalFormat)nf;
+                    dec.setMaximumFractionDigits(2);
+                    dec.setMinimumFractionDigits(2);
+                    String precio_p =modelitems[position].getPrecio_publico();
+                    String lab=modelitems[position].getLaboratorio();
+                    String pref=modelitems[position].getPrecio_neto();
+
+                    if(precio_p==null)
+                        precio_p="0";
+                    if(precio_p.trim().isEmpty())
+                        precio_p="0";
+                    Double prec;
+
+                    try {
+                        prec = Double.parseDouble(precio_p);
+                    }catch (Exception e){
+                        prec = 0.0;
+                    }
+
+                    if(pref==null)
+                        pref="0";
+                    if(pref.trim().isEmpty())
+                        pref="0";
+                    Double precf=0.00;
+
+                    try {
+                        precf = Double.parseDouble(pref);
+                    }catch (Exception e){
+                        prec = 0.0;
+                    }
+                    Double gan=prec-precf;
+                    ShowDescripcion("$"+dec.format(prec),modelitems[position].getSustancia(),lab,"$"+dec.format(gan));
+                    return false;
+                }
+            });
 
             if (position % 2 == 0) {
                 convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
@@ -187,10 +228,52 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
         });
 
         alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
+        if(alertDescripcion!=null){
+            if(!alertDescripcion.isShowing()) {
+                alertDialog.show();
+                Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
+            }
+        }else {
+            alertDialog.show();
+            Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
+        }
+    }
 
-        Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+    public void ShowDescripcion(String precio,String sustancia,String lab,String gan){
+
+        LayoutInflater inflater=((Activity)context).getLayoutInflater();
+        View view=inflater.inflate(R.layout.dialog_descripcion,null);
+
+        TextView txtSus=(TextView)view.findViewById(R.id.textView2);
+        txtSus.setText(sustancia);
+
+        TextView txtPrec=(TextView)view.findViewById(R.id.textView5);
+        txtPrec.setText(precio);
+
+        TextView txtLab=(TextView)view.findViewById(R.id.textView4);
+        txtLab.setText(lab);
+
+        TextView txtGan=(TextView)view.findViewById(R.id.textView8);
+        txtGan.setText(gan);
+
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Descripción");
+        alert.setView(view);
+        alert.setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"),new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        alertDescripcion=alert.create();
+        alertDescripcion.show();
+
+        Button pbutton = alertDescripcion.getButton(DialogInterface.BUTTON_POSITIVE);
         pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
+
+
     }
 
     public int AgregarProducto(String ean,int cantidad,int isChecked,View view,int posicion){
@@ -278,7 +361,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
             String filt=WhereFiltro(filtro);
 
             String query=String.format("select distinct descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal" +
-                    ",o.descuento, p.laboratorio, e.cantidad ,devolucion " +
+                    ",o.descuento, p.laboratorio, e.cantidad ,devolucion,sustancia_activa,precio_publico " +
                     "from productos as p left join ofertas as o on p.codigo=o.codigo " +
                     "left join existencias as e on p.codigo=e.codigo " +
                     "left join productos_obligados as po on p.codigo=po.codigo " +
@@ -312,8 +395,26 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
             if(valDev.isEmpty())
                 dev=true;
 
-            String oferta=(rs.getString(7)==null)?"0":rs.getString(7);
-            modelitems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),oferta,rs.getString(8),rs.getString(9),dev);
+            String of = rs.getString(7);
+            String oferta;
+
+            if (of == null) {
+                oferta = "0";
+            } else {
+                oferta = of;
+            }
+
+            String existencia=rs.getString(9);
+
+            if(existencia==null)
+                existencia="0";
+            if(existencia.trim().isEmpty())
+                existencia="0";
+            if(existencia.equals("null"))
+                existencia="0";
+
+            modelitems[cont]=new Model(rs.getString(0),rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4),
+                    rs.getString(5),rs.getString(6),oferta,rs.getString(8),existencia,dev,rs.getString(11),rs.getString(12));
             cont++;
         }
 

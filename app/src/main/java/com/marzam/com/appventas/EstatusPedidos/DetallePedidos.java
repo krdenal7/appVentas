@@ -62,7 +62,6 @@ public class DetallePedidos extends Activity {
 
     }
 
-
     public void LlenasHasMap(){
         try{
           lite=new CSQLite(context);
@@ -86,7 +85,6 @@ public class DetallePedidos extends Activity {
 
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

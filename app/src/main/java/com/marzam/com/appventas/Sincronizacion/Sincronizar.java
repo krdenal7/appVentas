@@ -14,6 +14,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -89,7 +90,7 @@ public class Sincronizar extends Activity {
         txtClientes.setText(""+VerificarClientesPendientes());
 
         txtDevoluciones=(TextView)findViewById(R.id.textView45);
-        //txtDevoluciones.setText(""+VerificarDevolucionesPendiente());
+        txtDevoluciones.setText(""+VerificarDevolucionesPendiente());
 
 
         Button btnCerrar=(Button)findViewById(R.id.button5);
@@ -138,7 +139,7 @@ public class Sincronizar extends Activity {
         SQLiteDatabase db=lt.getReadableDatabase();
         int val=0;
 
-        Cursor rs=db.rawQuery("select * from clientesDr where estatus <> '50'",null);
+        Cursor rs=db.rawQuery("select * from clientesDr where estatus = '10'",null);
 
         val=rs.getCount();
 
@@ -154,7 +155,7 @@ public class Sincronizar extends Activity {
         SQLiteDatabase db=lt.getReadableDatabase();
         int val=0;
 
-        Cursor rs=db.rawQuery("select * from DEV_Encabezado where status='10'",null);
+        Cursor rs=db.rawQuery("select * from DEV1_Encabezado where status='10'",null);
 
         val=rs.getCount();
 
@@ -190,7 +191,7 @@ public class Sincronizar extends Activity {
                 if(!VerificarSesionActiva()) {
                  if(VerificarClientesPendientes()<=0){
                     if (VerificarPedidosPendientes() <= 0) {
-                        /*if(VerificarDevolucionesPendiente()<=0) {*/
+                        if(VerificarDevolucionesPendiente()<=0) {
                             if (isOnline()) {
 
 
@@ -205,9 +206,9 @@ public class Sincronizar extends Activity {
                             } else {
                                 Toast.makeText(context, "Verifique su conexión a internet e intente nuevamente", Toast.LENGTH_LONG).show();
                             }
-                       /* }else {
+                        }else {
                             Toast.makeText(context, "No se puede completar la sincronización. Envíe sus devoluciónes pendientes", Toast.LENGTH_LONG).show();
-                        }*/
+                        }
                     } else {
                         Toast.makeText(context, "No se puede completar la sincronización. Envíe sus pedidos pendientes", Toast.LENGTH_LONG).show();
                     }//Pedidos pendientes por transmitir
@@ -504,7 +505,7 @@ public class Sincronizar extends Activity {
 
                 txtPedidos.setText("" + VerificarPedidosPendientes());
                 txtClientes.setText(""+VerificarClientesPendientes());
-                //txtDevoluciones.setText(""+VerificarDevolucionesPendiente());
+                txtDevoluciones.setText(""+VerificarDevolucionesPendiente());
 
                 progres.dismiss();
 
@@ -590,7 +591,7 @@ public class Sincronizar extends Activity {
             }
 
             File back=new File(directorio+"/"+archivoBack+".zip");
-            String bd64=web.Down_DB(nomAgente+".zip");
+            String bd64=web.Down_DB(nomAgente+".zip",getIMEI());
             if(!back.exists())
                    EscribirTXT();
 
@@ -1463,7 +1464,7 @@ public class Sincronizar extends Activity {
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
 
-        Cursor rs=db.rawQuery("select * from visitas where status_visita='10'",null);
+        Cursor rs=db.rawQuery("select * from visitas where estatus_visita='10'",null);
         JSONArray array=new JSONArray();
         JSONObject object=new JSONObject();
 
@@ -1471,15 +1472,14 @@ public class Sincronizar extends Activity {
 
             try {
 
-
-
-                object.put("numero_empleado",rs.getString(0));
-                object.put("id_cliente",rs.getString(1));
-                object.put("latitud",rs.getString(2));
-                object.put("longitud",rs.getString(3));
-                object.put("fecha_visita",rs.getString(4).replace(":","|"));
-                object.put("fecha_registro",rs.getString(5).replace(":","|"));
-                String id_visita=rs.getString(6);
+                object.put("clave_agente",rs.getString(0));
+                object.put("id_fuerza",rs.getString(1));
+                object.put("id_cliente",rs.getString(2));
+                object.put("latitud",rs.getString(3));
+                object.put("longitud",rs.getString(4));
+                object.put("fecha_visita",rs.getString(5).replace(":","|"));
+                object.put("fecha_registro",rs.getString(6).replace(":","|"));
+                String id_visita=rs.getString(7);
                 object.put("id_visita",id_visita);
 
                 array.put(object);
@@ -1531,6 +1531,20 @@ public class Sincronizar extends Activity {
 
 
         return  array.length()==0 ? null: array.toString();
+    }
+
+    private String getIMEI(){
+        String imei="";
+
+        try{
+
+            TelephonyManager manager=(TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+            imei=manager.getDeviceId();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return imei;
     }
 
     @Override

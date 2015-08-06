@@ -118,7 +118,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     public void ShowCteH(){
 
-        final CharSequence[] list=ObtenerCtesHoy(ObtenerAgenteActivo());
+        final CharSequence[] list=ObtenerCtesHoy(ObtenerClavedeAgente());
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context,AlertDialog.THEME_DEVICE_DEFAULT_DARK);
         alert.setTitle("Clientes de hoy");
@@ -355,12 +355,15 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         Cursor rs = null;
        for(int i=0;i<clientesH.length;i++){
+try {
+    rs = db.rawQuery("select id_cliente,nombre from clientes where id_cliente='" + clientesH[i] + "'", null);
 
-        rs=db.rawQuery("select id_cliente,nombre from clientes where id_cliente='"+clientesH[i]+"'",null);
-
-           if(rs.moveToFirst()){
-               datos[i]=rs.getString(0)+"-"+rs.getString(1);
-           }
+    if (rs.moveToFirst()) {
+        datos[i] = rs.getString(0) + "-" + rs.getString(1);
+    }
+}finally {
+        rs.close();
+}
 
        }
 
@@ -394,12 +397,15 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
         Cursor rs=null;
 
          for(int i=0;i<datos.length;i++){
+try {
+    rs = db.rawQuery("select id_cliente,nombre from clientes where id_cliente='" + clientesT[i] + "' ", null);
 
-             rs=db.rawQuery("select id_cliente,nombre from clientes where id_cliente='"+clientesT[i]+"' ",null);
-
-             if(rs.moveToFirst()){
-                 datos[i]=rs.getString(0)+"-"+rs.getString(1);
-             }
+    if (rs.moveToFirst()) {
+        datos[i] = rs.getString(0) + "-" + rs.getString(1);
+    }
+}finally {
+    rs.close();
+}
 
          }
 
@@ -585,7 +591,7 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
     private void ObtenerClientesVisitados(){
 
-        ObtenerCtesHoy(ObtenerAgenteActivo());
+        ObtenerCtesHoy(ObtenerClavedeAgente());
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
@@ -594,13 +600,16 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         for(int i=0;i<clientesH.length;i++){
 
-            Cursor rs=db.rawQuery("select Sesion from sesion_cliente where id_cliente='"+clientesH[i]+"'",null);
-
-            if(rs.moveToFirst()){
-                if(rs.getInt(0)==2){
-                    visitados++;
-                }
-            }
+    Cursor rs = db.rawQuery("select Sesion from sesion_cliente where id_cliente='" + clientesH[i] + "'", null);
+            try {
+    if (rs.moveToFirst()) {
+        if (rs.getInt(0) == 2) {
+            visitados++;
+        }
+    }
+}finally {
+    rs.close();
+}
         }
 
         txtVisitados.setText( visitados+"/"+total );

@@ -1,33 +1,33 @@
 package com.marzam.com.appventas.EstatusPedidos;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
-
-import com.marzam.com.appventas.R;
-import com.marzam.com.appventas.SQLite.CSQLite;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+
+import com.fortysevendeg.swipelistview.BaseSwipeListViewListener;
+import com.fortysevendeg.swipelistview.SwipeListView;
+import com.marzam.com.appventas.Adapters.ItemAdapter;
+import com.marzam.com.appventas.Adapters.ItemRow;
+import com.marzam.com.appventas.R;
+import com.marzam.com.appventas.SQLite.CSQLite;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
+import android.app.Activity;
+import android.util.DisplayMetrics;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.ListView;
 
 
 public class Encabezados_pedidos extends Activity {
 
-    SimpleAdapter adapter;
+    //SimpleAdapter adapter;
     HashMap<String, String> row;
     ArrayList<HashMap<String,?>> data;
     String id_cliente;
@@ -36,10 +36,14 @@ public class Encabezados_pedidos extends Activity {
     Context context;
     CSQLite lite;
 
+    SwipeListView swipelistview;
+    ItemAdapter adapter;
+    List<ItemRow> itemData;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_encabezados_pedidos);
+        setContentView(R.layout.list_swipe);
         id_cliente=getIntent().getStringExtra("cliente");
         String name_cliente=getIntent().getStringExtra("clienteNombre");
         setTitle(name_cliente);
@@ -52,44 +56,86 @@ public class Encabezados_pedidos extends Activity {
             finish();
         }
 
-        LlenarHasMap(id_cliente);
-        adapter=new SimpleAdapter(context,data,R.layout.row_simple_encabezado,new String[]{"A","B","C","D"},new int[]{R.id.textView5,R.id.textView6,R.id.textView7,R.id.textView8}){
+        swipelistview=(SwipeListView)findViewById(R.id.example_swipe_lv_list);
+        itemData=new ArrayList<ItemRow>();
+        adapter=new ItemAdapter(this,R.layout.row_simple_encabezado,itemData,swipelistview);
+
+        swipelistview.setSwipeListViewListener(new BaseSwipeListViewListener() {
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-
-                convertView = super.getView(position, convertView, parent);
-
-                if (position % 2 == 0) {
-                    convertView.setBackgroundColor(Color.parseColor("#FFFFFF"));
-                }else {
-                    convertView.setBackgroundColor(Color.parseColor("#F2F2F2"));
-                }
-                //return super.getView(position, convertView, parent);
-                return convertView;
+            public void onOpened(int position, boolean toRight) {
             }
-        };
-        list=(ListView)findViewById(R.id.listEncabezado);
-        list.setAdapter(adapter);
 
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onClosed(int position, boolean fromRight) {
+            }
+
+            @Override
+            public void onListChanged() {
+            }
+
+            @Override
+            public void onMove(int position, float x) {
+            }
+
+            @Override
+            public void onStartOpen(int position, int action, boolean right) {
+                //Log.d("swipe", String.format("onStartOpen %d - action %d", position, action));
+            }
+
+            @Override
+            public void onStartClose(int position, boolean right) {
+                //Log.d("swipe", String.format("onStartClose %d", position));
+            }
+
+            @Override
+            public void onClickFrontView(int position) {
+                //Log.d("swipe", String.format("onClickFrontView %d", position));
+
                 Intent intent=new Intent(context,DetallePedidos.class);
-                intent.putExtra("pedido",data.get(i).get("A").toString());
+                intent.putExtra("pedido",itemData.get(position).getPedido());
                 startActivity(intent);
+
             }
+
+            @Override
+            public void onClickBackView(int position) {
+                // Log.d("swipe", String.format("onClickBackView %d", position));
+
+                swipelistview.closeAnimate(position);//when you touch back view it will close
+            }
+
+            @Override
+            public void onDismiss(int[] reverseSortedPositions) {
+
+            }
+
         });
 
+        swipelistview.setSwipeMode(SwipeListView.SWIPE_MODE_LEFT); // there are five swiping modes
+        swipelistview.setSwipeActionLeft(SwipeListView.SWIPE_ACTION_REVEAL); //there are four swipe actions
+        swipelistview.setSwipeActionRight(SwipeListView.SWIPE_ACTION_NONE);
+        swipelistview.setOffsetLeft(convertDpToPixel(260f)); // left side offset
+        swipelistview.setOffsetRight(convertDpToPixel(0f)); // right side offset
+        swipelistview.setAnimationTime(50); // Animation time
+        swipelistview.setSwipeOpenOnLongPress(true); // enable or disable SwipeOpenOnLongPress
+
+        swipelistview.setAdapter(adapter);
+        LlenarItems(id_cliente);
+        adapter.notifyDataSetChanged();
     }
 
-    public void LlenarHasMap(String id){
+    public int convertDpToPixel(float dp) {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        float px = dp * (metrics.densityDpi / 160f);
+        return (int) px;
+    }
+
+    public void LlenarItems(String id){
           try{
 
               lite=new CSQLite(context);
               SQLiteDatabase db=lite.getWritableDatabase();
               Cursor rs;
-              row=new HashMap<String,String>();
-              data=new ArrayList<HashMap<String, ?>>();
 
               rs=db.rawQuery("select id_pedido,fecha_captura,e.descripcion from encabezado_pedido as en inner join estatus as e on en.id_estatus=e.id_estatus where id_cliente='"+id+"'",null);
 
@@ -97,14 +143,10 @@ public class Encabezados_pedidos extends Activity {
              while ( rs.moveToNext()){
 
                     String id_pedido=rs.getString(0);
-
-                    row.put("A",id_pedido);
                     String[] fecha=rs.getString(1).split(" ");
-                    row.put("B",fecha.length<=0?"00-00-00":fecha[0]);
-                    row.put("C",rs.getString(2));
-                    row.put("D",ObtenerTotal(id_pedido));
-                    data.add(row);
-                    row=new HashMap<String, String>();
+                     itemData.add(new ItemRow(id_pedido,fecha.length<=0?"00-00-00":fecha[0],
+                     rs.getString(2),ObtenerTotal(id_pedido)));
+
              }
 
           }catch (Exception e){

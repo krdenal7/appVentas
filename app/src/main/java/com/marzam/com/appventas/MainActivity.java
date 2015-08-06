@@ -19,6 +19,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
@@ -90,6 +91,7 @@ public class  MainActivity extends Activity {
     File directorio;
     LocationManager locationManager;
 
+    Float ver_p;
     CSQLite lite;
     String password;
     String nombre_agente;
@@ -123,8 +125,6 @@ public class  MainActivity extends Activity {
 
         locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
         ShowEnableGPS();//Muestra el alert en caso de que el GPS del dispositivo se encuentre desactivado
-
-        // ObtenerArchivos2();
 
         if(VerificarActualizacion())
                     Show_New_Version();
@@ -179,30 +179,56 @@ public class  MainActivity extends Activity {
 
             }
         });
-
-     if(ExistsBD())
-     PushNotification();
-
     }
 
     public boolean VerificarActualizacion(){
 
-        float version=0;
+        float version;
+        boolean push;
+
 
         SharedPreferences prefs =
                 getSharedPreferences("Actualizaciones",Context.MODE_PRIVATE);
-                version=prefs.getFloat("VersionAp",1);
+                version=prefs.getFloat("VersionAp",getAppVersion(context));
+                push=prefs.getBoolean("push",false);
+                ver_p=prefs.getFloat("VersionApPendiente",0);
 
+        SharedPreferences.Editor editor=prefs.edit();
 
         float version_pref=version;
         float version_app=getAppVersion(context);
 
         txtVersion.setText("V."+version_app);
 
-        if(version_pref!=version_app){
-            return true;
+        if(push==false){
+         editor.putFloat("VersionAp",getAppVersion(context));
+         editor.putBoolean("push",false);
+
+
+            if(ver_p!=0){
+                if(ver_p>version_app) {
+                    editor.putFloat("VersionApPendiente",version_pref);
+                    return true;
+                }else{
+                   editor.putFloat("VersionApPendiente",0);
+                }
+            }
+            editor.commit();
+         return false;
+        }else{
+            if(version_pref>version_app){
+                editor.putFloat("VersionApPendiente",version_pref);
+                editor.commit();
+                return true;
+            }else{
+                editor.putFloat("VersionAp",getAppVersion(context));
+                editor.putBoolean("push", false);
+                editor.putFloat("VersionApPendiente",0);
+                editor.commit();
+                return false;
+            }
+
         }
-        return false;
     }
 
     public void CrearDirectorioDownloads(){
@@ -492,6 +518,7 @@ try {
             object.put("numero_empleado",num_emp);
             object.put("api_key",key);
             object.put("numero_telefono",telefono!=null?telefono.replace("+",""):"0000000000");
+            object.put("IMEI",getIMEI());
             array.put(object);
 
 
@@ -597,7 +624,7 @@ try {
             WebServices web=new WebServices();
 
 
-            String bd64=web.Down_DB(strings[0]+".zip");
+            String bd64=web.Down_DB(strings[0]+".zip",getIMEI());
 
                if(bd64==null)
                    return "Error al descargar la base de datos.Intente nuevamente";
@@ -649,6 +676,8 @@ try {
 
                 pd.dismiss();
             }
+            if(ExistsBD())
+                PushNotification();
         }
     }
 
@@ -668,7 +697,7 @@ try {
 
             String agente=bundle.getString("Agente");
             WebServices web=new WebServices();
-            String bd64=web.Down_DB(agente+".zip");
+            String bd64=web.Down_DB(agente+".zip",getIMEI());
 
 
             if(bd64==null)
@@ -1039,6 +1068,20 @@ try {
         return telephonyManager.getLine1Number();
     }
 
+    private String getIMEI(){
+       String imei="";
+
+        try{
+
+            TelephonyManager manager=(TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+            imei=manager.getDeviceId();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return imei;
+    }
+
     /*Comprobar si el dispositivo tiene conexión a Internet*/
 
     public  boolean isOnline(){
@@ -1069,7 +1112,9 @@ try {
 
     public void ObtenerArchivos2(){
 
+
         File directorio = new File("/data/data/com.marzam.com.appventas/databases/");
+        //File directorio = new File("/data/data/com.marzam.com.appventas/database/");
         File[] files=directorio.listFiles();
         CopiarArchivos2(files);
     }
@@ -1140,6 +1185,18 @@ try {
    public void IntentApk(){
 
        try{
+
+          /* boolean unknownSource = false;
+
+           if (Build.VERSION.SDK_INT < 3) {
+               unknownSource = Settings.System.getInt(getContentResolver(), Settings.System.INSTALL_NON_MARKET_APPS, 0) == 1;
+           }
+           else if (Build.VERSION.SDK_INT < 17) {
+               unknownSource = Settings.Secure.getInt(getContentResolver(), Settings.Secure.INSTALL_NON_MARKET_APPS, 0) == 1;
+           } else {
+               unknownSource = Settings.Global.getInt(getContentResolver(), Settings.Global.INSTALL_NON_MARKET_APPS, 0) == 1;
+           }*/
+
            Intent intent=new Intent(Intent.ACTION_VIEW);
            File path= android.os.Environment.getExternalStorageDirectory();
            String Folder=path+"/Marzam/apk/app-debug.apk";
@@ -1156,6 +1213,7 @@ try {
        }
 
    }
+
 
 }
 

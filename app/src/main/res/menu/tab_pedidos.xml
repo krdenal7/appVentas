@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.marzam.com.appventas.EstatusPedidos.tab_pedidos" >
+    <item android:id="@+id/CatalogoC" android:showAsAction="never"
+        android:title="Catálogo" android:orderInCategory="100"
+        tools:ignore="AppCompatResource" />
+    <item android:id="@+id/GuardarC" android:showAsAction="never"
+        android:title="Guardar" android:orderInCategory="100"
+        tools:ignore="AppCompatResource" />
+    <item android:id="@+id/CancelarC" android:showAsAction="never"
+        android:title="Cancelar" android:orderInCategory="100"
+        tools:ignore="AppCompatResource" />
+</menu>

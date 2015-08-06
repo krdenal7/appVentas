@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:baselineAligned="false"
+    android:paddingLeft="5dp"
+    android:paddingTop="5dp"
+    android:paddingRight="5dp">
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_weight="1">
+
+        <GridLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:columnCount="2"
+            android:rowCount="2"
+            android:id="@+id/gridLayout11"
+            android:columnOrderPreserved="false"
+            android:rowOrderPreserved="false"
+            android:useDefaultMargins="false"
+            android:layout_alignWithParentIfMissing="false"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="false"
+            android:layout_marginBottom="3dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_column="0"
+                android:layout_row="0"
+                android:layout_marginBottom="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Folio: "
+                    android:id="@+id/textView105"
+                    android:textColor="#000000"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/idTxtDevFullNumFolio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:layout_gravity="left"
+                    android:background="#00000000"
+                    android:text="Num. folio"
+                    android:layout_column="0"
+                    android:layout_row="0"
+                    android:layout_marginBottom="3dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_column="0"
+                android:layout_row="1"
+                android:layout_gravity="left|center_vertical"
+                android:layout_marginLeft="10dp"
+                android:layout_marginBottom="5dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="IBS:"
+                    android:id="@+id/textView120"
+                    android:textColor="#79000000"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/idTxtDevFullStatusIBS"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:textSize="12sp"
+                    android:textColor="#79000000"
+                    android:layout_alignWithParentIfMissing="false"
+                    android:background="#00000000"
+                    android:text="Status IBS"
+                    android:layout_below="@+id/idSetMarzamCode"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginLeft="3dp"
+                    android:layout_row="2"
+                    android:layout_column="0"
+                    android:layout_gravity="center_vertical" />
+
+            </LinearLayout>
+
+            <ImageView android:id="@+id/idImgDevFullSynchronize"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:gravity="center_vertical"
+                android:layout_alignWithParentIfMissing="false"
+                android:layout_row="0"
+                android:layout_column="1"
+                android:layout_gravity="right"
+                android:layout_alignParentBottom="false"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="false"
+                android:src="@drawable/upload_cloud"
+                android:layout_marginTop="3dp"
+                android:layout_marginRight="3dp"
+                android:layout_rowSpan="2"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="false" />
+
+        </GridLayout><![CDATA[
+
+
+
+
+
+
+
+
+
+        />
+
+
+
+
+    ]]>
+    </RelativeLayout>
+
+</LinearLayout>

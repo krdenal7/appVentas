@@ -56,8 +56,6 @@ import java.util.Objects;
 public class pcatalogo extends Activity {
 
     Context context;
-
-
     ListView lproductos;
     EditText EditBuscar;
     Model[] modelItems;
@@ -66,16 +64,15 @@ public class pcatalogo extends Activity {
     static ArrayList<HashMap<String,?>>data=null;
     SimpleAdapter simpleAdapter;
     CSQLite lite;
-
     AlertDialog alertDialog;
-
+    AlertDialog alertDescripcion;
+    Button btnDetalle;
     Button boton1;
     Button boton2;
     Button boton3;
     Button boton4;
     Button boton5;
     ProgressDialog dialogList;
-    ProgressDialog dialogList1;
 
     Spinner spFiltro;
 
@@ -183,11 +180,62 @@ public class pcatalogo extends Activity {
         lproductos.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                try {
+                    HashMap<String, ?> mdesc = (HashMap<String, ?>) simpleAdapter.getItem(i);
+                    String editB = EditBuscar.getText().toString().trim();
 
-                Toast t = Toast.makeText(context, "Detalle", Toast.LENGTH_SHORT);
-                t.show();
+                    if (!editB.isEmpty()) {
+                        if (editB.length() >= 2) {
 
-                return false;
+                            NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+                            DecimalFormat dec = (DecimalFormat) nf;
+                            dec.setMaximumFractionDigits(2);
+                            dec.setMinimumFractionDigits(2);
+
+                            String precio_p = mdesc.get("M").toString();
+                            String precioF=mdesc.get("E").toString().replace("$","");
+                            String lab=mdesc.get("H").toString();
+                            String sustancia = mdesc.get("L").toString();
+
+                            Double precio_publico;
+                            Double precio_final;
+                            Double ganancia;
+
+                            try{
+                                precio_publico=Double.parseDouble(precio_p);
+                            }catch (Exception e){
+                               Toast.makeText(context,"Error precioP",Toast.LENGTH_LONG).show();
+                                precio_publico=0.00;
+                            }
+                            try{
+                                precio_final=Double.parseDouble(precioF);
+                            }catch (Exception e){
+                                Toast.makeText(context,"Error preciof",Toast.LENGTH_LONG).show();
+                                precio_final=0.00;
+                            }
+                            ganancia=precio_publico-precio_final;
+                            ShowDescripcion("$"+dec.format(precio_publico),sustancia,lab,"$"+dec.format(ganancia));
+                        }
+                    }
+                    return false;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return  false;
+                }
+            }
+
+        });
+
+
+        btnDetalle=(Button)findViewById(R.id.button);
+        btnDetalle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                startActivity(new Intent(getBaseContext(),pedido.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                finish();
+
             }
         });
 
@@ -195,8 +243,10 @@ public class pcatalogo extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
-                    EditBuscar.setText("");
-                    new TaskFiltro().execute("");
+
+                     EditBuscar.setText("");
+                     new TaskFiltro().execute("");
+
 
             }
 
@@ -208,8 +258,8 @@ public class pcatalogo extends Activity {
         });
 
 
-         new UpdateList().execute("");
-         dialogList=ProgressDialog.show(context,"Catálogo","Generando..",true,false);
+        new UpdateList().execute("");
+        dialogList=ProgressDialog.show(context,"Catálogo","Generando..",true,false);
 
 
 
@@ -219,8 +269,8 @@ public class pcatalogo extends Activity {
 
 
 
-         String Item=String.valueOf(simpleAdapter.getItem(posicion));
-         final String codigo=ObtenerValoresdeFilter(Item);
+       String Item=String.valueOf(simpleAdapter.getItem(posicion));
+       final String codigo=ObtenerValoresdeFilter(Item);
 
         LayoutInflater inflater=getLayoutInflater();
         View viewButton=inflater.inflate(R.layout.botones_cantidad,null);
@@ -247,9 +297,54 @@ public class pcatalogo extends Activity {
 
 
         alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-        Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        if(alertDescripcion!=null){
+            if(!alertDescripcion.isShowing()) {
+                alertDialog.show();
+                Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
+            }
+        }else {
+                alertDialog.show();
+                Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                 pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
+        }
+
+
+
+    }
+
+    public void ShowDescripcion(String precio,String sustancia,String lab,String gan){
+
+        LayoutInflater inflater=getLayoutInflater();
+        View view=inflater.inflate(R.layout.dialog_descripcion,null);
+
+            TextView txtSus=(TextView)view.findViewById(R.id.textView2);
+            txtSus.setText(sustancia);
+
+            TextView txtPrec=(TextView)view.findViewById(R.id.textView5);
+            txtPrec.setText(precio);
+
+            TextView txtLab=(TextView)view.findViewById(R.id.textView4);
+            txtLab.setText(lab);
+
+            TextView txtGan=(TextView)view.findViewById(R.id.textView8);
+            txtGan.setText(gan);
+
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Descripción");
+        alert.setView(view);
+        alert.setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"),new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        alertDescripcion=alert.create();
+        alertDescripcion.show();
+
+        Button pbutton = alertDescripcion.getButton(DialogInterface.BUTTON_POSITIVE);
         pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
+
 
     }
 
@@ -277,7 +372,7 @@ public class pcatalogo extends Activity {
             String filt=WhereFiltro(filtro);
 
              String query=String.format("select distinct descripcion,precio,p.Cantidad,p.codigo,precio_final,clasificacion_fiscal,o.descuento, " +
-                    "p.laboratorio, e.cantidad,devolucion,isCheck from productos as p left join " +
+                    "p.laboratorio, e.cantidad,devolucion,isCheck,sustancia_activa,p.precio_publico from productos as p left join " +
                      " ofertas as o on p.codigo=o.codigo " +
                      " left join existencias as e on p.codigo=e.codigo " +
                      " left join productos_obligados as po on p.codigo=po.codigo " +
@@ -295,6 +390,16 @@ public class pcatalogo extends Activity {
                     double precio=Double.parseDouble(rs.getString(1));
                     double preciof=Double.parseDouble(rs.getString(4));
 
+                    String existencia=rs.getString(8);
+
+                    if(existencia==null)
+                        existencia="0";
+                    if(existencia.trim().isEmpty())
+                        existencia="0";
+                    if(existencia.equals("null"))
+                        existencia="0";
+
+
                     producto_row.put("A", rs.getString(0));
                     producto_row.put("B", "$"+dec.format(precio));
                     producto_row.put("C", rs.getString(2)+"");
@@ -303,9 +408,11 @@ public class pcatalogo extends Activity {
                     producto_row.put("F", rs.getString(5)+"");
                     producto_row.put("G", oferta+ "%");
                     producto_row.put("H", rs.getString(7)+"");
-                    producto_row.put("I", rs.getString(8)!=null?rs.getString(8):"0");
+                    producto_row.put("I", existencia);
                     producto_row.put("J",rs.getString(9));
                     producto_row.put("K",rs.getString(10));
+                    producto_row.put("L",rs.getString(11));
+                    producto_row.put("M",rs.getString(12));
                     data.add(producto_row);
                     producto_row = new HashMap<String, String>();
                 }
@@ -342,7 +449,7 @@ public class pcatalogo extends Activity {
               String filt=WhereFiltro(filtro);
 
               String query=String.format("select distinct descripcion,isCheck,p.Cantidad,precio,p.codigo,precio_final,clasificacion_fiscal" +
-                                          ",o.descuento, p.laboratorio, e.cantidad ,devolucion " +
+                                          ",o.descuento, p.laboratorio, e.cantidad ,devolucion,sustancia_activa,precio_publico " +
                                           "from productos as p left join ofertas as o on p.codigo=o.codigo " +
                                           "left join existencias as e on p.codigo=e.codigo " +
                                           "left join productos_obligados as po on p.codigo=po.codigo " +
@@ -376,7 +483,17 @@ public class pcatalogo extends Activity {
                   if(valDev.isEmpty())
                       dev=true;
 
-                  modelItems[cont] = new Model(rs.getString(0), rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6), oferta, rs.getString(8), rs.getString(9),dev);
+                  String existencia=rs.getString(9);
+
+                  if(existencia==null)
+                                   existencia="0";
+                  if(existencia.trim().isEmpty())
+                                   existencia="0";
+                  if(existencia.equals("null"))
+                                   existencia="0";
+
+                  modelItems[cont] = new Model(rs.getString(0), rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6), oferta,
+                          rs.getString(8), existencia,dev,rs.getString(11),rs.getString(12));
                   cont++;
               }
 

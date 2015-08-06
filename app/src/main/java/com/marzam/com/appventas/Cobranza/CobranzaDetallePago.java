@@ -46,7 +46,7 @@ public class CobranzaDetallePago extends Activity{
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setTitle("Cobranza");
 
-        Log.i("array", " = "+Cobranza.arrayseleccionpagosfinal.toString());
+      /*  Log.i("array", " = "+Cobranza.arrayseleccionpagosfinal.toString());*//*
 
         et_correoe = (EditText) findViewById(R.id.et_correoe);
         img_firma = (ImageButton) findViewById(R.id.img_firma);
@@ -111,7 +111,7 @@ public class CobranzaDetallePago extends Activity{
                 alertDialog.show();
                 et_correoe.getText().toString();
             }
-        });
+        });*/
 
     }
 }

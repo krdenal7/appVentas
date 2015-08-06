@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/devoluciones_full_lista_motivos"
+    android:background="#3B3B3B"
+    tools:context=".DevolucionesFull.DevolucionesFullReturnList"
+    android:weightSum="1"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="10dp">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:layout_above="@+id/idButtonIndicadores">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="5dp">
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="@string/txtDevFullSelectReturnReason"
+                        android:id="@+id/textView102"
+                        android:textSize="15sp"
+                        android:textStyle="normal"
+                        android:textColor="#FFFFFF"
+                        android:layout_gravity="left|center_vertical"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginLeft="5dp" />
+
+                    <RelativeLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop="5dp"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="10dp">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/imageView18"
+                            android:background="@drawable/background_txtfile" />
+
+                        <ImageButton
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/idIconTxtDevFullStartSearch"
+                            android:src="@drawable/lupa"
+                            android:background="#00000000"
+                            android:layout_alignParentTop="true"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentStart="true" />
+
+                        <ImageButton
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/idIconTxtDevFullCancelSearh"
+                            android:src="@drawable/exis"
+                            android:background="#00000000"
+                            android:layout_alignWithParentIfMissing="false"
+                            android:layout_alignParentTop="true"
+                            android:layout_alignParentRight="true"
+                            android:layout_alignParentEnd="true" />
+
+                        <EditText
+                            android:layout_width="fill_parent"
+                            android:layout_height="40dp"
+                            android:inputType="textNoSuggestions"
+                            android:ems="10"
+                            android:id="@+id/idEditTxtDevFullInputSearh"
+                            android:textSize="15sp"
+                            android:layout_weight="1"
+                            android:layout_gravity="center_vertical|right"
+                            android:background="#00000000"
+                            android:layout_marginRight="40dp"
+                            android:textStyle="normal"
+                            android:layout_alignTop="@+id/imageView18"
+                            android:gravity="center_vertical"
+                            android:layout_marginLeft="40dp"
+                            android:imeOptions="actionSearch"
+                            android:layout_alignBottom="@+id/idIconTxtDevFullStartSearch"
+                            android:hint="@string/hintDevFullInputSearchReason" />
+                    </RelativeLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ListView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/idListDevFullReason"
+                    android:background="#3B3B3B"
+                    android:scrollingCache="false"
+                    android:cacheColorHint="@android:color/white"
+                    android:fastScrollEnabled="false"
+                    android:drawSelectorOnTop="false"
+                    android:clickable="false"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:choiceMode="singleChoice" />
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:id="@+id/idButtonIndicadores"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical|right"
+            android:weightSum="1"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentStart="false">
+
+            <Button
+                android:layout_width="225dp"
+                android:layout_height="50dp"
+                android:text="@string/btnTextDevFullReturn"
+                android:id="@+id/idBtnDevFullReturnsConsult"
+                android:layout_gravity="center"
+                android:layout_alignParentBottom="true"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/bluebutton"
+                android:layout_alignParentLeft="true"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:paddingRight="5dp"
+                android:paddingLeft="5dp"
+                android:paddingBottom="3dp"
+                android:layout_marginLeft="5dp" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:layout_gravity="center_horizontal">
+
+                <Button
+                    android:layout_width="60dp"
+                    android:layout_height="55dp"
+                    android:id="@+id/idBtnDevFullMakeCall"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/start_call"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:layout_alignParentBottom="true"
+                    android:layout_toRightOf="@+id/idButtonIndicadores"
+                    android:layout_toEndOf="@+id/idButtonIndicadores"
+                    android:layout_weight="0"
+                    android:layout_gravity="center_horizontal|right" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>

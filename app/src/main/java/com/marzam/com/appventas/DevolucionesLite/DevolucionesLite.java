@@ -246,8 +246,13 @@ public class DevolucionesLite extends Activity {
      * Obtiene el tipo de documento mediante una consulta en la base de datos local
      * @return Una lista con los tipos de documentos
      */
-    private List<String> getTypeDocument(){
-        List<String> list = db.execSelectList( DataBase.QUERY_TYPE_DOCUMENT );
+    private List<String> getTypeDocument(){ //DATABASE EMULATION
+        List<String> list = db.execSelectList( DataBase.QUERY_TYPE_DOCUMENT );/*new ArrayList<String>();//db.execSelectList( DataBase.QUERY_TYPE_DOCUMENT );
+
+        list.add("Ninguno");
+        list.add("Orden vta");
+        list.add("Orden surt");
+        list.add("Factura");*/
 
         return list;
     }
@@ -281,8 +286,20 @@ public class DevolucionesLite extends Activity {
      *Obtiene los motivos de la devolución mediante una consulta en la base de datos local
      * @return Una lista con los motivo de devolución
      */
-    private List<String> getReasonRefund() {
+    private List<String> getReasonRefund() {//DATABASE EMULATION
         List<String> list = db.execSelectList( DataBase.QUERY_REASON_RETURN );
+
+        /*List<String> list = new ArrayList<String>();
+
+        list.add("Error en surtido");
+        list.add("Error en captura");
+        list.add("Vencidos");
+        list.add("Bulto Completo");
+        list.add("Recuperación de crédito");
+        list.add("Surtido con corta caducidad");
+        list.add("Omisión de oferta");
+        list.add("Roturas y/o manchados");*/
+
         return list;
     }
 

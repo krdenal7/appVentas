@@ -6,7 +6,7 @@
         tools:ignore="AppCompatResource" />
     <item android:id="@+id/Devoluciones_lite" android:showAsAction="never"
         android:title="Devoluciones" android:orderInCategory="100"
-        tools:ignore="AppCompatResource" android:visible="false" />
+        tools:ignore="AppCompatResource" android:visible="true" />
     <item android:id="@+id/Cobranza" android:showAsAction="never"
         android:title="Cobranza" android:orderInCategory="100"
         tools:ignore="AppCompatResource" android:visible="false" />

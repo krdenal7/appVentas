@@ -1,7 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+<LinearLayout
+        android:id="@+id/back"
+        android:tag="back"
+        style="@style/MyListBackContent">
+        <GridLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:rowCount="2" android:columnCount="1"
+            >
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageButton_swip_edit"
+                android:background="@android:color/transparent"
+                android:layout_column="0"
+                android:layout_row="0"
+                android:layout_gravity="right"
+
+            />
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageButton_swip_delete"
+                android:src="@drawable/icon_delete_swip"
+                android:background="@android:color/transparent"
+                android:layout_column="0"
+                android:layout_row="1"
+                android:layout_gravity="right"
+                />
+
+
+            </GridLayout>
+
+
+    </LinearLayout>
+<RelativeLayout
+    android:orientation="vertical"
+    android:id="@+id/front"
+    android:tag="front"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
 
     <GridLayout
         android:layout_width="match_parent"
@@ -19,7 +63,8 @@
         android:clickable="false"
         android:layout_alignParentStart="false"
         android:layout_gravity="left|center"
-        android:layout_marginLeft="5dp" >
+        android:layout_marginLeft="5dp"
+        android:background="#ffffff">
 
         <TextView
             android:layout_width="wrap_content"
@@ -151,12 +196,12 @@
 
         <ImageView
             android:id="@+id/imageView14"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:gravity="center_vertical"
             android:background="#00000000"
             android:layout_alignWithParentIfMissing="false"
-            android:src="@drawable/select_product"
+            android:src="@drawable/icon_transparent"
             android:layout_row="3"
             android:layout_column="2"
             android:layout_alignParentTop="true"
@@ -168,3 +213,5 @@
     </GridLayout>
 
 </RelativeLayout>
+
+</FrameLayout>

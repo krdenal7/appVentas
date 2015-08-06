@@ -50,7 +50,7 @@ public class RespuestaPedidos extends Activity {
         setTitle("Estatus de pedidos");
         context=this;
 
-         LlenarHasMap(Consultar_Agente_Activo());
+        LlenarHasMap(Consultar_Agente_Activo());
         simpleAdapter=new SimpleAdapter(context,data,R.layout.row_respuestas_principal,new String[]{"A","B"},new int[]{R.id.txtName,R.id.textViewSubtitle}){
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -96,7 +96,7 @@ public class RespuestaPedidos extends Activity {
             lite=new CSQLite(context);
             SQLiteDatabase db=lite.getWritableDatabase();
 
-            Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
+            Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
 
             if(rs.moveToFirst()){
                 id=rs.getString(0);
@@ -117,7 +117,7 @@ public class RespuestaPedidos extends Activity {
 
         return id;
     }
-    public void LlenarHasMap(String id_cliente){
+    public void LlenarHasMap(String agente){
 
         String query;
 
@@ -131,7 +131,7 @@ public class RespuestaPedidos extends Activity {
 
 
             query="select c.nombre,e.id_cliente from encabezado_pedido as e inner join clientes as c on " +
-                  "e.id_cliente=c.id_cliente where numero_empleado='"+id_cliente+"' group by e.id_cliente,c.nombre order by e.fecha_captura desc";
+                  "e.id_cliente=c.id_cliente where clave_agente='"+agente+"' group by e.id_cliente,c.nombre order by e.fecha_captura desc";
 
             rs=db.rawQuery(query,null);
 

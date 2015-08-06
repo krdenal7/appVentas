@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.marzam.com.appventas.Cobranza.Cobranza;
 import com.marzam.com.appventas.Cobranza.CobranzaDetallePago;
+import com.marzam.com.appventas.DevolucionesFull.DevolucionesFullConteiner;
 import com.marzam.com.appventas.DevolucionesLite.DevolucionesLite;
 import com.marzam.com.appventas.GPS.Actualizar_Coordenadas;
 import com.marzam.com.appventas.MapsLocation;
@@ -105,6 +106,7 @@ public class KPI_General extends Activity {
         AlertDialog alertDialog=alert.create();
         alertDialog.show();
     }
+
 
     public void CerrarVisita(){
         lite=new CSQLite(context);
@@ -346,8 +348,8 @@ public class KPI_General extends Activity {
                startActivity(intent2);
            break;
            case R.id.Devoluciones_lite:
-               Intent i = new Intent(context, DevolucionesLite.class);
-               i.putExtra("pharmacy", ((TextView)findViewById( R.id.textView55 )).getText());
+               Intent i = new Intent(context, DevolucionesFullConteiner.class);
+               /*i.putExtra("pharmacy", ((TextView)findViewById( R.id.textView55 )).getText());*/
                startActivity( i );
                break;
            case R.id.Cobranza:
@@ -482,9 +484,8 @@ public class KPI_General extends Activity {
     }
     @Override
     public void onBackPressed() {
-        startActivity(new Intent(getBaseContext(), MapsLocation.class)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
-                 finish();
+
+        ShowCierreVisita();
 
     }
 

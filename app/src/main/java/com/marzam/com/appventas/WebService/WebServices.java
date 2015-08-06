@@ -4,8 +4,9 @@ package com.marzam.com.appventas.WebService;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.marzam.com.appventas.DevolucionesFull.Devoluciones.DevolucionesFullReturnsList;
 import com.marzam.com.appventas.DevolucionesLite.DevolucionesLite;
-import com.marzam.com.appventas.DevolucionesLite.PrepareSendingData.PrepareSendingData;
+import com.marzam.com.appventas.DevolucionesFull.PrepareSendingData.PrepareSendingData;
 import com.marzam.com.appventas.Email.Mail;
 
 import org.kobjects.base64.Base64;
@@ -25,12 +26,15 @@ import java.net.Proxy;
 public class WebServices {
 
                  //static String ip="http://201.134.159.126/WebService/WebService.asmx";//
-                //static String ip="http://190.1.4.120/WebService/WebService.asmx";
+                 //static String ip="http://190.1.4.120/WebService/WebService.asmx";
                  //static String ip="http://190.1.4.129/WebServicePruebas/WebService.asmx";
-                 static String ip="http://201.134.159.126/WebServicePruebas/WebService.asmx";
-                //static String ip="http://201.134.159.126/WSFuerzasExternas/WebService.asmx";
-                //static String ip="http://marzam.mx/WSFuerzasExternas/WebService.asmx";
-                static String ip_cobranza="http://201.134.159.126/WSCobranza/WebService1.asmx";
+                 //static String ip="http://201.134.159.126/WebServicePruebas/WebService.asmx";
+                 //static String ip="http://201.134.159.126/WSFuerzasExternas/WebService.asmx";
+                 //static String ip="http://marzam.mx/WSFuerzasExternas/WebService.asmx";
+                   static String ip="http://ventas.marzam.mx/WSVentasNuevo/WebService.asmx";
+                 //static String ip="http://10.10.10.58/WSVentasNuevo/WebService.asmx";
+                 //static String ip="http://201.134.159.126/WSVentasExtNuevo/WebService.asmx";
+                   static String ip_cobranza="http://201.134.159.126/WSCobranza/WebService1.asmx";
 
     String from="WebServices";
     String subject;
@@ -186,7 +190,7 @@ public class WebServices {
         envelope.dotNet=true;
         envelope.implicitTypes=true;
         envelope.setOutputSoapObject(request);
-        HttpTransportSE androidhttpTransport=new HttpTransportSE(Proxy.NO_PROXY,SOAP_ADDRESS,60000);
+        HttpTransportSE androidhttpTransport=new HttpTransportSE(SOAP_ADDRESS);
 
         try {
 
@@ -238,7 +242,7 @@ public class WebServices {
         return response.toString();
     }
 
-    public String Down_DB(String agente){
+    public String Down_DB(String agente,String imei){
 
         String SOAP_ACTION="http://tempuri.org/SincronizaCatalogo";
         String OPERATION_NAME="SincronizaCatalogo";
@@ -247,6 +251,7 @@ public class WebServices {
 
         SoapObject request=new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME);
         request.addProperty("docName",agente);
+        request.addProperty("imei",imei);
 
 
         SoapSerializationEnvelope envelope=new SoapSerializationEnvelope(SoapEnvelope.VER11);
@@ -624,7 +629,7 @@ public class WebServices {
     }
 
     public static void callBack(Object father, Object response){
-        if( father.getClass()== DevolucionesLite.class){
+        if( father.getClass()== DevolucionesFullReturnsList.class){
             PrepareSendingData.callBack(response);
         }
     }
@@ -659,6 +664,5 @@ public class WebServices {
         return response.toString();
 
     }
-
 
 }

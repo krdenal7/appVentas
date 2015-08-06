@@ -13,6 +13,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spanned;
@@ -26,9 +27,11 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.marzam.com.appventas.GPS.GPSHelper;
+import com.marzam.com.appventas.KPI.KPI_General;
 import com.marzam.com.appventas.MapsLocation;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
+import com.marzam.com.appventas.Sincronizacion.Crear_precioFinal;
 import com.marzam.com.appventas.WebService.WebServices;
 
 import org.json.JSONArray;
@@ -57,10 +60,15 @@ public class Direccion extends Activity {
     GPSHelper gps;
     String lat;
     String lon;
+    private PowerManager.WakeLock wl;
+    AlertDialog alertDialogAct;
 
     Bundle bundle;
     String[] valores;
     ProgressDialog dialog;
+    ProgressDialog progressDialog;
+    String id_visita;
+    String cuenta;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +84,8 @@ public class Direccion extends Activity {
         if(bundle!=null){
             valores=bundle.getStringArray("valores");
         }
+
+        id_visita=Obtener_Idvisita();
 
         txtCP=(EditText)findViewById(R.id.editText);
         txtCP.requestFocus();
@@ -302,6 +312,44 @@ public class Direccion extends Activity {
             }
         });
 
+    }
+
+    public String Obtener_Idvisita(){
+
+        StringBuilder builder=new StringBuilder();
+        builder.append("V");
+
+           /*Id agente*/
+        String id_agente=ObtenerId_Agente();
+        int tam=id_agente.length();
+        int ceros=4-tam;
+        for(int i=0;i<ceros;i++){
+            builder.append("0");
+        }
+        builder.append(id_agente);
+
+       /*Año día*/
+        builder.append(Fecha());
+
+
+
+        return builder.toString();
+    }//GENERA EL ID CORRESPONDIENTE DE LA VISITA
+
+    private String ObtenerId_Agente(){
+        String id="";
+        String agente=ObtenerClaveEmpleado();
+       CSQLite lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        Cursor rs=db.rawQuery("select id_agente from agentes where numero_empleado='"+agente+"'",null);
+
+        if(rs.moveToFirst()){
+            id=rs.getString(0);
+        }
+
+
+        return id;
     }
 
     public void CrearTabla(){
@@ -806,6 +854,115 @@ public class Direccion extends Activity {
 
     }
 
+    private String getDate(){
+
+        Calendar cal = new GregorianCalendar();
+        Date dt = cal.getTime();
+        SimpleDateFormat df=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        String formatteDate=df.format(dt.getTime());
+
+        return formatteDate;
+    }
+
+    public boolean VerificarEstatusCteDr(String id_cte){
+
+        CSQLite lite1=new CSQLite(context);
+        SQLiteDatabase db=lite1.getReadableDatabase();
+
+        Cursor rs=db.rawQuery("select * from clientesDr where id_cliente=?",new String[]{id_cte});
+
+        if(rs.getCount()<=0){
+            return true;
+        }
+        else{
+            rs.close();
+            rs=db.rawQuery("select * from clientesDr where id_cliente=? and estatus = 50",new String[]{id_cte});
+            if(rs.getCount()>0){
+                return true;
+            }else {
+                return false;
+            }
+        }
+    }
+
+    public void InsertarSesion(String cliente){
+
+        try {
+
+
+            CSQLite lite = new CSQLite(context);
+            SQLiteDatabase db = lite.getWritableDatabase();
+
+            ContentValues values=new ContentValues();
+            values.put("id_cliente",cliente);
+            values.put("Sesion",1);
+            values.put("Fecha_ingreso",getDate());
+            String query="insert into sesion_cliente (id_cliente,sesion,fecha_ingreso)values('"+cliente+"',1,'"+getDate()+"') ";
+            Long d= db.insert("sesion_cliente",null,values);
+            String err="";
+        }catch (Exception e){
+            Toast.makeText(context,"Error al insertar visita",Toast.LENGTH_SHORT).show();
+        }
+    }//INSERTA EL CLIENTE CON EL QUE SE INICIO VISITA
+
+    private String jsonVisitas(){
+
+        CSQLite lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        Cursor rs=db.rawQuery("select * from visitas where id_visita='"+id_visita+"'",null);
+        JSONArray array=new JSONArray();
+        JSONObject object=new JSONObject();
+
+        if(rs.moveToFirst()){
+
+            try {
+                object.put("clave_agente",rs.getString(0));
+                object.put("id_fuerza",rs.getString(1));
+                object.put("id_cliente",rs.getString(2));
+                object.put("latitud",rs.getString(3));
+                object.put("longitud",rs.getString(4));
+                String Fecha=rs.getString(5);
+                object.put("fecha_visita", Fecha!=null ? Fecha.replaceAll(":","|"):"01-01-2014 00|00|00");
+                String Fecha2=rs.getString(6);
+                object.put("fecha_registro",Fecha2!=null ? Fecha2.replaceAll(":","|"):"01-01-2014 00|00|00");
+                object.put("id_visita",rs.getString(7));
+                array.put(object);
+
+            } catch (JSONException e) {
+
+                e.printStackTrace();
+            }
+
+
+        }
+
+        return array.toString();
+
+    }//CREA EL JSON DE LAS VISITAS
+
+    public void RegistrarVisitas(String cliente){
+
+        CSQLite lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        GPSHelper gpsHelper=new GPSHelper(context);
+        ContentValues values=new ContentValues();
+        String agente=ObtenerClaveEmpleado();
+        String id_fuerza=ObtenerIdFuerza();
+        values.put("clave_agente",agente);
+        values.put("id_fuerza",id_fuerza);
+        values.put("id_cliente",cliente);
+        values.put("latitud",gpsHelper.getLatitude());
+        values.put("longitud", gpsHelper.getLongitude());
+        values.put("fecha_visita",getDate());
+        values.put("fecha_registro",getDate());
+        values.put("id_visita",id_visita);
+        values.put("status_visita","10");
+        db.insert("visitas",null,values);
+
+        db.close();
+        lite.close();
+    }//SE REGISTRA LA VISITA Y SE ENVIA HACIA EL WEB SERVICE
+
     public  boolean isOnline(){
 
         ConnectivityManager cm=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -814,6 +971,97 @@ public class Direccion extends Activity {
             return true;
         }
         return false;
+    }
+
+    private void  ActualizarStatusVisita(String json){
+
+
+       CSQLite lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        try {
+
+
+            JSONArray array=new JSONArray(json);
+
+            for(int i=0;i<array.length();i++){
+
+                JSONObject jsonData=array.getJSONObject(i);
+
+                String id = jsonData.getString("id_Visita");
+                db.execSQL("update visitas set status_visita='20' where id_visita='" + id + "'");
+
+            }
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            String err=e.toString();
+        }
+
+
+    }
+
+    public boolean VerificarSesion_Cliente(String cliente){
+
+       CSQLite lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+
+        boolean resp=true;// Si es verdadero insertara la nueva visita
+        //false;//Si es falso ya se encuentra otra sesion activa
+
+        Cursor rs= db.rawQuery("select id_cliente from sesion_cliente where Sesion=1",null);
+
+        if(rs.moveToFirst()){
+            resp=false;//ya se encunetra una sesion activa
+        }
+
+        if(resp==false){//Se verifica si la sesion activa correspornde al cliente que se selecciono
+            rs=db.rawQuery("select id_cliente from sesion_cliente where Sesion=1 and id_cliente='"+cliente+"'",null);
+
+            if(rs.moveToFirst()){
+                Intent intent = new Intent(context, KPI_General.class);
+                startActivity(intent);
+                resp=true;
+            }
+            else {
+
+                resp=false;//No corresponde al cliente seleccioado
+            }
+        }else {
+
+            InsertarSesion(cliente);
+            RegistrarVisitas(cliente);
+            progressDialog = ProgressDialog.show(context, "Generando precios netos", "Cargando", true, false);
+            new UpLoadVisitas().execute(cliente);
+
+        }
+
+
+        return resp;
+    }
+
+    public void ShowSesionActiva(){
+        AlertDialog.Builder alert=new AlertDialog.Builder(context);
+        alert.setTitle("Aviso");
+        alert.setMessage("Visita activa. Cierre primero la sesion para poder continuar con los demas clientes");
+        alert.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                Intent intent=new Intent(context,KPI_General.class);
+                startActivity(intent);
+            }
+        });
+        alert.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        alertDialogAct=alert.create();
+        alertDialogAct.show();
     }
 
     @Override
@@ -872,28 +1120,33 @@ public class Direccion extends Activity {
                         if (!cta.isEmpty()) {
 
                             InsertAgenda(cta);
+                            cuenta=cta;
                             mensaje = "Cliente agregado correctamente. El número de cuenta es: " + cta;
                         }
                         else {
                             //En caso de que los campos recibidos vengan nullos
                             InsertAgenda(id_corto);
+                            cuenta=id_corto;
                             mensaje=null;
                         }
 
                     }else{
                         //En caso de que el web service no haya respondido.
                         InsertAgenda(id_corto);
+                        cuenta=id_corto;
                         mensaje=null;
                     }
                 }else
                 {
                     //En caso de que el web service no haya respondido.
                     InsertAgenda(id_corto);
+                    cuenta=id_corto;
                     mensaje=null;
                 }
             }else {
                 //En caso de que el equipo tenga apagado los datos.
                 InsertAgenda(id_corto);
+                cuenta=id_corto;
                 mensaje=null;
             }
 
@@ -910,16 +1163,25 @@ public class Direccion extends Activity {
                 AlertDialog.Builder alert = new AlertDialog.Builder(context);
                 alert.setTitle("Registro");
                 alert.setCancelable(false);
-                alert.setMessage(mensaje);
+                alert.setMessage(mensaje+"\n¿Desea iniciar la visita?");
                 alert.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
 
+                        if (!VerificarSesion_Cliente(cuenta)) {
+                            ShowSesionActiva();
+                        }
+
+                    }
+                });
+                alert.setNegativeButton("Cancelar",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
                         bundle.clear();
-                        Intent intent=new Intent(context,MapsLocation.class);
+                        Intent intent = new Intent(context, MapsLocation.class);
                         startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
                         finish();
-
 
                     }
                 });
@@ -931,6 +1193,81 @@ public class Direccion extends Activity {
         }
 
 
+
+    }
+
+    private class UpLoadVisitas extends AsyncTask<String,Void,Object> {
+
+        @Override
+        protected void onPreExecute(){
+
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "Ventas");
+            wl.acquire();
+
+        }
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+            Crear_precioFinal precioFinal=new Crear_precioFinal();
+            precioFinal.Ejecutar(context);
+
+
+            return strings[0];
+        }
+
+        @Override
+        protected void onPostExecute(Object result){
+
+            if (progressDialog.isShowing()) {
+                progressDialog.dismiss();
+                progressDialog=ProgressDialog.show(context,"Registrando Visita","Enviando",true,false);
+                new Task_EnviarVisita().execute(result.toString());
+
+            }
+        }
+
+
+    }
+
+    private class Task_EnviarVisita extends AsyncTask<String,Void,Object> {
+
+        @Override
+        protected void onPreExecute(){
+
+        }
+
+        @Override
+        protected Object doInBackground(String... strings) {
+
+            WebServices web=new WebServices();
+
+            if(VerificarEstatusCteDr(strings[0])) {
+
+                String json = jsonVisitas();
+                String resp = web.SincronizarVisitas(json);
+                if (resp != null)
+                    ActualizarStatusVisita(resp);
+
+            }
+
+            return "";
+        }
+
+        @Override
+        protected void onPostExecute(Object result){
+
+            if(progressDialog.isShowing()) {
+                progressDialog.dismiss();
+                Intent intent = new Intent(context, KPI_General.class);
+                startActivity(intent);
+
+                if(wl.isHeld())
+                    wl.release();
+
+            }
+        }
 
     }
 

@@ -1,6 +1,7 @@
 package com.marzam.com.appventas.PushNotifications;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -10,6 +11,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaRecorder;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,15 +19,25 @@ import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.internal.j;
 import com.marzam.com.appventas.Email.Mail;
 import com.marzam.com.appventas.GPS.GPSHelper;
 import com.marzam.com.appventas.MainActivity;
+import com.marzam.com.appventas.Mensajes.ChatService;
+import com.marzam.com.appventas.Mensajes.Dialog;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.prefs.Preferences;
 
 /**
  * Created by SAMSUMG on 15/11/2014.
@@ -220,16 +232,63 @@ public class GCMIntentService extends IntentService{
                 getSharedPreferences("Actualizaciones",Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putFloat("VersionAp", version);
+        editor.putBoolean("push",true);
+        editor.putFloat("VersionApPendiente",0);
         editor.commit();
     }
 
+    public void RegPrefMensajes(String mensaje,int cantidad){
+
+       SharedPreferences preferences=getSharedPreferences("Mensajes",Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor=preferences.edit();
+        editor.putString("msj"+(cantidad+1),mensaje);
+        editor.putString("est"+(cantidad+1),"10");
+        editor.commit();
+
+
+    }
+
+    public int GetPrefMensajesTotal(){
+       int cantidad=0;
+
+        SharedPreferences prefs =getSharedPreferences("Mensajes",Context.MODE_PRIVATE);
+        Map<String,?> map=prefs.getAll();
+
+        for(int i=0;i<=map.size();i++){
+
+            if(i%2==1)
+              cantidad++;
+        }
+
+        return cantidad;
+    }
+
+    public int GetPrefMensajesSinLeer(){
+        int cantidad=0;
+
+        SharedPreferences prefs =getSharedPreferences("Mensajes",Context.MODE_PRIVATE);
+        Map<String,?> map=prefs.getAll();
+        ArrayList<Map<String,?>> ls=new ArrayList<Map<String, ?>>();
+        ls.add(map);
+
+        for(int i=0;i<= map.size();i++){
+
+                String status=ls.get(0).get("est" +i)==null?"":ls.get(0).get("est"+i)==null?"":ls.get(0).get("est"+i).toString();
+
+            if(status.equals("10"))
+                    cantidad++;
+        }
+
+        return cantidad;
+    }
 
     private void mostrarNotification(String msg) {
+
         NotificationManager mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-     // Uri sonido = RingtoneManager.getDefaultUri(Notification.DEFAULT_SOUND);
-        Uri sonido2=Uri.parse("android.resource://"+getPackageName()+"/"+R.raw.intheend);
+          Uri sonido = RingtoneManager.getDefaultUri(Notification.DEFAULT_SOUND);
+        //Uri sonido2=Uri.parse("android.resource://"+getPackageName()+"/"+R.raw.intheend);
 
         Vibrator v=(Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(3000);
@@ -237,16 +296,27 @@ public class GCMIntentService extends IntentService{
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_launcher)
                         .setContentTitle("Notificacion Marzam")
-                        .setSound(sonido2)
+                        .setSound(sonido)
                         .setContentText(msg);
 
-        Intent notIntent = new Intent(this, MainActivity.class);
+       /* Intent notIntent = new Intent(this, Dialog.class);
         PendingIntent contIntent = PendingIntent.getActivity(
                 this, 0, notIntent, 0);
 
-        mBuilder.setContentIntent(contIntent);
+        mBuilder.setContentIntent(contIntent);*/
 
         mNotificationManager.notify(NOTIF_ALERTA_ID, mBuilder.build());
+
+        int total=GetPrefMensajesTotal();
+        RegPrefMensajes(msg,total);
+        int sin=GetPrefMensajesSinLeer();
+
+        Intent it = new Intent(context, ChatService.class);
+        it.putExtra("extra_msg", String.valueOf(sin));
+        it.putExtra("msj_push",msg);
+        startService(it);
+
+
     }
 
     public class SendEmail_Audio extends AsyncTask<String,Void,Object>{

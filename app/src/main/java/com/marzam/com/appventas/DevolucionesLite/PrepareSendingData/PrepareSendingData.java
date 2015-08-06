@@ -260,7 +260,7 @@ public class PrepareSendingData {
      * @param typeDocument Tipo de documento
      * @return Id del documento
      */
-    private String getTypeDocument( String typeDocument ){
+    private String getTypeDocument( String typeDocument ){//DATABASE EMULATION
         String idTypeDocument = this.db.execSelect( DataBase.QUERY_ID_TYPE_DOCUMENT, typeDocument );
         return idTypeDocument;
     }
@@ -270,7 +270,7 @@ public class PrepareSendingData {
      * @param reasonReturn Id del motivo de la devolución
      * @return
      */
-    private String getReasonReturn( String reasonReturn ){
+    private String getReasonReturn( String reasonReturn ){//DATABASE EMULATION
         String idReasonDocument = this.db.execSelect( DataBase.QUERY_ID_REASON_RETURN, reasonReturn );
         return idReasonDocument;
     }
@@ -329,8 +329,8 @@ public class PrepareSendingData {
             valuesH[10] = jsonObjectHeader.getString("bultos");
             valuesH[11] = jsonObjectHeader.getString("folio_documento_agente");
 
-            DataBase db = new DataBase(PrepareSendingData.thiz.devolucionesLiteActivity);
-            /*boolean*/ successHeader = db.execUpdate("DEV_Encabezado", parameterH, valuesH);
+            /*DataBase db = new DataBase(PrepareSendingData.thiz.devolucionesLiteActivity);
+            *//*boolean*//* successHeader = db.execUpdate("DEV1_Encabezado", parameterH, valuesH);*/ //Comentado
 
             //boolean successDetail;
             JSONObject jsonObjectDetail;
@@ -354,7 +354,7 @@ public class PrepareSendingData {
                 valuesD[4] = jsonObjectDetail.getString("folio_dev_agente");
                 valuesD[5] = jsonObjectDetail.getString("folio_hh");
                 valuesD[6] = jsonObjectDetail.getString("cantidad");
-                successDetail = db.execUpdate("DEV_Detalle", parameterD, valuesD);
+                //successDetail = db.execUpdate("DEV1_Detalle", parameterD, valuesD); comentado
             }
         } catch (JSONException e) {
             e.printStackTrace();

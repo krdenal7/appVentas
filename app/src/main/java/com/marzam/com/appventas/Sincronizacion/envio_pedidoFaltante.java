@@ -58,7 +58,7 @@ public class envio_pedidoFaltante {
             services.SincronizarVisitas(json);
 
         String jsonCierre=JSonCierreVisitas();
-        String respjson=null;
+        String respjson;
 
         if(jsonCierre!=null);
         respjson= services.CierreVisitas(jsonCierre);
@@ -93,9 +93,9 @@ public class envio_pedidoFaltante {
             respuesta = EnvioPedido();
         }
 
-            /*if(VerificarDevolucionesPendiente()>0) {
+            if(VerificarDevolucionesPendiente()>0) {
                 respuesta = EnvioDevoluciones();
-            }*/
+            }
 
 
         if(respuesta.isEmpty()){
@@ -194,7 +194,6 @@ public class envio_pedidoFaltante {
 
         lite=new CSQLite(context);
         SQLiteDatabase db=lite.getWritableDatabase();
-
         Cursor rs=db.rawQuery("select id_pedido from encabezado_pedido where id_estatus=10",null);
 
         if(rs.getCount()>0){
@@ -225,7 +224,7 @@ public class envio_pedidoFaltante {
         SQLiteDatabase db=lt.getReadableDatabase();
         int val;
 
-        Cursor rs=db.rawQuery("select id_devolucion from DEV_Encabezado where status='10'",null);
+        Cursor rs=db.rawQuery("select id_devolucion from DEV1_Encabezado where status='10'",null);
         val=rs.getCount();
 
         id_devoluciones=new String[val];
@@ -351,7 +350,7 @@ public class envio_pedidoFaltante {
                     if(!db.isOpen())
                         db=lt.getWritableDatabase();
 
-                int up=db.update("DEV_Encabezado",values,"id_devolucion=?",new String[]{id});
+                int up=db.update("DEV1_Encabezado",values,"id_devolucion=?",new String[]{id});
 
                 if(up>0)
                     res=true;
@@ -840,7 +839,7 @@ public class envio_pedidoFaltante {
         for(int i=0;i<id_devoluciones.length;i++) {
 
             rs= db.rawQuery("select sucursal,folio_hh,cliente,folio_dev_agente,tipo_documento,empleado, " +
-                             "folio_documento_agente,fecha_creacion,fecha_creacion_txt,status,bultos,id_devolucion from DEV_Encabezado where id_devolucion='"+id_devoluciones[i]+"'",null);
+                             "folio_documento_agente,fecha_creacion,fecha_creacion_txt,status,bultos,id_devolucion from DEV1_Encabezado where id_devolucion='"+id_devoluciones[i]+"'",null);
 
             while (rs.moveToNext()) {
 
@@ -879,7 +878,7 @@ public class envio_pedidoFaltante {
 
         for(int i=0;i<id_devoluciones.length;i++) {
 
-            rs= db.rawQuery("select sucursal,folio_hh,codigo,motivo,cantidad,folio_dev_agente,id_devolucion from DEV_Detalle where id_devolucion='"+id_devoluciones[i]+"'",null);
+            rs= db.rawQuery("select sucursal,folio_hh,codigo,motivo,cantidad,folio_dev_agente,id_devolucion from DEV1_Detalle where id_devolucion='"+id_devoluciones[i]+"'",null);
 
             while (rs.moveToNext()) {
 
@@ -928,6 +927,7 @@ public class envio_pedidoFaltante {
                 }
 
             }catch (Exception e){
+                e.printStackTrace();
                 return null;
             }
         }
