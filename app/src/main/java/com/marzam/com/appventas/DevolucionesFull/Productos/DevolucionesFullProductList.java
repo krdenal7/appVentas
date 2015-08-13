@@ -245,7 +245,7 @@ public class DevolucionesFullProductList extends Activity{
         devolucionPendiente.setPercentageBonus(porsentajeBonificacion);
 
         devolucionPendiente.setStatusFolio("A");
-        devolucionPendiente.setStatusIBS("INT");
+        devolucionPendiente.setStatusIBS("INI");
         devolucionPendiente.setStatusAutorizacion("AUT");
         devolucionPendiente.setIdStatus("10");
         devolucionPendiente.setStatusTransmit(" ");
@@ -459,86 +459,87 @@ public class DevolucionesFullProductList extends Activity{
             }
         });
         if( this.NUM_INVOICE!=null ){
-            this.litsProduct.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            if( this.NUM_INVOICE.trim().compareTo("0")!=0 ){
+                this.litsProduct.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-                    Product product = DevolucionesFullProductList.this.productRowAdapter.getItem(position);
+                        Product product = DevolucionesFullProductList.this.productRowAdapter.getItem(position);
 
-                    int numberProducts = new Integer(product.getNumberProducts()).intValue();
-                    int numberProductsToReturn = new Integer(product.getNumberProductsToReturn()).intValue();
+                        int numberProducts = new Integer(product.getNumberProducts()).intValue();
+                        int numberProductsToReturn = new Integer(product.getNumberProductsToReturn()).intValue();
 
-                    //Quitamos el precio acomulado y la cantidad de productos que se hiban a devolver de este producto
-                    if ((numberProductsToReturn <= numberProducts) && (numberProductsToReturn != 0)) {
+                        //Quitamos el precio acomulado y la cantidad de productos que se hiban a devolver de este producto
+                        if ((numberProductsToReturn <= numberProducts) && (numberProductsToReturn != 0)) {
 
-                        String strTotalProductToReturn = DevolucionesFullProductList.this.editTxtDevFullTotalProductoToReturn.getText() + "";
-                        String txtCostProductoToReturn = DevolucionesFullProductList.this.txtDevFullTotalCostProductoToReturn.getText().toString().replace(",", "") + "";
-                        int totalProductToReturnOfThisInvoice = new Integer(strTotalProductToReturn).intValue();
-                        double costProductoToReturn = Double.parseDouble(txtCostProductoToReturn);
+                            String strTotalProductToReturn = DevolucionesFullProductList.this.editTxtDevFullTotalProductoToReturn.getText() + "";
+                            String txtCostProductoToReturn = DevolucionesFullProductList.this.txtDevFullTotalCostProductoToReturn.getText().toString().replace(",", "") + "";
+                            int totalProductToReturnOfThisInvoice = new Integer(strTotalProductToReturn).intValue();
+                            double costProductoToReturn = Double.parseDouble(txtCostProductoToReturn);
 
-                        totalProductToReturnOfThisInvoice = totalProductToReturnOfThisInvoice - numberProductsToReturn;
-                        costProductoToReturn = costProductoToReturn - (Double.parseDouble(numberProductsToReturn + "") * product.getPrice());
+                            totalProductToReturnOfThisInvoice = totalProductToReturnOfThisInvoice - numberProductsToReturn;
+                            costProductoToReturn = costProductoToReturn - (Double.parseDouble(numberProductsToReturn + "") * product.getPrice());
 
-                        DevolucionesFullProductList.this.editTxtDevFullTotalProductoToReturn.setText(totalProductToReturnOfThisInvoice + "");
-                        DevolucionesFullProductList.this.txtDevFullTotalCostProductoToReturn.setText(setFormatMoney(costProductoToReturn));
-
-                        if( DevolucionesFullProductList.this.NUM_INVOICE!=null )
-                            DataBaseInterface.setNewDevolutionToProduct(DevolucionesFullProductList.this.NUM_INVOICE, product.getMarzamCode(), ""+(Integer.parseInt(product.getNumberProductsToReturn())-(Integer.parseInt(product.getNumberProductsToReturn())-0)));
-
-                        product.setNumberProductsToReturn("0");
-                        if( DevolucionesFullProductList.this.FROM_RETURN_LIST == null ){
-                            DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().removeProducts(product);
-                        }else{
-                            DevolucionesFullReturnsList.thiz.getDevolucionPendiente().removeProducts(product);
-                        }
-
-                        //if( DevolucionesFullProductList.this.NUM_INVOICE!=null )
-                        //    DataBaseInterface.setNewDevolutionToProduct(DevolucionesFullProductList.this.NUM_INVOICE, product.getMarzamCode(), "-"+numberProductsToReturn);//valuesH[10] = Factura, parameterD[ 1] = "Producto", parameterD[ 2] = "Cantidad"
-
-                    } else { // Agregamos toda la cantidad de producto y su precio en lo acomulado
-                        String strTotalProductToReturn = DevolucionesFullProductList.this.editTxtDevFullTotalProductoToReturn.getText() + "";
-                        String txtCostProductoToReturn = DevolucionesFullProductList.this.txtDevFullTotalCostProductoToReturn.getText().toString().replace(",", "") + "";
-                        int totalProductToReturnOfThisInvoice = new Integer(strTotalProductToReturn).intValue();
-                        double costProductoToReturn = Double.parseDouble(txtCostProductoToReturn);
-
-                        totalProductToReturnOfThisInvoice = totalProductToReturnOfThisInvoice - numberProductsToReturn;
-                        totalProductToReturnOfThisInvoice = totalProductToReturnOfThisInvoice + numberProducts;
-
-                        costProductoToReturn = costProductoToReturn - (Double.parseDouble(numberProductsToReturn + "") * product.getPrice());
-                        costProductoToReturn = costProductoToReturn + (numberProducts * product.getPrice());
-
-                        //Verificamos que el costo resultante no sobrepase lo disponible
-                        double availableReturns = Double.parseDouble(DevolucionesFullProductList.this.setTxtAvailableReturns.getText().toString().replace(",", ""));
-                        if (costProductoToReturn > availableReturns) {
-                            AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullProductList.this)
-                                    .setTitle("Alerta")
-                                    .setMessage("El monto de la devolución sobrepasa lo permitido")
-                                    .setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"), null)
-                                    .setIcon(android.R.drawable.ic_dialog_alert)
-                                    .show();
-                            Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                            pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
-                        } else {
                             DevolucionesFullProductList.this.editTxtDevFullTotalProductoToReturn.setText(totalProductToReturnOfThisInvoice + "");
                             DevolucionesFullProductList.this.txtDevFullTotalCostProductoToReturn.setText(setFormatMoney(costProductoToReturn));
 
-                            if( DevolucionesFullProductList.this.NUM_INVOICE!=null )
-                                DataBaseInterface.setNewDevolutionToProduct(DevolucionesFullProductList.this.NUM_INVOICE, product.getMarzamCode(), ""+(Integer.parseInt(product.getNumberProductsToReturn())-(Integer.parseInt(product.getNumberProductsToReturn())-numberProducts)));
+                            if (DevolucionesFullProductList.this.NUM_INVOICE != null)
+                                DataBaseInterface.setNewDevolutionToProduct(DevolucionesFullProductList.this.NUM_INVOICE, product.getMarzamCode(), "" + (Integer.parseInt(product.getNumberProductsToReturn()) - (Integer.parseInt(product.getNumberProductsToReturn()) - 0)));
 
-                            product.setNumberProductsToReturn(numberProducts + "");
-                            if( DevolucionesFullProductList.this.FROM_RETURN_LIST == null ){
-                                DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().addProducts(product);
-                            }else{
-                                DevolucionesFullReturnsList.thiz.getDevolucionPendiente().addProducts(product);
+                            product.setNumberProductsToReturn("0");
+                            if (DevolucionesFullProductList.this.FROM_RETURN_LIST == null) {
+                                DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().removeProducts(product);
+                            } else {
+                                DevolucionesFullReturnsList.thiz.getDevolucionPendiente().removeProducts(product);
                             }
 
-                        }
-                    }
-                    DevolucionesFullProductList.this.productRowAdapter.notifyDataSetChanged();
-                    return true;
-                }
-            });
+                            //if( DevolucionesFullProductList.this.NUM_INVOICE!=null )
+                            //    DataBaseInterface.setNewDevolutionToProduct(DevolucionesFullProductList.this.NUM_INVOICE, product.getMarzamCode(), "-"+numberProductsToReturn);//valuesH[10] = Factura, parameterD[ 1] = "Producto", parameterD[ 2] = "Cantidad"
 
+                        } else { // Agregamos toda la cantidad de producto y su precio en lo acomulado
+                            String strTotalProductToReturn = DevolucionesFullProductList.this.editTxtDevFullTotalProductoToReturn.getText() + "";
+                            String txtCostProductoToReturn = DevolucionesFullProductList.this.txtDevFullTotalCostProductoToReturn.getText().toString().replace(",", "") + "";
+                            int totalProductToReturnOfThisInvoice = new Integer(strTotalProductToReturn).intValue();
+                            double costProductoToReturn = Double.parseDouble(txtCostProductoToReturn);
+
+                            totalProductToReturnOfThisInvoice = totalProductToReturnOfThisInvoice - numberProductsToReturn;
+                            totalProductToReturnOfThisInvoice = totalProductToReturnOfThisInvoice + numberProducts;
+
+                            costProductoToReturn = costProductoToReturn - (Double.parseDouble(numberProductsToReturn + "") * product.getPrice());
+                            costProductoToReturn = costProductoToReturn + (numberProducts * product.getPrice());
+
+                            //Verificamos que el costo resultante no sobrepase lo disponible
+                            double availableReturns = Double.parseDouble(DevolucionesFullProductList.this.setTxtAvailableReturns.getText().toString().replace(",", ""));
+                            if (costProductoToReturn > availableReturns) {
+                                AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullProductList.this)
+                                        .setTitle("Alerta")
+                                        .setMessage("El monto de la devolución sobrepasa lo permitido")
+                                        .setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"), null)
+                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                        .show();
+                                Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                                pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
+                            } else {
+                                DevolucionesFullProductList.this.editTxtDevFullTotalProductoToReturn.setText(totalProductToReturnOfThisInvoice + "");
+                                DevolucionesFullProductList.this.txtDevFullTotalCostProductoToReturn.setText(setFormatMoney(costProductoToReturn));
+
+                                if (DevolucionesFullProductList.this.NUM_INVOICE != null)
+                                    DataBaseInterface.setNewDevolutionToProduct(DevolucionesFullProductList.this.NUM_INVOICE, product.getMarzamCode(), "" + (Integer.parseInt(product.getNumberProductsToReturn()) - (Integer.parseInt(product.getNumberProductsToReturn()) - numberProducts)));
+
+                                product.setNumberProductsToReturn(numberProducts + "");
+                                if (DevolucionesFullProductList.this.FROM_RETURN_LIST == null) {
+                                    DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().addProducts(product);
+                                } else {
+                                    DevolucionesFullReturnsList.thiz.getDevolucionPendiente().addProducts(product);
+                                }
+
+                            }
+                        }
+                        DevolucionesFullProductList.this.productRowAdapter.notifyDataSetChanged();
+                        return true;
+                    }
+                });
+            }
         }
     }
 
@@ -551,10 +552,17 @@ public class DevolucionesFullProductList extends Activity{
 
         //ArrayList<Product> list = DataBaseInterface.getProductsFromInvoice(this, invoice);
         ArrayList<Product> list;
+
+        boolean onlyProductsWithRightOfReturn = false;
+        String[] arrayReason = this.REASON_TO_RETURN.split(" ");
+        String idReason = arrayReason[0];
+        if( idReason.trim().compareTo("5")==0 )
+            onlyProductsWithRightOfReturn = true;
+
         if( this.FROM_RETURN_LIST == null ){
-            list = DataBaseInterface.getProductsFromInvoice(this, invoice);
+            list = DataBaseInterface.getProductsFromInvoice(this, invoice, onlyProductsWithRightOfReturn);
         }else {
-            list = DataBaseInterface.getProductsFromInvoice(this, invoice, DevolucionesFullReturnsList.thiz.getDevolucionPendiente());
+            list = DataBaseInterface.getProductsFromInvoice(this, invoice, onlyProductsWithRightOfReturn, DevolucionesFullReturnsList.thiz.getDevolucionPendiente());
         }
         return list;
     }
@@ -787,7 +795,7 @@ public class DevolucionesFullProductList extends Activity{
             AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullProductList.this)
                     .setTitle("Aviso")
                     .setMessage(message)
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if( DevolucionesFullProductList.this.FROM_RETURN_LIST == null ){

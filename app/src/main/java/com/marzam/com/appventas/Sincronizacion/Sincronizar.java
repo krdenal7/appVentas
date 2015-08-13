@@ -23,6 +23,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.marzam.com.appventas.DevolucionesFull.PrepareSendingData.SendDataBackup;
 import com.marzam.com.appventas.Email.Mail;
 import com.marzam.com.appventas.KPI.KPI_General;
 import com.marzam.com.appventas.MainActivity;
@@ -153,15 +154,26 @@ public class Sincronizar extends Activity {
 
         CSQLite lt=new CSQLite(context);
         SQLiteDatabase db=lt.getReadableDatabase();
-        int val=0;
+        int val;
 
-        Cursor rs=db.rawQuery("select * from DEV1_Encabezado where status='10'",null);
+        for (int i=0;i<=4;i++) {
+            if(db!=null){
+                if(db.isOpen()){
+                    break;
+                }else{
+                    lite=new CSQLite(context);
+                    db=lite.getReadableDatabase();
+                }}else {
+                lite=new CSQLite(context);
+                db=lite.getReadableDatabase(); }}
+
+        Cursor rs=db.rawQuery("select * from DEV_EncabezadoDevoluciones where Id_estatus='10'",null);
 
         val=rs.getCount();
 
+
         db.close();
         lt.close();
-
 
         return val;
     }
@@ -488,9 +500,13 @@ public class Sincronizar extends Activity {
             if(isOnline()) {
                 envioPedidoFaltante = new envio_pedidoFaltante();
                  resp = envioPedidoFaltante.Enviar(context);
+
             }else {
                 resp="Verifique su conexión a Internet e intente nuevamente.";
             }
+
+            SendDataBackup sendDataBackup = new SendDataBackup(Sincronizar.this);
+            sendDataBackup.sendData();
 
             return resp;
         }
@@ -590,6 +606,9 @@ public class Sincronizar extends Activity {
                 new sendEmail().execute("");
             }
 
+            SendDataBackup sendDataBackup = new SendDataBackup(Sincronizar.this);
+            sendDataBackup.sendData();
+
             File back=new File(directorio+"/"+archivoBack+".zip");
             String bd64=web.Down_DB(nomAgente+".zip",getIMEI());
             if(!back.exists())
@@ -636,6 +655,8 @@ public class Sincronizar extends Activity {
                if(archivo!=null)
                    back.delete();
 
+
+
             return archivo;
         }
 
@@ -644,13 +665,13 @@ public class Sincronizar extends Activity {
         protected void onPostExecute(Object result){
 
             AlertDialog.Builder alert=new AlertDialog.Builder(context);
-            alert.setTitle("Sincroinización");
+            alert.setTitle("Sincronizacion");
 
 
             if(progres.isShowing()) {
                 progres.dismiss();
                 if(result==null) {
-        alert.setMessage("Error al sincronizar. Desea intentar nuevamente?");
+        alert.setMessage("Error al sincronizar. ¿Desea intentar nuevamente?");
                     alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -1593,7 +1614,7 @@ public class Sincronizar extends Activity {
 
             String agente=br.readLine();
 
-           ActualizarBD(agente);
+            ActualizarBD(agente);
 
 
         } catch (Exception e) {

@@ -97,12 +97,12 @@ public class PrepareSendingData {
     public PrepareSendingData(Activity context, DevolucionPendiente pendingReturn){
         this.context = context;
         this.pendingReturn = pendingReturn;
+        thiz = this;
         makeJSON();
 
         String jsonHeader = this.jsonArrayHeader.toString();
         String jsonDetail = this.jsonArrayDetail.toString();
 
-        thiz = this;
 
 
         JSONObject jsonObjectHeader = null;
@@ -188,8 +188,7 @@ public class PrepareSendingData {
             jheader.put("horaCapura", this.hHoraCapura);
             jheader.put("factura",hFactura);
             jheader.put("statusIBS", this.hStatusIBS);
-            jheader.put("referenciaAutorizacion", this.hReferenciaAutorizacion);
-            jheader.put("handlerAutorizacion", this.hHandlerAutorizacion);
+
             jheader.put("consecutivoCaptura", this.hConsecutivoCaptura);
             jheader.put("estadoTransmicion", this.hEstadoTransmicion);
             jheader.put("idStatus", this.hIdStatus);
@@ -197,6 +196,16 @@ public class PrepareSendingData {
             jheader.put("horaRecibido", this.hHoraRecibido);
             jheader.put("motivoSolicitud",this.hMotivoSolicitud);
             jheader.put("motivoAprobado",this.hMotivoAprobado);
+
+            jheader.put("referenciaAutorizacion", "");
+            jheader.put("handlerAutorizacion", "");
+
+            String[] necesitaAutorizacion = DataBaseInterface.thisReasonNeedAuthorization(this.context, this.hMotivoSolicitud);
+            if(necesitaAutorizacion[0].trim().toUpperCase().compareTo("Y")==0){
+                jheader.put("referenciaAutorizacion", this.hReferenciaAutorizacion);
+                jheader.put("handlerAutorizacion", this.hHandlerAutorizacion);
+            }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -217,7 +226,7 @@ public class PrepareSendingData {
         this.dImporteBruto = ""+( Double.parseDouble(this.dPrecioFarmacia) * Double.parseDouble(this.dCantidad) );
         this.dImporteAproximado = ""+((Double.parseDouble(this.dImporteBruto)-(Double.parseDouble(this.dImporteBruto)*(Double.parseDouble( this.dDescuentoComercial )/100)))*(Double.parseDouble(this.dPorcentajeBonificacion)/100));
         this.dConsecutivoCaptura = intex+"";
-        this.dStatusTransmitido = " ";
+        this.dStatusTransmitido = "T";
 
         /*this.dTipoFolio = this.hTipoFolio;
         this.dIdCliente = this.hIdCliente;
@@ -423,8 +432,22 @@ public class PrepareSendingData {
     }
 
 
+    private static String consecutivoAUX;
     public void sendData(){
         WebServices ws = new WebServices();
+
+        consecutivoAUX = DataBaseInterface.getConsecutivo(PrepareSendingData.thiz.context);
+        //DataBaseInterface.execUpdate("DEV_EncabezadoDevoluciones", "FolioDevolucion", thiz.pendingReturn.getFolioForThisReturn(), new String[]{"ConsecutivoCaptura"}, new String[]{consecutivoAUX});
+
+        try {
+            JSONObject jheader = (JSONObject)this.jsonArrayHeader.get(0);
+            jheader.put("consecutivoCaptura",consecutivoAUX);
+            this.jsonArrayHeader = new JSONArray();
+            this.jsonArrayHeader.put(jheader);
+        }catch (Exception e){
+            System.out.println(e);
+        }
+
         ws.sendData(this.context, PrepareSendingData.NAME_METHOP, this.NAME_PROPERTY_HEADER, this.jsonArrayHeader.toString(), this.NAME_PROPERTY_DETAIL, this.jsonArrayDetail.toString());
     }
     /**
@@ -457,11 +480,21 @@ public class PrepareSendingData {
                 if( finalStatus.compareTo("20")==0 ){
                     //Guardar en base de datos el id estatus a 20
                     DataBaseInterface.execUpdate("DEV_EncabezadoDevoluciones","FolioDevolucion",thiz.pendingReturn.getFolioForThisReturn(), new String[]{"Id_estatus"}, new String[]{"20"});
+
+                    //String consecutivo = DataBaseInterface.getConsecutivo(PrepareSendingData.thiz.context);
+                    DataBaseInterface.execUpdate("DEV_EncabezadoDevoluciones", "FolioDevolucion", thiz.pendingReturn.getFolioForThisReturn(), new String[]{"ConsecutivoCaptura"}, new String[]{consecutivoAUX});
+
                     DataBaseInterface.execUpdate("DEV_DetalleDevoluciones", "Folio", thiz.pendingReturn.getFolioForThisReturn(), new String[]{"EstadoTransmision"}, new String[]{"T"});
+
                     DevolucionesFullReturnsList.sendDevolution();
                     //Toast.makeText(PrepareSendingData.thiz.context, "Enviados Exitosamente", Toast.LENGTH_LONG).show();
                 } else{
+                    //String consecutivo = DataBaseInterface.getConsecutivo(PrepareSendingData.thiz.context);
+                    consecutivoAUX = ""+(Integer.parseInt(consecutivoAUX)-1);
+                    DataBaseInterface.db.execUpdate("DEV_Consecutivos", new String[]{"Consecutivo"},  new String[]{consecutivoAUX}, null);
+
                     DevolucionesFullReturnsList.exitoAlMandarTodas = false;
+                    DevolucionesFullReturnsList.sendDevolution();
                    //Toast.makeText(PrepareSendingData.thiz.devolucionesLiteActivity, "Ocurrio un inconveniente al enviar los datos, intente de nuevo", Toast.LENGTH_LONG).show();
                 }
             }

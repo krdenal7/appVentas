@@ -181,7 +181,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
                         prec = 0.0;
                     }
                     Double gan=prec-precf;
-                    ShowDescripcion("$"+dec.format(prec),modelitems[position].getSustancia(),lab,"$"+dec.format(gan));
+                    ShowDescripcion("$"+dec.format(prec),modelitems[position].getSustancia(),lab,"$"+dec.format(gan),modelitems[position].getName());
                     return false;
                 }
             });
@@ -241,7 +241,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
         }
     }
 
-    public void ShowDescripcion(String precio,String sustancia,String lab,String gan){
+    public void ShowDescripcion(String precio,String sustancia,String lab,String gan,String desc){
 
         LayoutInflater inflater=((Activity)context).getLayoutInflater();
         View view=inflater.inflate(R.layout.dialog_descripcion,null);
@@ -259,7 +259,7 @@ public class CustomAdapter extends ArrayAdapter  implements Filterable {
         txtGan.setText(gan);
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
-        alert.setTitle("Descripción");
+        alert.setTitle(desc);
         alert.setView(view);
         alert.setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"),new DialogInterface.OnClickListener() {
             @Override

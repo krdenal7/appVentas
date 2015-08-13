@@ -41,6 +41,7 @@ import android.widget.Toast;
 import com.marzam.com.appventas.Adapters.CustomAdapter;
 import com.marzam.com.appventas.Adapters.Model;
 import com.marzam.com.appventas.Email.Mail;
+import com.marzam.com.appventas.Mensajes.ChatService;
 import com.marzam.com.appventas.R;
 import com.marzam.com.appventas.SQLite.CSQLite;
 
@@ -125,8 +126,9 @@ public class pcatalogo extends Activity {
 
                 try {
                     if (charSequence.length() >= 2) {
+                        lproductos.setTextFilterEnabled(true);
 
-                        pcatalogo.this.simpleAdapter.getFilter().filter(charSequence);
+                        pcatalogo.this.simpleAdapter.getFilter().filter(charSequence.toString().trim());
                         lproductos.setAdapter(simpleAdapter);
                         simpleAdapter.notifyDataSetChanged();
 
@@ -192,6 +194,7 @@ public class pcatalogo extends Activity {
                             dec.setMaximumFractionDigits(2);
                             dec.setMinimumFractionDigits(2);
 
+                            String descripcion=mdesc.get("A").toString();
                             String precio_p = mdesc.get("M").toString();
                             String precioF=mdesc.get("E").toString().replace("$","");
                             String lab=mdesc.get("H").toString();
@@ -214,7 +217,7 @@ public class pcatalogo extends Activity {
                                 precio_final=0.00;
                             }
                             ganancia=precio_publico-precio_final;
-                            ShowDescripcion("$"+dec.format(precio_publico),sustancia,lab,"$"+dec.format(ganancia));
+                            ShowDescripcion("$"+dec.format(precio_publico),sustancia,lab,"$"+dec.format(ganancia),descripcion);
                         }
                     }
                     return false;
@@ -313,7 +316,7 @@ public class pcatalogo extends Activity {
 
     }
 
-    public void ShowDescripcion(String precio,String sustancia,String lab,String gan){
+    public void ShowDescripcion(String precio,String sustancia,String lab,String gan,String desc){
 
         LayoutInflater inflater=getLayoutInflater();
         View view=inflater.inflate(R.layout.dialog_descripcion,null);
@@ -331,7 +334,7 @@ public class pcatalogo extends Activity {
             txtGan.setText(gan);
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
-        alert.setTitle("Descripción");
+        alert.setTitle(desc);
         alert.setView(view);
         alert.setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"),new DialogInterface.OnClickListener() {
             @Override
@@ -936,6 +939,7 @@ public class pcatalogo extends Activity {
         getMenuInflater().inflate(R.menu.menu_catalogo, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -947,6 +951,7 @@ public class pcatalogo extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
+
     @Override
     public void onBackPressed(){
                 startActivity(new Intent(getBaseContext(),pedido.class)

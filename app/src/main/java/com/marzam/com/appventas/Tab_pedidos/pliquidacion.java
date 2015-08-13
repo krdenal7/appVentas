@@ -104,7 +104,7 @@ public class pliquidacion extends Activity {
     public void ShowisEnvio(){
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Aviso");
-        alert.setMessage("Desea enviar el pedido?");
+        alert.setMessage("¿Desea enviar el pedido?");
         alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -113,12 +113,12 @@ public class pliquidacion extends Activity {
                     if(NoOrden().isEmpty()){
                         ShowAviso();
                     }else {
-                        new UpLoadTaskGuardar().execute("");
-                        progress = ProgressDialog.show(context, "Guardando pedido", "Cargando..", true, false);
+                        new UpLoadTask().execute("");
+                        progress = ProgressDialog.show(context, "Enviando pedido", "Cargando..", true, false);
                     }
                 }else{
-                    new UpLoadTaskGuardar().execute("");
-                    progress = ProgressDialog.show(context, "Guardando pedido", "Cargando..", true, false);
+                    new UpLoadTask().execute("");
+                    progress = ProgressDialog.show(context, "Enviando pedido", "Cargando..", true, false);
                 }
             }
         });
@@ -305,7 +305,7 @@ public class pliquidacion extends Activity {
             WebServices web=new WebServices();
 
             envio_pedido pedido=new envio_pedido();
-            String res= pedido.GuardarPedido(context,true);
+            String res= pedido.GuardarPedido(context,false);
 
 
             return res;
@@ -359,7 +359,7 @@ public class pliquidacion extends Activity {
         protected void onPostExecute(Object result){
 
             AlertDialog.Builder alert=new AlertDialog.Builder(context);
-            alert.setTitle("Envio de pedido");
+            alert.setTitle("Guardado de pedido");
             alert.setIcon(android.R.drawable.ic_dialog_info);
 
             if(progress.isShowing()) {
@@ -367,7 +367,7 @@ public class pliquidacion extends Activity {
                 if(res!="")
                     alert.setMessage(res);
                 else
-                    alert.setMessage("Pedido enviado exitosamente");
+                    alert.setMessage("Pedido guardado exitosamente");
 
                 progress.dismiss();
 

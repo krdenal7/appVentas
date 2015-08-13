@@ -178,7 +178,18 @@ public class envio_pedidoFaltante {
 
         CSQLite lt=new CSQLite(context);
         SQLiteDatabase db=lt.getReadableDatabase();
-        int val=0;
+        int val;
+
+        for (int i=0;i<=4;i++) {
+            if(db!=null){
+                if(db.isOpen()){
+                    break;
+                }else{
+                    lite=new CSQLite(context);
+                    db=lite.getReadableDatabase();
+                }}else {
+                lite=new CSQLite(context);
+                db=lite.getReadableDatabase(); }}
 
         Cursor rs=db.rawQuery("select * from clientesDr where estatus == '10'", null);
 
@@ -190,25 +201,37 @@ public class envio_pedidoFaltante {
         return val;
     }
 
-    public boolean VerificarPedidosPendientes(){
+    public boolean VerificarPedidosPendientes() {
 
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
-        Cursor rs=db.rawQuery("select id_pedido from encabezado_pedido where id_estatus=10",null);
+        lite = new CSQLite(context);
+        SQLiteDatabase db = lite.getReadableDatabase();
 
-        if(rs.getCount()>0){
+       for (int i=0;i<=4;i++) {
+               if(db!=null){
+               if(db.isOpen()){
+               break;
+               }else{
+               lite=new CSQLite(context);
+               db=lite.getReadableDatabase();
+               }}else {
+               lite=new CSQLite(context);
+               db=lite.getReadableDatabase(); }}
 
-            id_pedidos=new String[rs.getCount()];
-            int cont=0;
-            while (rs.moveToNext()){
-                id_pedidos[cont]=rs.getString(0);
+
+        Cursor rs = db.rawQuery("select id_pedido from encabezado_pedido where id_estatus=10", null);
+
+        if (rs.getCount() > 0) {
+
+            id_pedidos = new String[rs.getCount()];
+            int cont = 0;
+            while (rs.moveToNext()) {
+                id_pedidos[cont] = rs.getString(0);
                 cont++;
             }
             db.close();
             lite.close();
             return true;
-        }
-        else {
+        } else {
 
             db.close();
             lite.close();
@@ -224,7 +247,18 @@ public class envio_pedidoFaltante {
         SQLiteDatabase db=lt.getReadableDatabase();
         int val;
 
-        Cursor rs=db.rawQuery("select id_devolucion from DEV1_Encabezado where status='10'",null);
+        for (int i=0;i<=4;i++) {
+            if(db!=null){
+                if(db.isOpen()){
+                    break;
+                }else{
+                    lite=new CSQLite(context);
+                    db=lite.getReadableDatabase();
+                }}else {
+                lite=new CSQLite(context);
+                db=lite.getReadableDatabase(); }}
+
+        Cursor rs=db.rawQuery("select * from DEV_EncabezadoDevoluciones where Id_estatus='10'",null);
         val=rs.getCount();
 
         id_devoluciones=new String[val];
@@ -340,17 +374,17 @@ public class envio_pedidoFaltante {
             for (int i=0;i<array.length();i++){
 
                 JSONObject obj=array.getJSONObject(i);
-                String id=obj.getString("id_devolucion");
-                String status=obj.getString("status");
+                String id=obj.getString("FolioDevolucion");
+                String status=obj.getString("Id_estatus");
 
                 ContentValues values=new ContentValues();
-                values.put("status",status);
+                values.put("Id_estatus",status);
 
                 if(db!=null)
                     if(!db.isOpen())
                         db=lt.getWritableDatabase();
 
-                int up=db.update("DEV1_Encabezado",values,"id_devolucion=?",new String[]{id});
+                int up=db.update("DEV_EncabezadoDevoluciones",values,"FolioDevolucion=?",new String[]{id});
 
                 if(up>0)
                     res=true;
@@ -757,7 +791,7 @@ public class envio_pedidoFaltante {
                        json.put("impote_total", rs.getString(5));
                        json.put("tipo_orden", rs.getString(6));
                        json.put("fecha_captura", rs.getString(8)!=null?  rs.getString(8).replace(":","|").replace("/","-").replace(".",""):"01-01-2014 00|00|00");
-                       json.put("fecha_transmision", fec.replace(":","|"));
+                       json.put("fecha_transmision", fec.replace(":", "|"));
                        json.put("id_estatus", "0");
                        json.put("no_pedido_cliente", rs.getString(10));
                        json.put("firma",Obtener_firma_Hexa(rs.getString(1)));
@@ -838,26 +872,56 @@ public class envio_pedidoFaltante {
 
         for(int i=0;i<id_devoluciones.length;i++) {
 
-            rs= db.rawQuery("select sucursal,folio_hh,cliente,folio_dev_agente,tipo_documento,empleado, " +
-                             "folio_documento_agente,fecha_creacion,fecha_creacion_txt,status,bultos,id_devolucion from DEV1_Encabezado where id_devolucion='"+id_devoluciones[i]+"'",null);
+            rs= db.rawQuery("select FolioDevolucion\n" +
+                    "      ,TipoFolio\n" +
+                    "      ,EstadoFolio\n" +
+                    "      ,ConsumoPresupuesto\n" +
+                    "      ,Cliente\n" +
+                    "      ,clave_agente\n" +
+                    "      ,TotalBultos\n" +
+                    "      ,ImporteTotalAprox\n" +
+                    "      ,FechaCaptura\n" +
+                    "      ,HoraCaptura\n" +
+                    "      ,Factura\n" +
+                    "      ,EstadoIBS\n" +
+                    "      ,ReferenciaAut\n" +
+                    "      ,HandlerAut\n" +
+                    "      ,ConsecutivoCaptura\n" +
+                    "      ,EstadoTransmision\n" +
+                    "      ,Id_estatus\n" +
+                    "      ,EstadoAutorizacion\n" +
+                    "      ,HoraRecibido\n" +
+                    "      ,MotivoSolicitud\n" +
+                    "      ,MotivoAprobado from DEV_EncabezadoDevoluciones where FolioDevolucion=?",new String[]{id_devoluciones[i]});
 
             while (rs.moveToNext()) {
 
                 try {
 
                     object=new JSONObject();
-                    object.put("sucursal", rs.getString(0));
-                    object.put("folio_hh", rs.getString(1));
-                    object.put("cliente", rs.getString(2));
-                    object.put("folio_dev_agente", rs.getString(3));
-                    object.put("tipo_documento", rs.getString(4));
-                    object.put("empleado", rs.getString(5));
-                    object.put("folio_documento_agente", rs.getString(6));
-                    object.put("fecha_creacion", rs.getString(7));
-                    object.put("fecha_creacion_txt", rs.getString(8));
-                    object.put("status", rs.getString(9));
-                    object.put("bultos",rs.getString(10));
-                    object.put("id_devolucion", rs.getString(11));
+                    object.put("folio", rs.getString(0));
+                    object.put("tipoFolio", rs.getString(1));
+                    object.put("esdatoFolio", rs.getString(2));
+                    object.put("consumoPresupuesto", rs.getString(3));
+                    object.put("idCliente", rs.getString(4));
+                    object.put("idClaveAgente", rs.getString(5));
+                    object.put("totalBultos", rs.getString(6));
+                    object.put("importeTotalAproximado", rs.getString(7));
+                    object.put("fechaCapura", rs.getString(8));
+                    object.put("horaCapura", rs.getString(9));
+                    object.put("factura", rs.getString(10));
+                    object.put("statusIBS", rs.getString(11));
+                    object.put("referenciaAutorizacion", rs.getString(12));
+                    object.put("handlerAutorizacion", rs.getString(13));
+                    object.put("consecutivoCaptura", rs.getString(14));
+                    object.put("estadoTransmicion", rs.getString(15));
+                    object.put("idStatus", rs.getString(16));
+                    object.put("statusAutorizacion", rs.getString(17));
+                    object.put("horaRecibido", rs.getString(18));
+                    object.put("motivoSolicitud", rs.getString(19));
+                    object.put("motivoAprobado", rs.getString(20));
+
+
                     array.put(object);
 
                 } catch (Exception e) {
@@ -878,19 +942,31 @@ public class envio_pedidoFaltante {
 
         for(int i=0;i<id_devoluciones.length;i++) {
 
-            rs= db.rawQuery("select sucursal,folio_hh,codigo,motivo,cantidad,folio_dev_agente,id_devolucion from DEV1_Detalle where id_devolucion='"+id_devoluciones[i]+"'",null);
+            rs= db.rawQuery("select Folio\n" +
+                    "      ,Producto\n" +
+                    "      ,Cantidad\n" +
+                    "      ,PrecioFarmacia\n" +
+                    "      ,DescuentoComercial\n" +
+                    "      ,PorcentajeBonificacion\n" +
+                    "      ,ImporteBruto\n" +
+                    "      ,ImporteAproximado\n" +
+                    "      ,ConsecutivoCaptura\n" +
+                    "      ,EstadoTransmision from DEV_DetalleDevoluciones where Folio=?",new String[]{id_devoluciones[i]});
 
             while (rs.moveToNext()) {
 
                 json=new JSONObject();
                 try {
-                    json.put("sucursal", rs.getString(0));
-                    json.put("folio_hh", rs.getString(1));
-                    json.put("codigo", rs.getString(2));
-                    json.put("motivo", rs.getString(3));
-                    json.put("cantidad", rs.getString(4));
-                    json.put("folio_dev_agente", rs.getString(5));
-                    json.put("id_devolucion", rs.getString(6));
+                    json.put("folio", rs.getString(0));
+                    json.put("producto", rs.getString(1));
+                    json.put("cantidad", rs.getString(2));
+                    json.put("precioFarmacia", rs.getString(3));
+                    json.put("descuentoComercial", rs.getString(4));
+                    json.put("porcentajeBonificacion", rs.getString(5));
+                    json.put("importeBruto", rs.getString(6));
+                    json.put("importeAproximado", rs.getString(7));
+                    json.put("consecutivoCaptura", rs.getString(8));
+                    json.put("statusTransmitido", rs.getString(9));
                     array.put(json);
 
                 } catch (JSONException e) {

@@ -176,12 +176,11 @@ public class envio_pedido {
             for(int i=0;i<array.length();i++){
 
                 JSONObject jsonData=array.getJSONObject(i);
-
                 String id = jsonData.getString("id_pedido");
                 String estatus = jsonData.getString("id_estatus");
                 sql="update encabezado_pedido set id_estatus='" + estatus + "' where id_pedido='" + id + "'";
-
                 db.execSQL(sql);
+
             }
 
 

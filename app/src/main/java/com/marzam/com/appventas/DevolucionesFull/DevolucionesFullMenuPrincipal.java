@@ -6,7 +6,9 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.StateListDrawable;
+import android.text.Editable;
 import android.text.Html;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -74,6 +76,7 @@ public class DevolucionesFullMenuPrincipal  implements ScreenChilds{
     private TextView txtProductNumPackages;
 
     public static boolean vieneDelMainMenu;
+    private static String ultimoMotivoSeleccionado="";
 
     /*
     public static String reasonReturnSelected;
@@ -187,7 +190,23 @@ public class DevolucionesFullMenuPrincipal  implements ScreenChilds{
     private void initButtonGoToInvoiceList() {
         this.btnGoToInvoiceList = (Button)this.layoutMainMenu.findViewById(R.id.idbtnGoToInvoiceList);
         this.txtInvoiceNumPackages = (TextView)this.layoutMainMenu.findViewById(R.id.idSetDevFullInvoiceNumPackages);
+        this.txtInvoiceNumPackages.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+            }
 
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String strEnteredVal = DevolucionesFullMenuPrincipal.this.txtInvoiceNumPackages.getText().toString();
+                if (!strEnteredVal.equals("")) {
+                    int num = Integer.parseInt(strEnteredVal);
+                    if (num > 99) {
+                        DevolucionesFullMenuPrincipal.this.txtInvoiceNumPackages.setText("99");
+                    }
+                }
+            }
+        });
         this.btnGoToInvoiceList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -208,8 +227,25 @@ public class DevolucionesFullMenuPrincipal  implements ScreenChilds{
     private void initButtonGoToProductStateNote() {
         this.txtNumNote = (TextView)this.layoutMainMenu.findViewById(R.id.idSetDevFullNumNote);
         this.txtNoteNumPackages = (TextView)this.layoutMainMenu.findViewById(R.id.idSetDevFullNoteNumPackages);
+        this.txtNoteNumPackages.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+            }
 
-        this.btnGoToProductStateNote = (Button)this.layoutMainMenu.findViewById(R.id.idbtnGoToProductStateNote);
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String strEnteredVal = DevolucionesFullMenuPrincipal.this.txtNoteNumPackages.getText().toString();
+                if (!strEnteredVal.equals("")) {
+                    int num = Integer.parseInt(strEnteredVal);
+                    if (num > 99) {
+                        DevolucionesFullMenuPrincipal.this.txtNoteNumPackages.setText("99");
+                    }
+                }
+            }
+        });
+
+            this.btnGoToProductStateNote = (Button)this.layoutMainMenu.findViewById(R.id.idbtnGoToProductStateNote);
         this.btnGoToProductStateNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -228,6 +264,23 @@ public class DevolucionesFullMenuPrincipal  implements ScreenChilds{
     private void initButtonGoToProduct() {
         this.btnGoToProduct = (Button)this.layoutMainMenu.findViewById(R.id.idbtnGoToProduct);
         this.txtProductNumPackages = (TextView)this.layoutMainMenu.findViewById(R.id.idSetDevFullProductNumPackages);
+        this.txtProductNumPackages.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+            }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String strEnteredVal = DevolucionesFullMenuPrincipal.this.txtProductNumPackages.getText().toString();
+                if (!strEnteredVal.equals("")) {
+                    int num = Integer.parseInt(strEnteredVal);
+                    if (num > 99) {
+                        DevolucionesFullMenuPrincipal.this.txtProductNumPackages.setText("99");
+                    }
+                }
+            }
+        });
 
         this.btnGoToProduct.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -263,6 +316,7 @@ public class DevolucionesFullMenuPrincipal  implements ScreenChilds{
 
                 if (returnIsReady) {//(DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().isAvalibleReturn()) {
                     String reason = DevolucionesFullMenuPrincipal.this.devolucionPendiente.getReasonReturnSelected();
+                    String perfilClient = DataBaseInterface.getPerfilCliente(DevolucionesFullMenuPrincipal.this.context );
                     String[] arrayReason = reason.split(" ");
                     String idReason = arrayReason[0];
                     String[] thisReasonNeedAuthorizationAndType = DevolucionesFullMenuPrincipal.this.thisReasonNeedAuthorization(idReason);
@@ -275,7 +329,20 @@ public class DevolucionesFullMenuPrincipal  implements ScreenChilds{
                     }
 
                     if (thisFolioIsAuthorization) {
-                        AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullMenuPrincipal.this.context)
+
+                        //Checamos si es nota de cargo
+                        if (idReason.trim().compareTo("10")==0 && perfilClient.trim().compareTo("3")!=0) {
+                            AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullMenuPrincipal.this.context)
+                                    .setTitle("Aviso")
+                                    .setMessage("El perfil del cliente no aplica para este tipo de devolución")
+                                    .setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"), null)
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    .show();
+                            Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                            pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
+                        }
+                        else{
+                            AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullMenuPrincipal.this.context)
                                 .setTitle("Aviso")
                                 .setMessage("¿Guardar devolución?")
                                 .setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
@@ -321,8 +388,8 @@ public class DevolucionesFullMenuPrincipal  implements ScreenChilds{
                                         String numEmpleado = DataBaseInterface.getNumEmpleado(DevolucionesFullMenuPrincipal.thiz.context);
                                         DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().setHandlerAutorizacion(numEmpleado);
 
-                                        String consecutivo = DataBaseInterface.getConsecutivo(DevolucionesFullMenuPrincipal.thiz.context);
-                                        DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().setConsecutivoCaptura(consecutivo);
+                                        /*String consecutivo = DataBaseInterface.getConsecutivo(DevolucionesFullMenuPrincipal.thiz.context);*/
+                                        DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().setConsecutivoCaptura("");
                                         //salvar Integer.parseInt(consecutivo) + 1)
 
                                         String descuentoComercial = DataBaseInterface.getDescuentoComercialCliente(DevolucionesFullMenuPrincipal.thiz.context);
@@ -334,7 +401,7 @@ public class DevolucionesFullMenuPrincipal  implements ScreenChilds{
                                         DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().setPercentageBonus(porsentajeBonificacion);
 
                                         DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().setStatusFolio("A");
-                                        DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().setStatusIBS("INT");
+                                        DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().setStatusIBS("INI");
                                         DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().setStatusAutorizacion("AUT");
                                         DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().setIdStatus("10");
                                         DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().setStatusTransmit(" ");
@@ -350,6 +417,7 @@ public class DevolucionesFullMenuPrincipal  implements ScreenChilds{
                                 .setIcon(android.R.drawable.ic_dialog_alert)
                                 .setCancelable(false)
                                 .show();
+                        }
                     } else {
                         AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullMenuPrincipal.this.context)
                                 .setTitle("Aviso")
@@ -546,9 +614,16 @@ public class DevolucionesFullMenuPrincipal  implements ScreenChilds{
             this.btnGoToReasonReturnList.setTextColor(Color.parseColor("#FFFFFF"));
             this.btnGoToInvoiceList.setTextColor(Color.parseColor("#FFFFFF"));
 
-            this.txtNoteNumPackages.setText("");
-            this.txtInvoiceNumPackages.setText("");
-            this.txtProductNumPackages.setText("");
+            if(DevolucionesFullMenuPrincipal.ultimoMotivoSeleccionado != this.devolucionPendiente.getReasonReturnSelected()){
+                DevolucionesFullMenuPrincipal.ultimoMotivoSeleccionado = this.devolucionPendiente.getReasonReturnSelected();
+
+                this.txtInvoiceNumPackages.setText("");
+                this.txtNumNote.setText("");
+                this.txtNoteNumPackages.setText("");
+                txtProductNumPackages.setText("");
+                DevolucionesFullMenuPrincipal.thiz.getDevolucionPendiente().setAvalibleReturn( false );
+            }
+
         }
     }
 
@@ -646,6 +721,7 @@ public class DevolucionesFullMenuPrincipal  implements ScreenChilds{
      */
     private boolean verificationFolio(){
         String reason = DevolucionesFullMenuPrincipal.this.devolucionPendiente.getReasonReturnSelected();
+        String perfilClient = DataBaseInterface.getPerfilCliente(DevolucionesFullMenuPrincipal.this.context );
         String[] arrayReason = reason.split(" ");
         String idReason = arrayReason[0];
         String[] thisReasonNeedAuthorizationAndType = DevolucionesFullMenuPrincipal.this.thisReasonNeedAuthorization( idReason );
@@ -660,6 +736,19 @@ public class DevolucionesFullMenuPrincipal  implements ScreenChilds{
             AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullMenuPrincipal.this.context)
                     .setTitle("Aviso")
                     .setMessage("El folio seleccionado no está autorizado para este tipo de devolución, contacte a su consultor.")
+                    .setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"), null)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+            Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
+            return false;
+        }
+
+        //Checamos si es nota de cargo
+        if (idReason.trim().compareTo("10")==0 && perfilClient.trim().compareTo("3")!=0) {
+            AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullMenuPrincipal.this.context)
+                    .setTitle("Aviso")
+                    .setMessage("El perfil del cliente no aplica para este tipo de devolución")
                     .setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"), null)
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();

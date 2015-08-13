@@ -39,6 +39,7 @@ public class pedido extends ActivityGroup {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pedido);
         context=this;
+        setTitle("Pedidos-"+ObtenerNumeroCta());
 
 try {
     TabHost tabHost = (TabHost) findViewById(R.id.tabHost);
@@ -55,7 +56,7 @@ try {
     spec2.setContent(inten2);
 
     TabHost.TabSpec spec3 = tabHost.newTabSpec("LIQUIDACION");
-    spec3.setIndicator("COTIZACION");
+    spec3.setIndicator("COTIZACIÓN");
     Intent inten3 = new Intent(this, pliquidacion.class);
     spec3.setContent(inten3);
 
@@ -111,12 +112,12 @@ try {
                     if(NoOrden().isEmpty()){
                         ShowAviso();
                     }else {
-                        new UpLoadTaskGuardar().execute("");
-                        progress = ProgressDialog.show(context, "Guardando pedido", "Cargando..", true, false);
+                        new UpLoadTask().execute("");
+                        progress = ProgressDialog.show(context, "Enviando pedido", "Cargando..", true, false);
                     }
                 }else{
-                    new UpLoadTaskGuardar().execute("");
-                    progress = ProgressDialog.show(context, "Guardando pedido", "Cargando..", true, false);
+                    new UpLoadTask().execute("");
+                    progress = ProgressDialog.show(context, "Enviando pedido", "Cargando..", true, false);
                 }
             }
         });
@@ -144,6 +145,7 @@ try {
                             dialogInterface.dismiss();
 
                       ShowAviso();
+
                     }else {
                         new UpLoadTaskGuardar().execute("");
                         progress = ProgressDialog.show(context, "Guardando pedido", "Cargando..", true, false);
@@ -220,6 +222,21 @@ try {
         }
     }
 
+    public String ObtenerNumeroCta(){
+
+        String cta="";
+
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getReadableDatabase();
+
+        Cursor rs=db.rawQuery("select id_cliente from sesion_cliente where sesion=1",null);
+
+        if(rs.moveToFirst())
+            cta=rs.getString(0);
+
+        return cta;
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -240,7 +257,7 @@ try {
                 ShowisEnvio();
                 break;
             case R.id.GuardarP:
-                //ShowGuardar();
+                ShowGuardar();
                 break;
             case R.id.Firma:
                 Intent intent=new Intent(context, Dib_firma.class);
@@ -317,7 +334,7 @@ try {
         protected void onPostExecute(Object result){
 
             AlertDialog.Builder alert=new AlertDialog.Builder(context);
-            alert.setTitle("Envio de pedido");
+            alert.setTitle("Guardado de pedido");
             alert.setIcon(android.R.drawable.ic_dialog_info);
 
             if(progress.isShowing()) {
@@ -325,7 +342,7 @@ try {
                 if(res!="")
                     alert.setMessage(res);
                 else
-                    alert.setMessage("Pedido enviado exitosamente");
+                    alert.setMessage("Pedido guardado exitosamente");
 
                 progress.dismiss();
 

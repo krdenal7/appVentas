@@ -12,7 +12,7 @@
     <string name="ctehoy">Clientes de hoy</string>
     <string name="ctetotales">Clientes totales</string>
     <string name="ReporteVendedor">Gráficas</string>
-    <string name="title_activity_grafica__vendedor">Gráfica del Vendedor</string>
+    <string name="title_activity_grafica__vendedor">KPI’s Vendedor</string>
     <string name="title_activity_kpi__general">KPI_General</string>
     <string name="visitas">Visitados:</string>
     <string name="title_activity_pedidos">Pedidos</string>
@@ -84,7 +84,7 @@
     <string name="txtDevLiteCaptSearchByMarzamCode">Buscar por codigo marzam</string>
     <string name="txtDevLiteCaptSearchByBarCode">Buscar por código de barras</string>
     <string name="title_activity_direccion">Dirección</string>
-    <string name="por_visitar">Por visitar:</string>
+    <string name="por_visitar">Visitas adicionales:</string>
     <string name="txtDevLiteCaptSearch">Buscar producto</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
@@ -257,7 +257,8 @@
     <string name="txtDevFullHistory">Historial</string>
     <string name="txtDevFullPending">Pendientes</string>
     <string name="txtDevFullInsertNumPackages">Número de paquetes:</string>
-    <string name="txtDevFullNoFoundProductsForDevolution">No se encontraron productos con derecho a devolución.</string>
+    <string name="txtDevFullNoFoundProductsForDevolution">No se encontraron productos disponibles para devolución.</string>
+    <string name="hintDevFullInputSearchNumFolio"><i>Buscar por número de folio</i></string>
 
 
 </resources>

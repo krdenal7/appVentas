@@ -349,7 +349,7 @@ e.printStackTrace();
     public void ShowisEnvio(){
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
         alert.setTitle("Aviso");
-        alert.setMessage("Desea enviar el pedido?");
+        alert.setMessage("¿Desea enviar el pedido?");
         alert.setPositiveButton("Si",new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -358,12 +358,12 @@ e.printStackTrace();
                     if(NoOrden().isEmpty()){
                         ShowAviso();
                     }else {
-                        new UpLoadTaskGuardar().execute("");
-                        progress = ProgressDialog.show(context, "Guardando pedido", "Cargando..", true, false);
+                        new UpLoadTask().execute("");
+                        progress = ProgressDialog.show(context, "Enviando pedido", "Cargando..", true, false);
                     }
                 }else{
-                    new UpLoadTaskGuardar().execute("");
-                    progress = ProgressDialog.show(context, "Guardando pedido", "Cargando..", true, false);
+                    new UpLoadTask().execute("");
+                    progress = ProgressDialog.show(context, "Enviando pedido", "Cargando..", true, false);
                 }
             }
         });
@@ -565,7 +565,7 @@ e.printStackTrace();
         protected void onPostExecute(Object result){
 
             AlertDialog.Builder alert=new AlertDialog.Builder(context);
-            alert.setTitle("Envio de pedido");
+            alert.setTitle("Guardado de pedido");
             alert.setIcon(android.R.drawable.ic_dialog_info);
 
             if(progress.isShowing()) {
@@ -573,7 +573,7 @@ e.printStackTrace();
                 if(res!="")
                     alert.setMessage(res);
                 else
-                    alert.setMessage("Pedido enviado exitosamente");
+                    alert.setMessage("Pedido guardado exitosamente");
 
                 progress.dismiss();
 

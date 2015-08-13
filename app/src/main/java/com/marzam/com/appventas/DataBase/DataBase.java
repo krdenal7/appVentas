@@ -26,7 +26,7 @@ public class DataBase {
     public static String QUERY_SUCURSAL = "SELECT numeroSucursal FROM sucursales WHERE id_sucursal IN (SELECT id_sucursal FROM agentes where sesion=1)";
     public static String QUERY_ID_AGENT = "SELECT id_agente FROM agentes WHERE sesion=1";
     public static String QUERY_CLIENT = "SELECT id_cliente FROM sesion_cliente WHERE sesion=1";
-    public static String QUERY_PROFILE_CLIENT = "SELECT perfil FROM clientes WHERE id_cliente=?";
+    //public static String QUERY_PROFILE_CLIENT = "SELECT perfil FROM clientes WHERE id_cliente=?";
     public static String QUERY_NUM_EMPLOYEE = "SELECT numero_empleado FROM agentes WHERE sesion=1";
     public static String QUERY_TYPE_DOCUMENT = "SELECT descripcion FROM DEV1_TiposDocumento ORDER BY descripcion ASC";
     public static String QUERY_ID_TYPE_DOCUMENT = "SELECT tipo_documento FROM DEV1_TiposDocumento WHERE descripcion=?";
@@ -87,11 +87,16 @@ public class DataBase {
     public static String QUERY_GET_FOLIO_TYPE_AUTHORIZATION = "SELECT TipoAutorizacion FROM DEV_FoliosAutorizados WHERE FolioAutorizado=? AND Cliente=?";
 
     //Solo los productos con derecho a devolcuión de una factura
-    public static String QUERY_PRODUCT_BY_INVOICE = "SELECT productOnInvoice.descripcion||'♀'||productOnInvoice.producto||'♀'||productOnInvoice.ean||'♀'||(productOnInvoice.CantidadOriginal - productOnInvoice.CantidadDevuelta)||'♀'||productOnInvoice.PrecioFarmacia " +
+    public static String QUERY_ONLY_PRODUCTS_ON_INVOICE_WITH_RIGHT_OF_RETURN = "SELECT productOnInvoice.descripcion||'♀'||productOnInvoice.producto||'♀'||productOnInvoice.ean||'♀'||(productOnInvoice.CantidadOriginal - productOnInvoice.CantidadDevuelta)||'♀'||productOnInvoice.PrecioFarmacia " +
             "FROM DEV_Facturas productOnInvoice " +
             "INNER JOIN DEV_PoliticasLaboratorio politics " +
             "ON productOnInvoice.Producto = politics.Producto AND politics.DerechoDev='S' " +
             "WHERE productOnInvoice.Factura=?";
+
+    public static String QUERY_ALL_PRODUCT_ON_INVOICE = "SELECT productOnInvoice.descripcion||'♀'||productOnInvoice.producto||'♀'||productOnInvoice.ean||'♀'||(productOnInvoice.CantidadOriginal - productOnInvoice.CantidadDevuelta)||'♀'||productOnInvoice.PrecioFarmacia " +
+            "FROM DEV_Facturas productOnInvoice " +
+            "WHERE productOnInvoice.Factura=?";
+
     // Todos los productos con derecho a devolcuión
     public static String QUERY_ALL_PRODUCT = "SELECT products.descripcion||'♀'||products.codigo||'♀'||products.ean||'♀'||products.precio " +
             "FROM productos products " +
@@ -132,8 +137,12 @@ public class DataBase {
             "encabezado.ReferenciaAut||'♀'||" +
             "encabezado.EstadoFolio " +
             "FROM DEV_EncabezadoDevoluciones encabezado " +
+            "WHERE encabezado.Cliente=? " +
             "ORDER BY encabezado.Id_estatus";
+
     public static String QUERY_NAME_CLIENT = "SELECT nombre FROM clientes WHERE id_cliente=?";
+
+    public static String QUERY_PROFILE_CLIENT = "SELECT perfil FROM clientes WHERE id_cliente=?";
 
 
     //Descuento comercial por cliente
@@ -154,6 +163,20 @@ public class DataBase {
     //Obtener el ultimo consecutivo para la devolucion
     public static String QUERY_GET_CONSECUTIVE = "SELECT Consecutivo FROM DEV_COnsecutivos";
 
+    //Obtener el ultimo consecutivo para la devolucion
+    public static String QUERY_GET_ALL_ATRIBUTES_FROM_CONSECUTIVE = "SELECT clave_agente||'♀'||Consecutivo||'♀'||fechaActualizacion FROM DEV_COnsecutivos";
+
+    //Obtener todos los productos en la factura que se van a devolver
+    public static String QUERY_ALL_PRODUCTS_RETURNED_ON_INVOICE = "SELECT Factura||'♀'||Cliente||'♀'||Producto||'♀'||CantidadDevuelta FROM DEV_Facturas WHERE CantidadDevuelta!=0";
+
+    //Obtener todos los atributos de la tabla DEV_ControlPresupuesto
+    public static String QUERY_GET_ALL_ATRIBUTES_FROM_CONTROL_PRESUPUESTO = "SELECT Representante||'♀'||Perfil||'♀'||FoliosAceptados||'♀'||ImporteFoliosMermaAuto||'♀'||ImporteFoliosPptoAuto||'♀'||ImporteDisponible FROM DEV_ControlPresupuesto";
+
+    //Obtener todos los atributos de la tabla DEV_EncabezadoDevoluciones
+    public static String QUERY_GET_ALL_ATRIBUTES_FROM_ENCABEZADO_DEVOLUCIONES = "SELECT FolioDevolucion||'♀'||TipoFolio||'♀'||EstadoFolio||'♀'||ConsumoPresupuesto||'♀'||Cliente||'♀'||clave_agente||'♀'||TotalBultos||'♀'||ImporteTotalAprox||'♀'||FechaCaptura||'♀'||HoraCaptura||'♀'||Factura||'♀'||EstadoIBS||'♀'||ReferenciaAut||'♀'||HandlerAut||'♀'||ConsecutivoCaptura||'♀'||EstadoTransmision||'♀'||Id_estatus||'♀'||EstadoAutorizacion||'♀'||HoraRecibido||'♀'||MotivoSolicitud||'♀'||MotivoAprobado FROM DEV_EncabezadoDevoluciones";
+
+    //Obtener todos los atributos de la tabla DEV_DetalleDevoluciones
+    public static String QUERY_GET_ALL_ATRIBUTES_FROM_DETALLE_DEVOLUCIONES = "SELECT Folio||'♀'||Producto||'♀'||Cantidad||'♀'||PrecioFarmacia||'♀'||DescuentoComercial||'♀'||PorcentajeBonificacion||'♀'||ImporteBruto||'♀'||ImporteAproximado||'♀'||ConsecutivoCaptura||'♀'||EstadoTransmision FROM DEV_DetalleDevoluciones";
 
     /**
      * Constructor

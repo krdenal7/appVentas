@@ -30,7 +30,9 @@ import com.marzam.com.appventas.DevolucionesFull.Devoluciones.DevolucionPendient
 import com.marzam.com.appventas.DevolucionesFull.DevolucionesFullConteiner;
 import com.marzam.com.appventas.DevolucionesFull.Interfaz.ColorSelect;
 import com.marzam.com.appventas.DevolucionesFull.PrepareSendingData.PrepareSendingData;
+import com.marzam.com.appventas.DevolucionesFull.PrepareSendingData.SendDataBackup;
 import com.marzam.com.appventas.DevolucionesFull.Productos.DevolucionesFullProductList;
+import com.marzam.com.appventas.DevolucionesFull.Productos.Product;
 import com.marzam.com.appventas.R;
 
 import java.util.ArrayList;
@@ -109,7 +111,9 @@ public class DevolucionesFullReturnsList extends Activity {
         this.imgSynchronizeAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DevolucionesFullReturnsList.this.startSynchronize(true, DevolucionesFullReturnsList.this.imgStartSynchronizeAll, 0);
+                if( DevolucionesFullReturnsList.this.NUM_AVALIBLE_RETURNS>0 ) {
+                    DevolucionesFullReturnsList.this.startSynchronize(true, DevolucionesFullReturnsList.this.imgStartSynchronizeAll, 0);
+                }
             }
         });
     }
@@ -142,7 +146,7 @@ public class DevolucionesFullReturnsList extends Activity {
                 DevolucionesFullReturnsList.this.folioToConsult = view;
                 DevolucionesFullReturnsList.this.devolucionPendiente = DevolucionesFullReturnsList.this.returnRowAdapter.getItem(position);
 
-                if (DevolucionesFullReturnsList.this.devolucionPendiente.getStatusIBS().trim().compareTo("INT") == 0 && DevolucionesFullReturnsList.this.devolucionPendiente.getIdStatus().trim().compareTo("10") == 0) {
+                if (DevolucionesFullReturnsList.this.devolucionPendiente.getStatusIBS().trim().compareTo("INI") == 0 && DevolucionesFullReturnsList.this.devolucionPendiente.getIdStatus().trim().compareTo("10") == 0) {
                     String nameClient = devolucionPendiente.getNameClient();
 
                     if (nameClient == null) {
@@ -273,7 +277,7 @@ public class DevolucionesFullReturnsList extends Activity {
                 litsToWork.setOnScrollListener(null);
 
                 final DevolucionPendiente devolucionPendiente = adaptadorListToWork.getItem( reverseSortedPositions[0] );
-                if( devolucionPendiente.getStatusIBS().trim().compareTo("INT")==0 && devolucionPendiente.getIdStatus().trim().compareTo("10")==0 ) {
+                if( devolucionPendiente.getStatusIBS().trim().compareTo("INI")==0 && devolucionPendiente.getIdStatus().trim().compareTo("10")==0 ) {
                     AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullReturnsList.this)
                             .setTitle("Aviso")
                             .setMessage("¿Eliminar devolucion: " + devolucionPendiente.getFolioForThisReturn()+"?")
@@ -301,7 +305,7 @@ public class DevolucionesFullReturnsList extends Activity {
                 DevolucionesFullReturnsList.this.litsReturn.setOnScrollListener(null);
 
                 final DevolucionPendiente devolucionPendiente = adaptadorListToWork.getItem( reverseSortedPositions[0] );
-                if( devolucionPendiente.getStatusIBS().trim().compareTo("INT")==0 && devolucionPendiente.getIdStatus().trim().compareTo("10")==0 ) {
+                if( devolucionPendiente.getStatusIBS().trim().compareTo("INI")==0 && devolucionPendiente.getIdStatus().trim().compareTo("10")==0 ) {
                     AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullReturnsList.this)
                             .setTitle("Aviso")
                             .setMessage("¿Eliminar devolucion: " + devolucionPendiente.getFolioForThisReturn()+"?")
@@ -338,6 +342,24 @@ public class DevolucionesFullReturnsList extends Activity {
         String idMotivo = (devolucionPendiente.getReasonReturnSelected().trim().split(" "))[0];
         String folio = devolucionPendiente.getFolioForThisReturn();
 
+        String  invoice = devolucionPendiente.getNumberInvoiceToReturn();
+
+        if (invoice != null) {
+
+            if (invoice.trim().compareTo("0")!=0) {
+
+                ArrayList<Product> product = DataBaseInterface.getProductsFromFolioDevolution(DevolucionesFullReturnsList.this, folio);
+
+                for( int i=0;i<product.size();i++ ){
+
+                    DataBaseInterface.setNewDevolutionToProduct(invoice, product.get(i).getMarzamCode(), ""+(Integer.parseInt(product.get(i).getNumberProductsToReturn())-(Integer.parseInt(product.get(i).getNumberProductsToReturn())-0)));
+
+                }
+
+            }
+
+        }
+
         DataBaseInterface.execDelate("DEV_EncabezadoDevoluciones", "FolioDevolucion", folio);
         DataBaseInterface.execDelate("DEV_DetalleDevoluciones", "Folio", folio);
 
@@ -369,6 +391,10 @@ public class DevolucionesFullReturnsList extends Activity {
 
             }
         }
+        this.NUM_AVALIBLE_RETURNS--;
+
+        this.totalReturnsPending.setText(this.NUM_AVALIBLE_RETURNS + "");
+
     }
 
     public void callbackSendElement(ImageView imgStartSynchronize, int position) {
@@ -434,45 +460,21 @@ public class DevolucionesFullReturnsList extends Activity {
         int i=DevolucionesFullReturnsList.indexDevolucionesPendientes;
         DevolucionesFullReturnsList.indexDevolucionesPendientes++;
         if(i >= DevolucionesFullReturnsList.thiz.returnRowAdapter.getCount()){
-            if (DevolucionesFullReturnsList.progressDialog.isShowing()) {
-                DevolucionesFullReturnsList.progressDialog.dismiss();
-            }
-            if( DevolucionesFullReturnsList.exitoAlMandarTodas ) {
-                AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullReturnsList.thiz)
-                        .setTitle("Aviso")
-                        .setMessage("Devoluciones enviadas exitosamente")
-                        .setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                DevolucionesFullReturnsList.thiz.onBackPressed();
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .show();
-                Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
-            }
-            else{
-                AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullReturnsList.thiz)
-                        .setTitle("Aviso")
-                        .setMessage("Algunas devoluciones no pudieron ser enviadas")
-                        .setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                DevolucionesFullReturnsList.thiz.onBackPressed();
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .show();
-                Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
-            }
+
+            new Thread(new Runnable(){
+
+                public void run()
+                {
+                    DevolucionesFullReturnsList.callback();
+                }
+            }).start();
+
             return;
         }
 
         DevolucionPendiente devolucionPendiente = DevolucionesFullReturnsList.thiz.returnRowAdapter.getItem(i);
 
-        if (devolucionPendiente.getStatusIBS().trim().compareTo("INT") == 0 && devolucionPendiente.getIdStatus().trim().compareTo("10") == 0) {
+        if (devolucionPendiente.getStatusIBS().trim().compareTo("INI") == 0 && devolucionPendiente.getIdStatus().trim().compareTo("10") == 0) {
             String nameClient = devolucionPendiente.getNameClient();
 
             if (nameClient == null) {
@@ -491,6 +493,57 @@ public class DevolucionesFullReturnsList extends Activity {
         }
         else {
             DevolucionesFullReturnsList.sendDevolution();
+        }
+    }
+
+    public static void callback(){
+        if( DevolucionesFullReturnsList.exitoAlMandarTodas ) {
+
+            SendDataBackup sendDataBackup = new SendDataBackup(DevolucionesFullReturnsList.thiz);
+            sendDataBackup.sendData();
+
+            DevolucionesFullReturnsList.thiz.runOnUiThread(new Runnable() {
+                public void run() {
+                    if (DevolucionesFullReturnsList.progressDialog.isShowing()) {
+                        DevolucionesFullReturnsList.progressDialog.dismiss();
+                    }
+                    AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullReturnsList.thiz)
+                            .setTitle("Aviso")
+                            .setMessage("Devoluciones enviadas exitosamente")
+                            .setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    DevolucionesFullReturnsList.thiz.onBackPressed();
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
+                    Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                    pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
+                }
+            });
+        }
+        else{
+            DevolucionesFullReturnsList.thiz.runOnUiThread(new Runnable() {
+                public void run() {
+                    if (DevolucionesFullReturnsList.progressDialog.isShowing()) {
+                        DevolucionesFullReturnsList.progressDialog.dismiss();
+                    }
+                    AlertDialog alertDialog = new AlertDialog.Builder(DevolucionesFullReturnsList.thiz)
+                            .setTitle("Aviso")
+                            .setMessage("Algunas devoluciones no pudieron ser enviadas")
+                            .setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    DevolucionesFullReturnsList.thiz.onBackPressed();
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
+                    Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                    pbutton.setBackgroundColor(Color.parseColor("#0E3E91"));
+                }
+            });
         }
     }
 

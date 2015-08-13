@@ -10,6 +10,10 @@ import com.marzam.com.appventas.DevolucionesFull.PrepareSendingData.PrepareSendi
 import com.marzam.com.appventas.DevolucionesFull.Productos.DevolucionesFullProductList;
 import com.marzam.com.appventas.DevolucionesFull.Productos.Product;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -25,7 +29,7 @@ public class DataBaseInterface {
     public static double totalProductoToReturn = 0.0;
     public static ArrayList<DevolucionPendiente> devolucionesPendientes;
 
-    private static DataBase db;
+    public static DataBase db;
     private static Activity context;
 
     private static void initDataBase( Activity newContext ){
@@ -282,7 +286,8 @@ public class DataBaseInterface {
     //Facturas------------------------------------------
     public static List getInvoices(Activity newContext) {
         initDataBase( newContext );
-        List<String> stringList = DataBaseInterface.db.execSelectList(DataBase.QUERY_GET_INVOICE);
+        String idClienteActivo = DataBaseInterface.db.execSelect(DataBase.QUERY_CLIENT);
+        List<String> stringList = DataBaseInterface.db.execSelectList(DataBase.QUERY_GET_INVOICE, idClienteActivo);
         ArrayList<Invoice> list = new ArrayList<Invoice>();
         for (int i = 0; i < stringList.size(); i++) {
             String invoiceWithAllAtributes = stringList.get(i);
@@ -461,7 +466,7 @@ public class DataBaseInterface {
     public static boolean setNewDevolutionToProduct(String invoice, String product, String total){
         String totalDevolutionForThisProduct = db.execSelect(db.QUERY_RETURN_TOTAL_PRODUCT, product, invoice);
         totalDevolutionForThisProduct = (Integer.parseInt(totalDevolutionForThisProduct.trim()) - (Integer.parseInt(totalDevolutionForThisProduct.trim()) - Integer.parseInt(total.trim()) ))+"";
-        return db.execUpdate("DEV_Facturas", new String[]{"CantidadDevuelta"}, new String[]{totalDevolutionForThisProduct}, "producto='" + product+"' AND Factura='"+invoice+"'");
+        return db.execUpdate("DEV_Facturas", new String[]{"CantidadDevuelta"}, new String[]{totalDevolutionForThisProduct}, "producto='" + product + "' AND Factura='" + invoice + "'");
     }
 
     /**
@@ -490,18 +495,22 @@ public class DataBaseInterface {
 
 
     //Productos de una factura ----------------------------------------------------------------------
-    public static ArrayList<Product> getProductsFromInvoice(Activity newContext, String invoice, DevolucionPendiente ... devolucionPendienteArr) {
+    public static ArrayList<Product> getProductsFromInvoice(Activity newContext, String invoice, boolean onlyProductsWithRightOfReturn,DevolucionPendiente ... devolucionPendienteArr) {
         initDataBase(newContext);
         ArrayList<Product> productosDevolucionPendiente = null;
         if( devolucionPendienteArr.length!=0 )
             productosDevolucionPendiente = devolucionPendienteArr[0].getProductsOnDetail();
 
-        ArrayList<String> strList = (ArrayList<String>)DataBaseInterface.db.execSelectList(DataBase.QUERY_PRODUCT_BY_INVOICE, invoice);
+        String query = DataBase.QUERY_ALL_PRODUCT_ON_INVOICE;
+        if( onlyProductsWithRightOfReturn )
+            query = DataBase.QUERY_ONLY_PRODUCTS_ON_INVOICE_WITH_RIGHT_OF_RETURN;
+
+        ArrayList<String> strList = (ArrayList<String>)DataBaseInterface.db.execSelectList(query, invoice);
         ArrayList<Product> list = new ArrayList<Product>();
         for(int i = 0;i<strList.size();i++){
             String productWithAllAtributes = strList.get(i);
 
-            //0:Descripcion, 1: Codigo MArzam, 2: Codigo de Barras, 3: CantidadOriginal, 4: Precio
+            //0:Descripcion, 1: Codigo MArzam, 2: Codigo de Barras, 3: CantidadOriginal-CantidadDevuelta (Disponibles), 4: Precio
             String[] arrayproduct = productWithAllAtributes.split("♀");
 
             Product product = new Product();
@@ -589,7 +598,8 @@ public class DataBaseInterface {
     public static ArrayList<DevolucionPendiente> getPendingReturns( Activity newContext ){
 
         initDataBase(newContext);
-        ArrayList<String> strList = (ArrayList<String>)DataBaseInterface.db.execSelectList(DataBase.QUERY_ALL_DEVOLUTIONS);
+        String idClienteActivo = DataBaseInterface.db.execSelect(DataBase.QUERY_CLIENT);
+        ArrayList<String> strList = (ArrayList<String>)DataBaseInterface.db.execSelectList(DataBase.QUERY_ALL_DEVOLUTIONS, idClienteActivo);
         ArrayList<DevolucionPendiente> list = new ArrayList<DevolucionPendiente>();
         for(int i = 0;i<strList.size();i++) {
             String devolutionHeaderWithAllAtributes = strList.get(i);
@@ -652,6 +662,168 @@ public class DataBaseInterface {
         return strTotalProducto;
     }
     //-----------------------------------------------------------------------------------
+
+    //Obtener perfil del cliente ----------------------------------------------------------
+    public static String getPerfilCliente( Activity newContext ) {
+        initDataBase(newContext);
+        String idClienteActivo = DataBaseInterface.db.execSelect(DataBase.QUERY_CLIENT);
+        String perfilClienteActivo = DataBaseInterface.db.execSelect(DataBaseInterface.db.QUERY_PROFILE_CLIENT, idClienteActivo);
+
+        return perfilClienteActivo;
+    }
+    //------------------------------------------------------------------------------------
+
+    //Obtener todos los productos que se van a devolver de una factura -------------------
+    public static JSONArray getAllProductsReturnedOnInvoice( Activity newContext ) {
+        initDataBase(newContext);
+        JSONArray allProductsReturnedOnInvoice = new JSONArray();
+        List<String> stringList = DataBaseInterface.db.execSelectList(DataBaseInterface.db.QUERY_ALL_PRODUCTS_RETURNED_ON_INVOICE);
+
+        for (int i = 0; i < stringList.size(); i++) {
+            String allProductsReturnedOnInvoiceWithAllAtributes = stringList.get(i);
+            String[] productsReturnedOnInvoice = allProductsReturnedOnInvoiceWithAllAtributes.split("♀");//Factura, Cliente, Producto, CantidadDevuelta
+
+            JSONObject jsonProductsReturnedOnInvoice = new JSONObject();
+            try {
+                jsonProductsReturnedOnInvoice.put("Factura", productsReturnedOnInvoice[0]);
+                jsonProductsReturnedOnInvoice.put("Cliente", productsReturnedOnInvoice[1]);
+                jsonProductsReturnedOnInvoice.put("Producto", productsReturnedOnInvoice[2]);
+                jsonProductsReturnedOnInvoice.put("CantidadDevuelta", productsReturnedOnInvoice[3]);
+                allProductsReturnedOnInvoice.put( jsonProductsReturnedOnInvoice );
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return allProductsReturnedOnInvoice;
+    }
+    //------------------------------------------------------------------------------------
+
+    //Obtener todos los atributos de la tabla de consecutivo -------------------
+    public static JSONArray getAllConsecutive( Activity newContext ) {
+        initDataBase(newContext);
+        JSONArray consecutiveJSONArray = new JSONArray();
+        List<String> stringList = DataBaseInterface.db.execSelectList(DataBaseInterface.db.QUERY_GET_ALL_ATRIBUTES_FROM_CONSECUTIVE);
+
+        for (int i = 0; i < stringList.size(); i++) {
+            String consecutiveWithAllAtributes = stringList.get(i);
+            String[] strConsecutive = consecutiveWithAllAtributes.split("♀");//clave_agente, Consecutivo, fechaActualizacion
+
+            JSONObject jsonConsecutive = new JSONObject();
+            try {
+                jsonConsecutive.put("clave_agente", strConsecutive[0]);
+                jsonConsecutive.put("Consecutivo", strConsecutive[1]);
+                jsonConsecutive.put("fechaActualizacion", strConsecutive[2]);
+                consecutiveJSONArray.put( jsonConsecutive );
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return consecutiveJSONArray;
+    }
+    //------------------------------------------------------------------------------------
+
+    //Obtener todos los atributos de la tabla de consecutivo -------------------
+    public static JSONArray getAllControlPresupuesto( Activity newContext ) {
+        initDataBase(newContext);
+        JSONArray controlPresupuestoJSONArray = new JSONArray();
+        List<String> stringList = DataBaseInterface.db.execSelectList(DataBaseInterface.db.QUERY_GET_ALL_ATRIBUTES_FROM_CONTROL_PRESUPUESTO);
+
+        for (int i = 0; i < stringList.size(); i++) {
+            String presupuestoWithAllAtributes = stringList.get(i);
+            String[] strPresupuesto = presupuestoWithAllAtributes.split("♀");//clave_agente, Consecutivo, fechaActualizacion
+
+            JSONObject jsonControlPresupuesto = new JSONObject();
+            try {
+                jsonControlPresupuesto.put("Representante", strPresupuesto[0]);
+                jsonControlPresupuesto.put("Perfil", strPresupuesto[1]);
+                jsonControlPresupuesto.put("FoliosAceptados", strPresupuesto[2]);
+                jsonControlPresupuesto.put("ImporteFoliosMermaAuto", strPresupuesto[3]);
+                jsonControlPresupuesto.put("ImporteFoliosPptoAuto", strPresupuesto[4]);
+                jsonControlPresupuesto.put("ImporteDisponible", strPresupuesto[5]);
+                controlPresupuestoJSONArray.put( jsonControlPresupuesto );
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return controlPresupuestoJSONArray;
+    }
+    //------------------------------------------------------------------------------------
+
+    //Obtener todos los atributos de la tabla de DEV_EncabezadoDevoluciones -------------------
+    public static JSONArray getAllEncabezadoDevoluciones( Activity newContext ) {
+        initDataBase(newContext);
+        JSONArray encabezadoDevolucionesJSONArray = new JSONArray();
+        List<String> stringList = DataBaseInterface.db.execSelectList(DataBaseInterface.db.QUERY_GET_ALL_ATRIBUTES_FROM_ENCABEZADO_DEVOLUCIONES);
+
+        for (int i = 0; i < stringList.size(); i++) {
+            String encabezadoDevolucionesWithAllAtributes = stringList.get(i);
+            String[] strEncabezadoDevoluciones = encabezadoDevolucionesWithAllAtributes.split("♀");
+            //FolioDevolucion, TipoFolio, EstadoFolio, ConsumoPresupuesto, Cliente, clave_agente, TotalBultos, ImporteTotalAprox, FechaCaptura
+            // HoraCaptura, Factura, EstadoIBS, ReferenciaAut, HandlerAut, ConsecutivoCaptura, EstadoTransmision, Id_estatus, EstadoAutorizacion
+            // HoraRecibido, MotivoSolicitud, MotivoAprobado
+            JSONObject jsonEncabezadoDevoluciones = new JSONObject();
+            try {
+                jsonEncabezadoDevoluciones.put("FolioDevolucion", strEncabezadoDevoluciones[0]);
+                jsonEncabezadoDevoluciones.put("TipoFolio", strEncabezadoDevoluciones[1]);
+                jsonEncabezadoDevoluciones.put("EstadoFolio", strEncabezadoDevoluciones[2]);
+                jsonEncabezadoDevoluciones.put("ConsumoPresupuesto", strEncabezadoDevoluciones[3]);
+                jsonEncabezadoDevoluciones.put("Cliente", strEncabezadoDevoluciones[4]);
+                jsonEncabezadoDevoluciones.put("clave_agente", strEncabezadoDevoluciones[5]);
+                jsonEncabezadoDevoluciones.put("TotalBultos", strEncabezadoDevoluciones[6]);
+                jsonEncabezadoDevoluciones.put("ImporteTotalAprox", strEncabezadoDevoluciones[7]);
+                jsonEncabezadoDevoluciones.put("FechaCaptura", strEncabezadoDevoluciones[8]);
+                jsonEncabezadoDevoluciones.put("HoraCaptura", strEncabezadoDevoluciones[9]);
+                jsonEncabezadoDevoluciones.put("Factura", strEncabezadoDevoluciones[10]);
+                jsonEncabezadoDevoluciones.put("EstadoIBS", strEncabezadoDevoluciones[11]);
+                jsonEncabezadoDevoluciones.put("ReferenciaAut", strEncabezadoDevoluciones[12]);
+                jsonEncabezadoDevoluciones.put("HandlerAut", strEncabezadoDevoluciones[13]);
+                jsonEncabezadoDevoluciones.put("ConsecutivoCaptura", strEncabezadoDevoluciones[14]);
+                jsonEncabezadoDevoluciones.put("EstadoTransmision", strEncabezadoDevoluciones[15]);
+                jsonEncabezadoDevoluciones.put("Id_estatus", strEncabezadoDevoluciones[16]);
+                jsonEncabezadoDevoluciones.put("EstadoAutorizacion", strEncabezadoDevoluciones[17]);
+                jsonEncabezadoDevoluciones.put("HoraRecibido", strEncabezadoDevoluciones[18]);
+                jsonEncabezadoDevoluciones.put("MotivoSolicitud", strEncabezadoDevoluciones[19]);
+                jsonEncabezadoDevoluciones.put("MotivoAprobado", strEncabezadoDevoluciones[20]);
+                encabezadoDevolucionesJSONArray.put( jsonEncabezadoDevoluciones );
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return encabezadoDevolucionesJSONArray;
+    }
+    //------------------------------------------------------------------------------------
+
+    //Obtener todos los atributos de la tabla de DEV_EncabezadoDevoluciones -------------------
+    public static JSONArray getAllDetalleDevoluciones( Activity newContext ) {
+        initDataBase(newContext);
+        JSONArray detalleDevolucionesJSONArray = new JSONArray();
+        List<String> stringList = DataBaseInterface.db.execSelectList(DataBaseInterface.db.QUERY_GET_ALL_ATRIBUTES_FROM_DETALLE_DEVOLUCIONES);
+
+        for (int i = 0; i < stringList.size(); i++) {
+            String detalleDevolucionesWithAllAtributes = stringList.get(i);
+            String[] strDetalleDevoluciones = detalleDevolucionesWithAllAtributes.split("♀");//clave_agente, Consecutivo, fechaActualizacion
+            JSONObject jsonDetalleDevoluciones = new JSONObject();
+            try {
+                jsonDetalleDevoluciones.put("Folio", strDetalleDevoluciones[0]);
+                jsonDetalleDevoluciones.put("Producto", strDetalleDevoluciones[1]);
+                jsonDetalleDevoluciones.put("Cantidad", strDetalleDevoluciones[2]);
+                jsonDetalleDevoluciones.put("PrecioFarmacia", strDetalleDevoluciones[3]);
+                jsonDetalleDevoluciones.put("DescuentoComercial", strDetalleDevoluciones[4]);
+                jsonDetalleDevoluciones.put("PorcentajeBonificacion", strDetalleDevoluciones[5]);
+                jsonDetalleDevoluciones.put("ImporteBruto", strDetalleDevoluciones[6]);
+                jsonDetalleDevoluciones.put("mporteAproximado", strDetalleDevoluciones[7]);
+                jsonDetalleDevoluciones.put("ConsecutivoCaptura", strDetalleDevoluciones[8]);
+                jsonDetalleDevoluciones.put("EstadoTransmision", strDetalleDevoluciones[9]);
+                detalleDevolucionesJSONArray.put( jsonDetalleDevoluciones );
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return detalleDevolucionesJSONArray;
+    }
+    //------------------------------------------------------------------------------------
+
+
 
 
 

@@ -138,7 +138,7 @@ public class  MainActivity extends Activity {
         }
 
 
-       //ObtenerArchivos2();
+      // ObtenerArchivos2();
       // EliminarBD();
 
         if(!existTxt(txt))
@@ -266,7 +266,7 @@ public class  MainActivity extends Activity {
         if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
             AlertDialog.Builder alert=new AlertDialog.Builder(context);
             alert.setTitle("Aviso");
-            alert.setMessage("Desea activar el GPS");
+            alert.setMessage("¿Desea activar el GPS?");
             alert.setPositiveButton("SI", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {

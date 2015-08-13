@@ -35,7 +35,7 @@ public class Grafica_Vendedor extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grafica__vendedor);
         context=this;
-
+        setTitle("KPI’s Vendedor "+ ObtenerNumero_empleado()+"-"+ObtenerClavedeAgente());
 
         webView=(WebView)findViewById(R.id.webView);
         webView.setScrollContainer(false);
@@ -86,6 +86,7 @@ public class Grafica_Vendedor extends Activity {
 
         return  url.replace("+","%20");
     }
+
     public String ObtenerClavedeAgente(){
 
         lite=new CSQLite(context);
@@ -93,6 +94,22 @@ public class Grafica_Vendedor extends Activity {
         String clave="";
 
         Cursor rs=db.rawQuery("select clave_agente from agentes where Sesion=1",null);
+        if(rs.moveToFirst()){
+
+            clave=rs.getString(0);
+        }
+
+
+        return clave;
+    }
+
+    public String ObtenerNumero_empleado(){
+
+        lite=new CSQLite(context);
+        SQLiteDatabase db=lite.getWritableDatabase();
+        String clave="";
+
+        Cursor rs=db.rawQuery("select numero_empleado from agentes where Sesion=1",null);
         if(rs.moveToFirst()){
 
             clave=rs.getString(0);
@@ -134,6 +151,7 @@ public class Grafica_Vendedor extends Activity {
 
         return contador;
     }
+
     private int dias_transcurridos(){
         int dias=0;
 

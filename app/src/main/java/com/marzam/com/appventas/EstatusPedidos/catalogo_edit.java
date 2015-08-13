@@ -182,6 +182,7 @@ public class catalogo_edit extends Activity {
                             dec.setMaximumFractionDigits(2);
                             dec.setMinimumFractionDigits(2);
 
+                            String descripcion=mdesc.get("A").toString();
                             String precio_p = mdesc.get("M").toString();
                             String precioF=mdesc.get("E").toString().replace("$","");
                             String lab=mdesc.get("H").toString();
@@ -204,7 +205,7 @@ public class catalogo_edit extends Activity {
                                 precio_final=0.00;
                             }
                             ganancia=precio_publico-precio_final;
-                            ShowDescripcion("$"+dec.format(precio_publico),sustancia,lab,"$"+dec.format(ganancia));
+                            ShowDescripcion("$"+dec.format(precio_publico),sustancia,lab,"$"+dec.format(ganancia),descripcion);
                         }
                     }
                     return false;
@@ -297,7 +298,7 @@ public class catalogo_edit extends Activity {
 
     }
 
-    public void ShowDescripcion(String precio,String sustancia,String lab,String gan){
+    public void ShowDescripcion(String precio,String sustancia,String lab,String gan,String desc){
 
         LayoutInflater inflater=getLayoutInflater();
         View view=inflater.inflate(R.layout.dialog_descripcion,null);
@@ -315,7 +316,7 @@ public class catalogo_edit extends Activity {
         txtGan.setText(gan);
 
         AlertDialog.Builder alert=new AlertDialog.Builder(context);
-        alert.setTitle("Descripción");
+        alert.setTitle(desc);
         alert.setView(view);
         alert.setPositiveButton(Html.fromHtml("<font color='#FFFFFF'><b>Aceptar</b></font>"),new DialogInterface.OnClickListener() {
             @Override

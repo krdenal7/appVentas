@@ -10,11 +10,12 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_above="@+id/button3"
         android:eventsInterceptionEnabled="true"
         android:background="@android:color/white"
         android:gestureColor="@android:color/black"
-        android:gestureStrokeType="multiple"></android.gesture.GestureOverlayView>
+        android:gestureStrokeType="multiple"
+        android:layout_above="@+id/button3"
+        ></android.gesture.GestureOverlayView>
 
     <Button
         android:layout_width="match_parent"
@@ -23,6 +24,6 @@
         android:id="@+id/button3"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/bluebutton"
-        android:textColor="#ffffff" />
+        android:textColor="#ffffff"
+        android:background="#0E3E91" />
 </RelativeLayout>

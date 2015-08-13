@@ -90,6 +90,8 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
     CSQLite lite;
     TextView txtVisitados;
     TextView txtPendientes;
+    TextView txtPedidos;
+    TextView txtCtePedido;
     GPSHelper gpsHelper;
 
     private static final LocationRequest REQUEST = LocationRequest.create()
@@ -108,6 +110,8 @@ public class MapsLocation extends FragmentActivity implements GoogleApiClient.Co
 
         txtVisitados=(TextView)findViewById(R.id.textView9);
         txtPendientes=(TextView)findViewById(R.id.textView78);
+        txtPedidos=(TextView)findViewById(R.id.textView5);
+        txtCtePedido=(TextView)findViewById(R.id.textView10);
 
         ObtenerCtesHoy(ObtenerClavedeAgente());
         ObtenerClientesVisitados();
@@ -591,29 +595,64 @@ try {
 
     private void ObtenerClientesVisitados(){
 
-        ObtenerCtesHoy(ObtenerClavedeAgente());
+        CSQLite lt=new CSQLite(context);
+        SQLiteDatabase db=lt.getReadableDatabase();
+        int visitados=0;
+        int adicionales=0;
+        int pedidos=0;
+        int clientes=0;
 
-        lite=new CSQLite(context);
-        SQLiteDatabase db=lite.getWritableDatabase();
-         int visitados=0;
-        int total=clientesH.length;
+        if(db.isOpen()){
 
-        for(int i=0;i<clientesH.length;i++){
 
-    Cursor rs = db.rawQuery("select Sesion from sesion_cliente where id_cliente='" + clientesH[i] + "'", null);
+                String wher=where();
+
+                Cursor rs = db.rawQuery("select * from sesion_cliente where sesion=2 and id_cliente in " +
+                                        "(select id_cliente from agenda where id_frecuencia in "+wher+" )", null);
+
+                try {
+                    visitados = rs.getCount();
+                }finally {
+                    rs.close();
+                }
+
+                        rs = db.rawQuery("select * from sesion_cliente where id_cliente not in (select id_cliente from agenda where id_frecuencia in "+wher+")", null);
             try {
-    if (rs.moveToFirst()) {
-        if (rs.getInt(0) == 2) {
-            visitados++;
-        }
-    }
-}finally {
-    rs.close();
-}
+                adicionales = rs.getCount();
+            }finally {
+                rs.close();
+            }
+
+                       if(!db.isOpen()){
+                           lt=new CSQLite(context);
+                           db=lt.getReadableDatabase();
+                       }
+
+                       rs=db.rawQuery("SELECT * from encabezado_pedido  where strftime('%Y%m%d', 'now')= strftime('%Y%m%d',fecha_captura)",null);
+
+            try {
+                pedidos = rs.getCount();
+            }finally {
+                rs.close();
+            }
+
+
+                     rs=db.rawQuery("select * from encabezado_pedido where id_cliente in" +
+                             " (select id_cliente from agenda where id_frecuencia in "+wher+" ) and strftime('%Y%m%d', 'now')= strftime('%Y%m%d',fecha_captura) group by id_cliente ",null);
+
+            try {
+                clientes = rs.getCount();
+            }finally {
+                rs.close();
+            }
+
         }
 
-        txtVisitados.setText( visitados+"/"+total );
-        txtPendientes.setText( (total-visitados)+"/"+total );
+         txtVisitados.setText( visitados+"/"+clientesH.length );
+         txtPendientes.setText(""+adicionales);
+         txtPedidos.setText(""+pedidos);
+         txtCtePedido.setText(""+clientes);
+
 
     }//HACE EL CALCULO PARA MOSTRAR EN LA PANTALLA LOS CLIENTES QUE HAN SIDO VISITADOS Y LOS FALTANTES
 
